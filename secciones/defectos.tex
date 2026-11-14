@@ -17,10 +17,10 @@ según la escala de severidad del estándar ISO/IEC/IEEE 29119-3: \textbf{S1} bl
 \hline
 \textbf{ID} & \textbf{Caso} & \textbf{Descripción y pasos para reproducir} & \textbf{Esperado / obtenido} & \textbf{Sev.} & \textbf{Responsable} & \textbf{Estado} \\ \hline
 \endhead
-DEF-01 & & & & & & \\ \hline
-DEF-02 & & & & & & \\ \hline
-DEF-03 & & & & & & \\ \hline
-DEF-04 & & & & & & \\ \hline
+DEF-01 & CP-094 (regresión) & La suite \texttt{urgent-dispatch} (pruebas CP-SEG-004/008) falla si se ejecuta entre las 23:25 y las 00:05 (America/Guayaquil): el helper de la prueba cae al mediodía del día siguiente y \texttt{POST /routes} para esa fecha responde 409. Pasos: ejecutar la suite en esa franja; con el camino forzado fallan 2 pruebas. & Esperado: 21 de 21 pruebas en verde a cualquier hora. Obtenido: 2 fallas (409 en lugar de 201) cerca de la medianoche; fuera de esa franja 21 de 21 en dos corridas. Defecto de la prueba, no del producto. & S4 & José Mateo Auz & Corregido (PR \#75) \\ \hline
+DEF-02 & CP-104 & Con el motor vial OSRM real y \texttt{OSRM\_MAX\_POINTS} elevado, \texttt{GET /route-proposals} con 2000 pedidos responde 502 \texttt{ROAD\_ENGINE\_BAD\_RESPONSE}. OSRM devuelve 8 distancias ligeramente negativas ($-0{,}2$ a $-0{,}6$ m) entre 4\,020\,025 pares y el backend rechaza toda la propuesta si hay un solo valor negativo. Pasos: sembrar 2000 pedidos y pedir la propuesta. & Esperado: propuesta de rutas (o los valores negativos mínimos tratados como 0). Obtenido: 502 en 7 de 7 repeticiones (JMeter); 100 y 500 pedidos funcionan. & S3 & Backend & Corregido (PR \#76) \\ \hline
+DEF-03 & CP-100 & La documentación de \#51 dice que \texttt{UNIT\_RECOVERY\_CONFIRM} acepta \texttt{recoveryId} o \texttt{orderItemId} + \texttt{unitNumber}, pero la API solo acepta \texttt{recoveryId}. Pasos: enviar la acción con \texttt{orderItemId} y \texttt{unitNumber}. & Esperado: HTTP 200 según la documentación. Obtenido: 400 \texttt{Action requires its exact resource fields}. & S4 & Backend (\#51) & Abierto \\ \hline
+DEF-04 & CP-104 & Con 2000 pedidos el cliente de OSRM pide la matriz en unos 1\,700 bloques y no reintenta un cierre de conexión aislado (\texttt{SocketError: other side closed}): toda la propuesta responde 503 \texttt{ROAD\_ENGINE\_UNAVAILABLE}. Pasos: pedir la propuesta de 2000 pedidos con el motor real tras corregir DEF-02. & Esperado: HTTP 200 mientras el motor esté disponible. Obtenido: 2 de 7 repeticiones con 503. Corrección: hasta 3 intentos solo ante fallos de conexión (no tiempos agotados ni errores HTTP); reejecución 7 de 7 con 200. & S3 & Backend & Corregido (PR \#76) \\ \hline
 DEF-05 & & & & & & \\ \hline
 DEF-06 & & & & & & \\ \hline
 DEF-07 & & & & & & \\ \hline
