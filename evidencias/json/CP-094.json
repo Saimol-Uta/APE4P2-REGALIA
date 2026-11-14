@@ -1,0 +1,77 @@
+{
+  "lossDeclare": {
+    "id": "93fa72c9-ff34-4cf7-8d0e-afe80a5f519b",
+    "requestId": "5190952e-c8c5-4639-9740-80e7a5ceeb9b",
+    "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+    "orderId": "9203aa73-346b-4828-b180-1e8afb76eaf0",
+    "routeId": null,
+    "action": "LOSS_DECLARE",
+    "reason": "Gestión APE4",
+    "outcome": "APPLIED",
+    "recordedAt": "2026-11-14T05:26:29.143552Z",
+    "result": {
+      "lossId": "347b4b59-9214-4494-9460-f01581692f21",
+      "replacement": "PREPARED",
+      "stock": "2"
+    }
+  },
+  "contact": {
+    "id": "88093776-e0d2-4ad9-9595-30c60535248a",
+    "requestId": "56648e30-10a9-4c57-aa42-905255202624",
+    "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+    "orderId": "9203aa73-346b-4828-b180-1e8afb76eaf0",
+    "routeId": "cb6c0c85-af13-44e6-8a86-c1a63d921c1f",
+    "action": "CONTACT",
+    "reason": "Gestión APE4",
+    "outcome": "APPLIED",
+    "recordedAt": "2026-11-14T05:26:29.172073Z",
+    "result": {
+      "attemptId": "38bfc550-5c4c-481f-9d23-6432174bf255",
+      "orderId": "9203aa73-346b-4828-b180-1e8afb76eaf0",
+      "routeId": "cb6c0c85-af13-44e6-8a86-c1a63d921c1f"
+    }
+  },
+  "reschedule": {
+    "id": "b612f44c-5aeb-41c3-bb2c-8557e5e6b3da",
+    "requestId": "4ef1c1c3-3a61-4db0-8e5b-65329a34a711",
+    "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+    "orderId": "9203aa73-346b-4828-b180-1e8afb76eaf0",
+    "routeId": "cb6c0c85-af13-44e6-8a86-c1a63d921c1f",
+    "action": "RESCHEDULE",
+    "reason": "Gestión APE4",
+    "outcome": "APPLIED",
+    "recordedAt": "2026-11-14T05:26:29.211494Z",
+    "result": {
+      "agreementId": "88093776-e0d2-4ad9-9595-30c60535248a",
+      "attemptId": "38bfc550-5c4c-481f-9d23-6432174bf255",
+      "orderId": "9203aa73-346b-4828-b180-1e8afb76eaf0",
+      "routeId": "cb6c0c85-af13-44e6-8a86-c1a63d921c1f",
+      "scheduledDeliveryDate": "2026-11-16T17:00:00Z"
+    }
+  },
+  "orderAfter": {
+    "status": "PENDING",
+    "scheduledDeliveryDate": "2026-11-16T17:00:00Z",
+    "requiresAdministrativeReview": false,
+    "routeId": null
+  },
+  "agreedDate": "2026-11-16T17:00:00Z",
+  "audits": [
+    {
+      "action": "LOSS_DECLARE",
+      "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+      "outcome": "APPLIED"
+    },
+    {
+      "action": "CONTACT",
+      "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+      "outcome": "APPLIED"
+    },
+    {
+      "action": "RESCHEDULE",
+      "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+      "outcome": "APPLIED"
+    }
+  ],
+  "routeStopsOfOrder": 1
+}

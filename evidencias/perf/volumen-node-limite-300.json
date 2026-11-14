@@ -1,0 +1,150 @@
+{
+  "environment": {
+    "date": "2026-11-14T05:12:36.810Z",
+    "commit": "219e72eb657b5f10ec647bf51d203878fe60e5af",
+    "node": "v26.11.1",
+    "os": "Windows_NT 10.0.26200 (x64)",
+    "cpu": "Intel(R) Core(TM) i9-14900HX",
+    "threads": 32,
+    "memoryGB": 31.7,
+    "postgres": "postgres:16-alpine (Docker, contenedor desechable)",
+    "roadEngine": {
+      "engine": {
+        "engine": "OSRM",
+        "configured": true,
+        "available": true,
+        "profile": "car",
+        "latencyMs": 3,
+        "checkedAt": "2026-11-14T05:12:29.902Z",
+        "message": "Motor vial disponible (el punto de prueba queda a 20 m de la red)"
+      },
+      "image": "osrm/osrm-backend v5.26.0 (mld)",
+      "map": "ecuador-latest.osm.pbf (Geofabrik)"
+    },
+    "generator": "ape4-volume.ts (fetch de Node, un solo cliente secuencial; sin JMeter ni k6)",
+    "maxPoints": "por defecto (300)",
+    "shared": "API, PostgreSQL, OSRM y el generador comparten la misma laptop"
+  },
+  "results": [
+    {
+      "size": 100,
+      "checksum": "703324b68f5155cd628d31ba08ee4a7e479205f35bff94bf511f1c4aa96d89e2",
+      "theoreticalRoutes": 25,
+      "seedMs": 245,
+      "runs": 7,
+      "timesMs": [
+        199,
+        156,
+        158,
+        154,
+        154,
+        151,
+        152
+      ],
+      "stats": {
+        "count": 7,
+        "min": 151.23220000000038,
+        "mean": 160.62412857142877,
+        "p50": 154.33640000000014,
+        "p95": 199.47990000000027,
+        "p99": 199.47990000000027,
+        "max": 199.47990000000027
+      },
+      "errors": 0,
+      "errorSample": null,
+      "distanceMethod": "OSRM_ROAD_NETWORK",
+      "summary": {
+        "candidateOrders": 100,
+        "plannedOrders": 100,
+        "excludedOrders": 0,
+        "routes": 26,
+        "baselineKm": 371.256,
+        "plannedKm": 142.379,
+        "savingsKm": 228.877,
+        "savingsPercent": 61.65
+      }
+    },
+    {
+      "size": 500,
+      "checksum": "0c575b96e6e88d7bc8c793b82bb292f758ac297804a2d3f41c79d7004fd87597",
+      "theoreticalRoutes": 125,
+      "seedMs": 827,
+      "runs": 7,
+      "timesMs": [
+        20,
+        29,
+        22,
+        31,
+        18,
+        16,
+        17
+      ],
+      "stats": {
+        "count": 7,
+        "min": 16.129699999999502,
+        "mean": 21.813385714285687,
+        "p50": 19.533400000000256,
+        "p95": 31.184000000001106,
+        "p99": 31.184000000001106,
+        "max": 31.184000000001106
+      },
+      "errors": 7,
+      "errorSample": {
+        "status": 422,
+        "body": {
+          "statusCode": 422,
+          "error": "Unprocessable Entity",
+          "code": "ROAD_MATRIX_TOO_LARGE",
+          "message": "La propuesta necesita 505 puntos y el límite del motor vial es 300: acota la fecha o la zona",
+          "details": {
+            "points": 505,
+            "maxPoints": 300
+          }
+        }
+      },
+      "distanceMethod": null,
+      "summary": null
+    },
+    {
+      "size": 2000,
+      "checksum": "9bff21a2f66dcdd007d73b8560f024a4a970c07d6d69b8e010474fbf57d85db3",
+      "theoreticalRoutes": 500,
+      "seedMs": 3107,
+      "runs": 7,
+      "timesMs": [
+        63,
+        57,
+        67,
+        53,
+        52,
+        53,
+        52
+      ],
+      "stats": {
+        "count": 7,
+        "min": 52.006099999998696,
+        "mean": 56.64788571428549,
+        "p50": 52.749299999999494,
+        "p95": 66.63420000000042,
+        "p99": 66.63420000000042,
+        "max": 66.63420000000042
+      },
+      "errors": 7,
+      "errorSample": {
+        "status": 422,
+        "body": {
+          "statusCode": 422,
+          "error": "Unprocessable Entity",
+          "code": "ROAD_MATRIX_TOO_LARGE",
+          "message": "La propuesta necesita 2005 puntos y el límite del motor vial es 300: acota la fecha o la zona",
+          "details": {
+            "points": 2005,
+            "maxPoints": 300
+          }
+        }
+      },
+      "distanceMethod": null,
+      "summary": null
+    }
+  ]
+}

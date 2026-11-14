@@ -1,0 +1,42 @@
+{
+  "request": "GET /api/v1/route-proposals?date=2026-11-15 (ADMIN)",
+  "status": 200,
+  "distanceMethod": "OSRM_ROAD_NETWORK",
+  "timeWindowMarginMinutes": 30,
+  "summary": {
+    "candidateOrders": 3,
+    "plannedOrders": 3,
+    "excludedOrders": 0,
+    "routes": 2,
+    "baselineKm": 41.997,
+    "plannedKm": 40.147,
+    "savingsKm": 1.85,
+    "savingsPercent": 4.41
+  },
+  "groups": [
+    {
+      "stops": [
+        {
+          "order": "P1 10:00 Centro",
+          "scheduledAt": "2026-11-15T15:00:00Z"
+        },
+        {
+          "order": "P2 10:20 lejano (norte)",
+          "scheduledAt": "2026-11-15T15:20:00Z"
+        }
+      ],
+      "totalDistanceKm": 38.536,
+      "totalDurationSeconds": 3212
+    },
+    {
+      "stops": [
+        {
+          "order": "P3 15:00 cercano a P1",
+          "scheduledAt": "2026-11-15T20:00:00Z"
+        }
+      ],
+      "totalDistanceKm": 1.611,
+      "totalDurationSeconds": 159
+    }
+  ]
+}

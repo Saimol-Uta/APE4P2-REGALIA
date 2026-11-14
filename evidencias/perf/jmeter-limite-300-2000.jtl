@@ -1,0 +1,8 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794637567566,201,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,198,0,16
+1794637567768,74,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,74,0,0
+1794637567843,104,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,104,0,0
+1794637567947,72,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,71,0,0
+1794637568019,114,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,114,0,0
+1794637568134,121,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,121,0,0
+1794637568255,70,GET route-proposals,422,Unprocessable Entity,Un usuario 1-1,text,false,,497,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,70,0,0

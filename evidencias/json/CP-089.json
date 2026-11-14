@@ -1,0 +1,28 @@
+{
+  "emergencyClose": {
+    "status": 200,
+    "result": {
+      "closedAt": "2026-11-14T05:26:28.909675049Z",
+      "emergencyId": "5870264f-4310-4d19-b72b-f7ae639a0874",
+      "routeId": "12de5cb6-4ab8-4f35-b774-4f9c5857475b"
+    }
+  },
+  "route": {
+    "status": "INTERRUPTED",
+    "returnedAt": null
+  },
+  "unitRecovery": {
+    "recoveredAt": null
+  },
+  "driverReservation": {
+    "releasedAt": null
+  },
+  "driverAvailability": {
+    "isAvailable": false,
+    "hasPersistedHolds": true,
+    "compatibilityFlagBlocks": true,
+    "blockingRouteIds": [
+      "12de5cb6-4ab8-4f35-b774-4f9c5857475b"
+    ]
+  }
+}

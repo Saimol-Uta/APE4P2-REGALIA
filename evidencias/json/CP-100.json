@@ -1,0 +1,68 @@
+{
+  "declared": {
+    "status": 200,
+    "emergencyId": "a2391abd-b7f3-4cd6-b456-cca83f079a65"
+  },
+  "races": [
+    {
+      "unit": "f0eb6c08",
+      "unitRecovery": {
+        "status": 200,
+        "code": null
+      },
+      "lossDeclare": {
+        "status": 409,
+        "code": "UNIT_ALREADY_RECOVERED"
+      },
+      "persisted": {
+        "recovered": true,
+        "activeLosses": 0
+      }
+    },
+    {
+      "unit": "aa0b1c21",
+      "unitRecovery": {
+        "status": 409,
+        "code": "UNIT_HAS_ACTIVE_LOSS"
+      },
+      "lossDeclare": {
+        "status": 200,
+        "code": null
+      },
+      "persisted": {
+        "recovered": false,
+        "activeLosses": 1
+      }
+    },
+    {
+      "unit": "dea275d0",
+      "unitRecovery": {
+        "status": 409,
+        "code": "UNIT_HAS_ACTIVE_LOSS"
+      },
+      "lossDeclare": {
+        "status": 200,
+        "code": null
+      },
+      "persisted": {
+        "recovered": false,
+        "activeLosses": 1
+      }
+    },
+    {
+      "unit": "a200a5df",
+      "unitRecovery": {
+        "status": 409,
+        "code": "UNIT_HAS_ACTIVE_LOSS"
+      },
+      "lossDeclare": {
+        "status": 200,
+        "code": null
+      },
+      "persisted": {
+        "recovered": false,
+        "activeLosses": 1
+      }
+    }
+  ]
+}

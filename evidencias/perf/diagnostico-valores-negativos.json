@@ -1,0 +1,27 @@
+{
+ "badDistance": 8,
+ "badDuration": 0,
+ "sample": [
+  {
+   "i": 50,
+   "j": 1874,
+   "v": "-0.6"
+  },
+  {
+   "i": 633,
+   "j": 1718,
+   "v": "-0.5"
+  },
+  {
+   "i": 982,
+   "j": 1355,
+   "v": "-0.2"
+  }
+ ],
+ "points": 2005,
+ "pairs": 4020025,
+ "nullPairs": 0,
+ "sourcesWithNulls": 0,
+ "destsWithNulls": 0,
+ "worst": []
+}

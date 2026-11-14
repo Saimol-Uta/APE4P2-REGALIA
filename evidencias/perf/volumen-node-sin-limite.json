@@ -1,0 +1,132 @@
+{
+  "environment": {
+    "date": "2026-11-14T05:13:08.856Z",
+    "commit": "219e72eb657b5f10ec647bf51d203878fe60e5af",
+    "node": "v26.11.1",
+    "os": "Windows_NT 10.0.26200 (x64)",
+    "cpu": "Intel(R) Core(TM) i9-14900HX",
+    "threads": 32,
+    "memoryGB": 31.7,
+    "postgres": "postgres:16-alpine (Docker, contenedor desechable)",
+    "roadEngine": {
+      "engine": {
+        "engine": "OSRM",
+        "configured": true,
+        "available": true,
+        "profile": "car",
+        "latencyMs": 3,
+        "checkedAt": "2026-11-14T05:12:47.668Z",
+        "message": "Motor vial disponible (el punto de prueba queda a 20 m de la red)"
+      },
+      "image": "osrm/osrm-backend v5.26.0 (mld)",
+      "map": "ecuador-latest.osm.pbf (Geofabrik)"
+    },
+    "generator": "ape4-volume.ts (fetch de Node, un solo cliente secuencial; sin JMeter ni k6)",
+    "maxPoints": "2100",
+    "shared": "API, PostgreSQL, OSRM y el generador comparten la misma laptop"
+  },
+  "results": [
+    {
+      "size": 100,
+      "checksum": "703324b68f5155cd628d31ba08ee4a7e479205f35bff94bf511f1c4aa96d89e2",
+      "theoreticalRoutes": 25,
+      "seedMs": 216,
+      "runs": 3,
+      "timesMs": [
+        191,
+        155,
+        151
+      ],
+      "stats": {
+        "count": 3,
+        "min": 151.45929999999862,
+        "mean": 166.04876666666618,
+        "p50": 155.4412999999986,
+        "p95": 191.2457000000013,
+        "p99": 191.2457000000013,
+        "max": 191.2457000000013
+      },
+      "errors": 0,
+      "errorSample": null,
+      "distanceMethod": "OSRM_ROAD_NETWORK",
+      "summary": {
+        "candidateOrders": 100,
+        "plannedOrders": 100,
+        "excludedOrders": 0,
+        "routes": 26,
+        "baselineKm": 371.256,
+        "plannedKm": 142.379,
+        "savingsKm": 228.877,
+        "savingsPercent": 61.65
+      }
+    },
+    {
+      "size": 500,
+      "checksum": "0c575b96e6e88d7bc8c793b82bb292f758ac297804a2d3f41c79d7004fd87597",
+      "theoreticalRoutes": 125,
+      "seedMs": 738,
+      "runs": 3,
+      "timesMs": [
+        2744,
+        2656,
+        2706
+      ],
+      "stats": {
+        "count": 3,
+        "min": 2655.5594,
+        "mean": 2701.918,
+        "p50": 2706.254000000001,
+        "p95": 2743.9406,
+        "p99": 2743.9406,
+        "max": 2743.9406
+      },
+      "errors": 0,
+      "errorSample": null,
+      "distanceMethod": "OSRM_ROAD_NETWORK",
+      "summary": {
+        "candidateOrders": 500,
+        "plannedOrders": 500,
+        "excludedOrders": 0,
+        "routes": 126,
+        "baselineKm": 1736.992,
+        "plannedKm": 532.515,
+        "savingsKm": 1204.477,
+        "savingsPercent": 69.34
+      }
+    },
+    {
+      "size": 2000,
+      "checksum": "9bff21a2f66dcdd007d73b8560f024a4a970c07d6d69b8e010474fbf57d85db3",
+      "theoreticalRoutes": 500,
+      "seedMs": 3127,
+      "runs": 3,
+      "timesMs": [
+        1994,
+        2275,
+        2558
+      ],
+      "stats": {
+        "count": 3,
+        "min": 1993.8264999999992,
+        "mean": 2275.595266666666,
+        "p50": 2275.4052999999985,
+        "p95": 2557.554,
+        "p99": 2557.554,
+        "max": 2557.554
+      },
+      "errors": 3,
+      "errorSample": {
+        "status": 502,
+        "body": {
+          "statusCode": 502,
+          "error": "Bad Gateway",
+          "code": "ROAD_ENGINE_BAD_RESPONSE",
+          "message": "El motor vial devolvió un valor que no es un número válido",
+          "details": {}
+        }
+      },
+      "distanceMethod": null,
+      "summary": null
+    }
+  ]
+}

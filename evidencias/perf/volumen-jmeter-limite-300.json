@@ -1,0 +1,159 @@
+{
+  "environment": {
+    "date": "2026-11-14T06:26:10.993Z",
+    "commit": "7eb9a5a1b75505d7460a8f9a4a94387504bb0463",
+    "node": "v26.11.1",
+    "os": "Windows_NT 10.0.26200 (x64)",
+    "cpu": "Intel(R) Core(TM) i9-14900HX",
+    "threads": 32,
+    "memoryGB": 31.7,
+    "postgres": "postgres:16-alpine (Docker, contenedor desechable)",
+    "roadEngine": {
+      "engine": {
+        "engine": "OSRM",
+        "configured": true,
+        "available": true,
+        "profile": "car",
+        "latencyMs": 3,
+        "checkedAt": "2026-11-14T06:25:51.833Z",
+        "message": "Motor vial disponible (el punto de prueba queda a 20 m de la red)"
+      },
+      "image": "osrm/osrm-backend v5.26.0 (mld)",
+      "map": "ecuador-latest.osm.pbf (Geofabrik)"
+    },
+    "generator": "Apache JMeter 5.6.3 (modo no GUI, 1 usuario, plan ape4-volume.jmx)",
+    "maxPoints": "por defecto (300)",
+    "shared": "API, PostgreSQL, OSRM y el generador comparten la misma laptop"
+  },
+  "results": [
+    {
+      "size": 100,
+      "checksum": "703324b68f5155cd628d31ba08ee4a7e479205f35bff94bf511f1c4aa96d89e2",
+      "theoreticalRoutes": 25,
+      "seedMs": 538,
+      "runs": 7,
+      "timesMs": [
+        366,
+        273,
+        233,
+        218,
+        245,
+        216,
+        213
+      ],
+      "stats": {
+        "count": 7,
+        "min": 213,
+        "mean": 252,
+        "p50": 233,
+        "p95": 366,
+        "p99": 366,
+        "max": 366
+      },
+      "errors": 0,
+      "responseCodes": {
+        "200": 7
+      },
+      "errorSample": null,
+      "distanceMethod": "OSRM_ROAD_NETWORK",
+      "summary": {
+        "candidateOrders": 100,
+        "plannedOrders": 100,
+        "excludedOrders": 0,
+        "routes": 26,
+        "baselineKm": 371.256,
+        "plannedKm": 142.379,
+        "savingsKm": 228.877,
+        "savingsPercent": 61.65
+      }
+    },
+    {
+      "size": 500,
+      "checksum": "0c575b96e6e88d7bc8c793b82bb292f758ac297804a2d3f41c79d7004fd87597",
+      "theoreticalRoutes": 125,
+      "seedMs": 1246,
+      "runs": 7,
+      "timesMs": [
+        53,
+        31,
+        27,
+        24,
+        24,
+        25,
+        28
+      ],
+      "stats": {
+        "count": 7,
+        "min": 24,
+        "mean": 30.285714285714285,
+        "p50": 27,
+        "p95": 53,
+        "p99": 53,
+        "max": 53
+      },
+      "errors": 7,
+      "responseCodes": {
+        "422": 7
+      },
+      "errorSample": {
+        "status": 422,
+        "body": {
+          "statusCode": 422,
+          "error": "Unprocessable Entity",
+          "code": "ROAD_MATRIX_TOO_LARGE",
+          "message": "La propuesta necesita 505 puntos y el límite del motor vial es 300: acota la fecha o la zona",
+          "details": {
+            "points": 505,
+            "maxPoints": 300
+          }
+        }
+      },
+      "distanceMethod": null,
+      "summary": null
+    },
+    {
+      "size": 2000,
+      "checksum": "9bff21a2f66dcdd007d73b8560f024a4a970c07d6d69b8e010474fbf57d85db3",
+      "theoreticalRoutes": 500,
+      "seedMs": 4065,
+      "runs": 7,
+      "timesMs": [
+        201,
+        74,
+        104,
+        72,
+        114,
+        121,
+        70
+      ],
+      "stats": {
+        "count": 7,
+        "min": 70,
+        "mean": 108,
+        "p50": 104,
+        "p95": 201,
+        "p99": 201,
+        "max": 201
+      },
+      "errors": 7,
+      "responseCodes": {
+        "422": 7
+      },
+      "errorSample": {
+        "status": 422,
+        "body": {
+          "statusCode": 422,
+          "error": "Unprocessable Entity",
+          "code": "ROAD_MATRIX_TOO_LARGE",
+          "message": "La propuesta necesita 2005 puntos y el límite del motor vial es 300: acota la fecha o la zona",
+          "details": {
+            "points": 2005,
+            "maxPoints": 300
+          }
+        }
+      },
+      "distanceMethod": null,
+      "summary": null
+    }
+  ]
+}

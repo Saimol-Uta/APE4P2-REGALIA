@@ -1,0 +1,27 @@
+{
+  "request": "GET /api/v1/route-proposals?date=2026-11-16 (ADMIN)",
+  "status": 200,
+  "distanceMethod": "OSRM_ROAD_NETWORK",
+  "summary": {
+    "candidateOrders": 1,
+    "plannedOrders": 1,
+    "excludedOrders": 0,
+    "routes": 1,
+    "baselineKm": 1.607,
+    "plannedKm": 1.607,
+    "savingsKm": 0,
+    "savingsPercent": 0
+  },
+  "groups": [
+    {
+      "stops": [
+        {
+          "order": "Único 11:00",
+          "scheduledAt": "2026-11-16T16:00:00Z"
+        }
+      ],
+      "totalDistanceKm": 1.607,
+      "totalDurationSeconds": 147
+    }
+  ]
+}

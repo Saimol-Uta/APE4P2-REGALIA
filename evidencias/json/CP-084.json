@@ -1,0 +1,38 @@
+{
+  "request": "GET /api/v1/route-proposals?date=2026-11-17 (ADMIN)",
+  "status": 200,
+  "summary": {
+    "candidateOrders": 4,
+    "plannedOrders": 4,
+    "excludedOrders": 0,
+    "routes": 1,
+    "baselineKm": 20.186,
+    "plannedKm": 17.617,
+    "savingsKm": 2.569,
+    "savingsPercent": 12.73
+  },
+  "groups": [
+    {
+      "stops": [
+        {
+          "order": "A 10:00",
+          "scheduledAt": "2026-11-17T15:00:00Z"
+        },
+        {
+          "order": "B 10:10",
+          "scheduledAt": "2026-11-17T15:10:00Z"
+        },
+        {
+          "order": "C 10:15",
+          "scheduledAt": "2026-11-17T15:15:00Z"
+        },
+        {
+          "order": "D 10:25",
+          "scheduledAt": "2026-11-17T15:25:00Z"
+        }
+      ],
+      "totalDistanceKm": 17.617,
+      "totalDurationSeconds": 1771
+    }
+  ]
+}

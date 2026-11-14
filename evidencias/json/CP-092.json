@@ -1,0 +1,66 @@
+{
+  "request": "POST /api/v1/dispatch/interventions LOSS_DECLARE",
+  "response": {
+    "id": "9a3ee45b-11b7-49dd-8d16-87bf8f172001",
+    "requestId": "d43d4228-1584-4f98-a244-1aa0c0a1be27",
+    "actorId": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+    "orderId": "98cf5263-ccd8-4bb7-b686-8758ce5bf4b1",
+    "routeId": null,
+    "action": "LOSS_DECLARE",
+    "reason": "Gestión APE4",
+    "outcome": "APPLIED",
+    "recordedAt": "2026-11-14T05:26:28.958328Z",
+    "result": {
+      "lossId": "9845bdeb-56a9-4304-a18d-09ae4f68df8e",
+      "replacement": "PREPARED",
+      "stock": "2"
+    }
+  },
+  "before": {
+    "orders": 1,
+    "receipts": 1,
+    "payments": 1,
+    "cardBalanceCents": "500000"
+  },
+  "after": {
+    "orders": 1,
+    "receipts": 1,
+    "payments": 1,
+    "cardBalanceCents": "500000"
+  },
+  "lossHistory": [
+    {
+      "id": "9845bdeb-56a9-4304-a18d-09ae4f68df8e",
+      "orderId": "98cf5263-ccd8-4bb7-b686-8758ce5bf4b1",
+      "orderItemId": "6f516991-65e3-44c9-b6af-dc285bb8d342",
+      "unitNumber": 1,
+      "productId": "1f38c4bf-0648-4186-b603-e9d47d7fe6f7",
+      "attemptId": null,
+      "declaredAt": "2026-11-14T05:26:28.95133Z",
+      "declaredById": "e6d4fec1-a881-4dc0-918a-fcf3474baba7",
+      "cancelledAt": null,
+      "cancelledById": null,
+      "cancelReason": null,
+      "replacement": {
+        "state": "PREPARED",
+        "preparedAt": "2026-11-14T05:26:28.95641Z",
+        "preparedById": "e6d4fec1-a881-4dc0-918a-fcf3474baba7"
+      },
+      "original": {
+        "state": "LOST",
+        "condition": null,
+        "recoveredAt": null,
+        "recoveredById": null
+      },
+      "movements": [
+        {
+          "kind": "REPLACEMENT_OUT",
+          "delta": -1,
+          "stockAfter": 2,
+          "createdAt": "2026-11-14T05:26:28.944989Z",
+          "createdById": "e6d4fec1-a881-4dc0-918a-fcf3474baba7"
+        }
+      ]
+    }
+  ]
+}

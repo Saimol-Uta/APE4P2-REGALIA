@@ -1,0 +1,15 @@
+{
+  "ejecutado": "2026-11-14, corrida que cayó en la franja de medianoche de America/Guayaquil (23:25-00:05)",
+  "fallos": [
+    {
+      "suite": "C:\\Users\\teoau\\Documents\\Sexto\\Pruebas e Implantacion\\SistemaEntregasYRutas\\backend\\test\\urgent-dispatch.e2e-spec.ts",
+      "test": "Issue12 dispatch: PostgreSQL + actual JWT HTTP CP-SEG-004/008: RECIPIENT_ABSENT, explicit agreement, same commercial order in R2 and immutable R1 history",
+      "error": "Error: expected 201 \"Created\", got 409 \"Conflict\""
+    },
+    {
+      "suite": "C:\\Users\\teoau\\Documents\\Sexto\\Pruebas e Implantacion\\SistemaEntregasYRutas\\backend\\test\\urgent-dispatch.e2e-spec.ts",
+      "test": "Issue12 dispatch: PostgreSQL + actual JWT HTTP CP-SEG-004/008: RECIPIENT_REFUSED, explicit agreement, same commercial order in R2 and immutable R1 history",
+      "error": "Error: expected 201 \"Created\", got 409 \"Conflict\""
+    }
+  ]
+}

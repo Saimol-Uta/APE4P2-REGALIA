@@ -1,0 +1,8 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794637554061,366,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,364,0,15
+1794637554429,273,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,273,0,0
+1794637554703,233,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,233,0,0
+1794637554937,218,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,218,0,0
+1794637555156,245,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,245,0,0
+1794637555402,216,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,216,0,0
+1794637555618,213,GET route-proposals,200,OK,Un usuario 1-1,text,true,,41086,429,1,1,http://127.0.0.1:3101/api/v1/route-proposals?date=2030-02-14,213,0,0
