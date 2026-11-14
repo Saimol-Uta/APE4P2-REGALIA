@@ -1,0 +1,36 @@
+% FRONTEND WEB - fichas individuales de ejecución (27 casos: CP-028..CP-054)
+% GUÍA EQUIPO (Kerly Chicaiza): completar los parámetros de \casoejec{ID}{título}{resultado obtenido}{PASS|FAIL|BLOCKED|N/A}{evidencia o log}{DEF-XX}.
+% - Estado: solo PASS, FAIL, BLOCKED o N/A.
+% - Defecto: ID del defecto (ej. DEF-01) si falló, o Ninguno si pasó.
+% - Resultado obtenido: describir lo observado al ejecutar la prueba.
+% - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
+\par\medskip\noindent\textbf{Módulo Web --- Tienda en línea y panel de rutas (27 casos: CP-028 a CP-054).}\par\smallskip
+Pruebas ejecutadas sobre la aplicación web React conectada al backend aislado y verificadas mediante Playwright y Vitest.
+
+\casoejec{CP-028}{Historial unificado Mis pedidos con compras SHOP y ADMIN propias}{}{}{Captura UI / reporte}{}
+\casoejec{CP-029}{Bloqueo en lista y detalle ante pedido ajeno o invitado coincidente}{}{}{Captura UI / reporte}{}
+\casoejec{CP-030}{Pedido sin PurchaseReceipt y sin importes inventados}{}{}{Captura UI / reporte}{}
+\casoejec{CP-031}{Cobertura tienda: punto interior al polígono aceptado en web}{}{}{Captura UI / reporte}{}
+\casoejec{CP-032}{Cobertura tienda: punto exactamente en el borde del polígono}{}{}{Captura UI / reporte}{}
+\casoejec{CP-033}{Cobertura tienda: punto exterior rechazado con 422 en web}{}{}{Captura UI / reporte}{}
+\casoejec{CP-034}{Cambio de cobertura A a B conserva pedidos ya aceptados}{}{}{Captura UI / reporte}{}
+\casoejec{CP-035}{Compra nueva tras cambio de cobertura aplica área B vigente}{}{}{Captura UI / reporte}{}
+\casoejec{CP-036}{Horario Shop límite inicial 07:\allowbreak{}00 America/\allowbreak{}Guayaquil aceptado}{}{}{Captura UI / reporte}{}
+\casoejec{CP-037}{Horario Shop límite final 17:\allowbreak{}00 America/\allowbreak{}Guayaquil aceptado}{}{}{Captura UI / reporte}{}
+\casoejec{CP-038}{Horario Shop inválido 06:\allowbreak{}59 rechazado sin orden ni cobro}{}{}{Captura UI / reporte}{}
+\casoejec{CP-039}{Horario Shop inválido 17:\allowbreak{}01 rechazado sin orden ni cobro}{}{}{Captura UI / reporte}{}
+\casoejec{CP-040}{Cambio de horario en shop-settings genera 409 al confirmar}{}{}{Captura UI / reporte}{}
+\casoejec{CP-041}{Verificación UI web de aviso de hora de entrega aproximada}{}{}{Captura UI / reporte}{}
+\casoejec{CP-042}{Propuesta de rutas en panel ADMIN es solo lectura sin persistir}{}{}{Captura UI / reporte}{}
+\casoejec{CP-043}{Confirmación de borrador DRAFT en hoy persiste ruta sin conductor}{}{}{Captura UI / reporte}{}
+\casoejec{CP-044}{Asignación separada de ruta DRAFT a conductor disponible}{}{}{Captura UI / reporte}{}
+\casoejec{CP-045}{Rechazo de asignación a conductor no disponible o ausente (409)}{}{}{Captura UI / reporte}{}
+\casoejec{CP-046}{Motor vial OSRM indisponible muestra aviso sin rutas en línea recta}{}{}{Captura UI / reporte}{}
+\casoejec{CP-047}{Preservación de pedidos pendientes y rutas tras falla OSRM}{}{}{Captura UI / reporte}{}
+\casoejec{CP-048}{Recuperación tras indisponibilidad OSRM genera propuestas válidas}{}{}{Captura UI / reporte}{}
+\casoejec{CP-049}{Origen y retorno común en tienda única reflejado en propuesta y mapa}{}{}{Captura UI / reporte}{}
+\casoejec{CP-050}{Paradas y trazado vial en panel ADMIN coinciden con motor vial}{}{}{Captura UI / reporte}{}
+\casoejec{CP-051}{Distancias y duraciones mostradas como estimadas sin tráfico en vivo}{}{}{Captura UI / reporte}{}
+\casoejec{CP-052}{Regresión Shop: compra válida con DEMO\_APPROVED crea pedido y recibo}{}{}{Captura UI / reporte}{}
+\casoejec{CP-053}{Regresión Shop: carrito mixto con agotado rechazado sin efectos}{}{}{Captura UI / reporte}{}
+\casoejec{CP-054}{Regresión Shop: precio o total manipulado en cliente no es aceptado}{}{}{Captura UI / reporte}{}

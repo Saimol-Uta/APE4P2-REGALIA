@@ -1,0 +1,36 @@
+% BACKEND - fichas individuales de ejecución (27 casos: CP-001..CP-027)
+% GUÍA EQUIPO (Saimol Jimenez): completar los parámetros de \casoejec{ID}{título}{resultado obtenido}{PASS|FAIL|BLOCKED|N/A}{evidencia o log}{DEF-XX}.
+% - Estado: solo PASS, FAIL, BLOCKED o N/A.
+% - Defecto: ID del defecto (ej. DEF-01) si falló, o Ninguno si pasó.
+% - Resultado obtenido: describir lo observado al ejecutar la prueba.
+% - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
+\par\medskip\noindent\textbf{Módulo Backend y reglas de negocio (27 casos: CP-001 a CP-027).}\par\smallskip
+Pruebas ejecutadas sobre la API REST en entorno aislado (\texttt{pnpm test:cov}, \texttt{pnpm test:e2e:isolated}, \texttt{pnpm test:api:isolated}) y clientes HTTP.
+
+\casoejec{CP-001}{Compra ADMIN para cliente con destinatario de regalo}{}{}{Log / reporte}{}
+\casoejec{CP-002}{Rechazo compra ADMIN cliente sin teléfono de comprador}{}{}{Log / reporte}{}
+\casoejec{CP-003}{Compra ADMIN invitado y lectura de comprobante}{}{}{Log / reporte}{}
+\casoejec{CP-004}{Rechazo compra ADMIN invitado sin teléfono obligatorio}{}{}{Log / reporte}{}
+\casoejec{CP-005}{Compra invitado con teléfono de cliente sin vínculo}{}{}{Log / reporte}{}
+\casoejec{CP-006}{Pago externo declarado ADMIN en efectivo}{}{}{Log / reporte}{}
+\casoejec{CP-007}{Pago externo declarado ADMIN por transferencia}{}{}{Log / reporte}{}
+\casoejec{CP-008}{Cambio de tasa IVA tras cotizar (409 SHOP\_SETTINGS\_CHANGED)}{}{}{Log / reporte}{}
+\casoejec{CP-009}{Cambio de precio tras cotizar e inmutabilidad 15\% IVA}{}{}{Log / reporte}{}
+\casoejec{CP-010}{Corrección autorizada de contacto ADMIN y auditoría}{}{}{Log / reporte}{}
+\casoejec{CP-011}{Aislamiento de corrección de contacto en recibo y pedido}{}{}{Log / reporte}{}
+\casoejec{CP-012}{Rechazo de corrección de contacto por rol no autorizado}{}{}{Log / reporte}{}
+\casoejec{CP-013}{Horario ADMIN límite inicial 07:\allowbreak{}00 America/\allowbreak{}Guayaquil}{}{}{Log / reporte}{}
+\casoejec{CP-014}{Horario ADMIN límite final 17:\allowbreak{}00 America/\allowbreak{}Guayaquil}{}{}{Log / reporte}{}
+\casoejec{CP-015}{Rechazo horario ADMIN inválido 06:\allowbreak{}59 (422)}{}{}{Log / reporte}{}
+\casoejec{CP-016}{Rechazo horario ADMIN inválido 17:\allowbreak{}01 (422)}{}{}{Log / reporte}{}
+\casoejec{CP-017}{Agrupación temporal por extremos (10:\allowbreak{}00, 10:\allowbreak{}25, 10:\allowbreak{}50)}{}{}{Log / reporte}{}
+\casoejec{CP-018}{Agrupación por extremos con separación de 29 minutos}{}{}{Log / reporte}{}
+\casoejec{CP-019}{Agrupación por extremos con separación exacta de 30 min}{}{}{Log / reporte}{}
+\casoejec{CP-020}{Separación de rutas por extremos con 31 minutos}{}{}{Log / reporte}{}
+\casoejec{CP-021}{Cambio de margen horario (5..180) y desempate OSRM}{}{}{Log / reporte}{}
+\casoejec{CP-022}{Creación de pedido sin fecha programada (scheduledDeliveryDate nulo)}{}{}{Log / reporte}{}
+\casoejec{CP-023}{Exclusión en propuestas y 409 en asignación sin fecha}{}{}{Log / reporte}{}
+\casoejec{CP-024}{Idempotencia Shop checkout con replay 201}{}{}{Log / reporte}{}
+\casoejec{CP-025}{Recuperación Shop ante timeout con mismo Idempotency-Key}{}{}{Log / reporte}{}
+\casoejec{CP-026}{Conflicto Idempotency-Key con payload distinto (409)}{}{}{Log / reporte}{}
+\casoejec{CP-027}{Liberación auditada de DRAFT caducado (RELEASE\_DRAFT)}{}{}{Log / reporte}{}

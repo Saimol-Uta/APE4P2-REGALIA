@@ -1,0 +1,414 @@
+%%\documentclass[a4paper,11pt]{article}
+\documentclass[11pt]{article}
+\usepackage[left=2.5cm, right=2cm, top=1.5cm, bottom=3cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{35pt}
+\setlength{\headsep}{35pt}
+\fancyhead[L]{\includegraphics[width=18cm]{picture/logo.pdf}}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{\thepage}
+\setlength{\footskip}{5pt}
+\title{Informe del Proyecto REGALÍA}
+
+% Let long monospace identifiers (endpoints, error codes) wrap inside narrow cells.
+\let\oldtexttt\texttt
+\renewcommand{\texttt}[1]{\oldtexttt{\hyphenchar\font=45\relax #1}}
+\renewcommand{\_}{\textunderscore\allowbreak}
+\setlength{\emergencystretch}{3em}
+\renewcommand{\figurename}{Figura}
+
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\renewcommand{\arraystretch}{1.3}
+
+% ---------------------------------------------------------------------------
+% Macros for the test design and execution tables.
+% Design row:    \caso{ID}{Case and requirement}{Inputs}{Actions}{Expected}{Acceptance}
+% Execution row: \fila{ID}{Obtained result}{Status}{Evidence}{Defect ID}
+% Screenshot:    \captura{ID}{Description} -> loads evidencias/ID.png if it exists
+% ---------------------------------------------------------------------------
+\newcommand{\caso}[6]{\oldtexttt{#1} & #2 & #3 & #4 & #5 & #6 \\ \hline}
+\newenvironment{disenio}{%
+  \sloppy\scriptsize\setlength{\tabcolsep}{3pt}
+  \begin{longtable}{|P{1.8cm}|P{2.2cm}|P{2.75cm}|P{2.85cm}|P{2.8cm}|P{2.65cm}|}
+  \hline
+  \textbf{ID} & \textbf{Caso / requisito} & \textbf{Entradas} & \textbf{Acciones} & \textbf{Resultado esperado} & \textbf{Criterio de aceptación} \\ \hline
+  \endhead
+}{\end{longtable}\fussy\normalsize}
+
+\newcommand{\fila}[5]{\oldtexttt{#1} & #2 & #3 & #4 & #5 \\ \hline}
+\newenvironment{ejecucion}{%
+  \sloppy\footnotesize\setlength{\tabcolsep}{3pt}
+  \begin{longtable}{|P{2.05cm}|P{6.3cm}|P{1.6cm}|P{3.4cm}|P{1.5cm}|}
+  \hline
+  \textbf{ID} & \textbf{Resultado obtenido} & \textbf{Estado} & \textbf{Evidencia} & \textbf{Defecto} \\ \hline
+  \endhead
+}{\end{longtable}\fussy\normalsize}
+
+% Ficha individual numerada (2.7.4.1 .. 2.7.4.107) para Ejecución de pruebas:
+% \casoejec{ID}{Título}{Resultado obtenido}{Estado}{Evidencia / Log}{Defecto}
+\newcommand{\casoejec}[6]{%
+  \paragraph{\oldtexttt{#1} --- #2}\nopagebreak[4]%
+  \par\noindent
+  \begin{minipage}{\textwidth}
+    \sloppy
+    {\footnotesize
+      \textbf{Estado:} \if\relax\detokenize{#4}\relax\underline{\hspace{2.5cm}}\else\textbf{#4}\fi
+      \hfill
+      \textbf{Defecto:} \if\relax\detokenize{#6}\relax\underline{\hspace{2.5cm}}\else #6\fi\par
+      \vspace{4pt}
+      \textbf{Resultado obtenido:}
+      \if\relax\detokenize{#3}\relax
+        \par\vspace{8pt}\noindent\rule{\textwidth}{0.3pt}\par\vspace{8pt}\noindent\rule{\textwidth}{0.3pt}\par
+      \else
+        #3\par
+      \fi
+      \vspace{4pt}
+      \textbf{Evidencia (log / reporte):} #5\par
+      \vspace{4pt}
+      \IfFileExists{evidencias/#1.png}%
+        {\begin{center}\includegraphics[width=0.78\textwidth,height=0.25\textheight,keepaspectratio]{evidencias/#1.png}\end{center}}%
+        {\noindent\fbox{\parbox[c][1.35cm][c]{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{\centering\scriptsize Evidencia gr\'afica: \texttt{evidencias/#1.png}}}}%
+    }
+    \vspace{4pt}
+    \noindent\rule{\textwidth}{0.4pt}\par
+    \fussy
+  \end{minipage}\par
+  \vspace{4pt}
+}
+
+% GUÍA EQUIPO: guardar cada captura como evidencias/CP-XXX.png; \captura la inserta automáticamente si el archivo existe.
+\newcommand{\captura}[2]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{evidencias/#1.png}%
+      {\includegraphics[width=0.8\textwidth,height=0.32\textheight,keepaspectratio]{evidencias/#1.png}}%
+      {\fbox{\parbox[c][2.5cm][c]{0.8\textwidth}{\centering\small Evidencia gr\'afica #1 (\texttt{evidencias/#1.png})}}}
+    \caption{#1: #2}
+  \end{figure}}
+
+\begin{document}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\renewcommand{\thesection}{\Roman{section}}
+\begin{center}
+    \textbf{\underline{\normalsize INFORME DE GUÍA PRÁCTICA}}
+\end{center}
+
+\section{PORTADA}
+
+\begin{tabbing}
+\textbf{Tema:}\hspace{7cm} \= APE GPIS 4: Diseño y ejecución de pruebas (REGALÍA)\\
+\textbf{Carrera:}\hspace{7cm} \= SOFTWARE \\
+\textbf{Unidad de Organización Curricular:} \hspace{1cm} \= \ PROFESIONAL\\
+\textbf{Nivel y Paralelo:} \> 6 - A\\
+\textbf{Alumnos participantes:}  \> Jimenez Chango Saimol Steph\\
+ \> Chicaiza Kerly\\
+ \> Ramos Carlos\\
+ \> Auz José Mateo\\
+\textbf{Asignatura:} \> GESTION DE PRUEBAS E IMPLANTACIÓN DE\\
+ \> SOFTWARE \\
+\textbf{Docente:} \> Mgtr. Ing. Leonardo David Torres Valverde
+\end{tabbing}
+
+\section{INFORME DE GUÍA PRÁCTICA}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\renewcommand{\thesection}{\arabic{section}}
+
+\subsection{Objetivos}
+\textbf{General:}\\
+Diseñar y ejecutar un conjunto integral de casos de prueba que permita validar el correcto
+funcionamiento del sistema de Logística de Última Milla y la tienda en línea REGALÍA, cubriendo sus
+requisitos funcionales (\texttt{NR-01} a \texttt{NR-29}), de seguridad, concurrencia y rendimiento
+(\texttt{100/500/2000} pedidos).\\
+
+\textbf{Específicos:}\\
+\begin{itemize}
+    \item Analizar los requisitos funcionales (\texttt{NR-01} a \texttt{NR-29}) y escenarios de
+    prueba (\texttt{NP-01} a \texttt{NP-19}) definidos en la documentación del sistema REGALÍA.
+    \item Diseñar y ejecutar 107 casos de prueba individuales (\texttt{CP-001} a \texttt{CP-107}),
+    abarcando variantes funcionales, de seguridad, concurrencia y rendimiento (\texttt{100/500/2000}
+    pedidos), con entradas, acciones, resultados esperados y criterios de aceptación.
+    \item Configurar el entorno aislado con datos sintéticos, registrando los resultados obtenidos y
+    los defectos detectados con su nivel de severidad.
+    \item Verificar los resultados obtenidos frente a los esperados y consolidar el informe técnico
+    de pruebas en formato PDF.
+\end{itemize}
+
+\subsection{Modalidad}
+\begin{tabbing}
+    \hspace{1cm} \= Presencial\\
+\end{tabbing}
+
+\subsection{Tiempo de duración}
+\begin{tabbing}
+    \hspace{1cm} \= \textbf{Presenciales:} \= 8 \\
+    \hspace{1cm} \= \textbf{No presenciales:} \= 0
+\end{tabbing}
+
+\subsection{Instrucciones}
+En base a los requerimientos definidos para el desarrollo del sistema realice lo siguiente:
+\begin{itemize}
+    \item \textbf{Análisis de requisitos:} revisar la documentación del sistema para identificar qué funcionalidades deben probarse.
+    \item \textbf{Diseño de pruebas:} elaborar los casos de prueba especificando entradas, acciones, resultados esperados y criterios de aceptación.
+    \item \textbf{Preparación del entorno:} asegúrese de contar con los datos de prueba y el ambiente configurado.
+    \item \textbf{Ejecución de pruebas:} realizar las pruebas según lo planificado, registrando los resultados obtenidos.
+    \item \textbf{Registro de incidentes:} documentar cualquier error o comportamiento inesperado en un reporte de defectos.
+    \item \textbf{Verificación de resultados:} comparar los resultados reales con los esperados y concluir si las pruebas fueron exitosas.
+    \item \textbf{Entrega de evidencias:} generar un documento en formato pdf en base al formato indicado.
+\end{itemize}
+
+\subsection{Listado de equipos, materiales y recursos}
+Listado de equipos y materiales generales empleados en la guía práctica:\\
+\begin{itemize}
+    \item Computador o laptop, y un dispositivo o emulador Android para la aplicación móvil.
+    \item Internet.
+    \item Apuntes de clase.
+    \item Documentación técnica del sistema REGALÍA (requisitos funcionales \texttt{NR-01}--\texttt{NR-29} y escenarios \texttt{NP-01}--\texttt{NP-19}).
+    \item Componentes del sistema: backend (NestJS, Prisma 8, PostgreSQL), aplicación web (React) y aplicación móvil (Flutter).
+    \item Herramientas de prueba: Jest, Supertest, Newman, Vitest, Testing Library, Playwright, \texttt{flutter\_test}, JMeter, OSRM (motor vial), \texttt{oxlint} y \texttt{flutter analyze}.
+\end{itemize}
+\textbf{TAC (Tecnologías para el Aprendizaje y Conocimiento) empleados en la guía práctica:}\\
+$\boxtimes$ Plataformas educativas \\
+$\boxtimes$ Simuladores y laboratorios virtuales \\
+$\square$ Aplicaciones educativas \\
+$\square$ Recursos audiovisuales \\
+$\square$ Gamificación \\
+$\boxtimes$ Inteligencia Artificial \\
+Otros (Especifique): \underline{Docker, emulador Android, GitHub Actions} \\
+
+\subsection{Actividades por desarrollar}
+Desarrollar la guía APE en base al formato y las instrucciones brindadas.
+
+\subsection{Resultados obtenidos}
+Se diseñaron y ejecutaron \textbf{107 casos de prueba individuales} (\texttt{CP-001} a
+\texttt{CP-107}) sobre el sistema REGALÍA (API NestJS, aplicación web React y aplicación móvil
+Flutter), cubriendo de manera integral los módulos comercial, geográfico, de planificación de rutas,
+operación móvil, seguridad, incidencias, concurrencia y rendimiento:
+
+% GUÍA PARA EL EQUIPO (asignación interna y cronograma de registro; no visible en el PDF):
+% - Backend (Saimol Jimenez, 27 casos: CP-001..CP-027): levantar entorno común (PostgreSQL, seed aislado), API/settings y llenar secciones/backend/ejecucion.tex + capturas.tex.
+% - Frontend Web (Kerly Chicaiza, 27 casos: CP-028..CP-054): pruebas Shop web, cobertura poligonal, panel de rutas y llenar secciones/frontend/ejecucion.tex + capturas.tex.
+% - Móvil (Carlos Ramos, 27 casos: CP-055..CP-081): emulador/app Flutter, entregas, fallos, retorno y llenar secciones/movil/ejecucion.tex + capturas.tex.
+% - Calidad (José Mateo Auz, 26 casos: CP-082..CP-107): concurrencia, emergencias, pérdidas, carga 100/500/2000, llenar secciones/calidad/*, consolidar defectos.tex, Verificación y Conclusiones.
+% - Cronograma sugerido (8h): H1 entorno y datos sintéticos; H2-6 ejecución 107 casos y capturas; H7 defectos y verificación; H8 PDF final.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|c|c|L|}
+\hline
+\textbf{Módulo del sistema} & \textbf{Rango de casos} & \textbf{Cantidad} & \textbf{Alcance evaluado} \\ \hline
+Backend y reglas de negocio & \texttt{CP-001}--\texttt{CP-027} & 27 & API REST, comercio, cobros simulados, configuraciones e idempotencia. \\ \hline
+Aplicación Web REGALÍA & \texttt{CP-028}--\texttt{CP-054} & 27 & Catálogo Shop, cobertura poligonal, horarios, historial y panel de rutas. \\ \hline
+Aplicación Móvil & \texttt{CP-055}--\texttt{CP-081} & 27 & Seguridad RBAC, asignación de entregas, fallos, retiros y retorno. \\ \hline
+Calidad y Rendimiento & \texttt{CP-082}--\texttt{CP-107} & 26 & Agrupación de rutas, emergencias, pérdidas, concurrencia y carga \texttt{100/500/2000}. \\ \hline
+\textbf{Total} & \texttt{CP-001}--\texttt{CP-107} & \textbf{107} & Cobertura integral del sistema REGALÍA. \\ \hline
+\end{tabularx}
+\end{center}
+
+% ===========================================================================
+\subsubsection{Análisis de requisitos}
+Se analizaron los 29 requisitos del sistema (\texttt{NR-01} a \texttt{NR-29}) y los 19 escenarios
+principales (\texttt{NP-01} a \texttt{NP-19}) correspondientes a los módulos comercial, geográfico,
+de planificación de rutas, operación móvil y calidad. La trazabilidad entre requisitos y casos de
+prueba es la siguiente:
+
+\begin{center}
+\footnotesize
+\begin{tabularx}{\textwidth}{|P{4.2cm}|L|}
+\hline
+\textbf{Grupo de requisitos (\texttt{NR}/\texttt{NP})} & \textbf{Casos de prueba asignados} \\ \hline
+\texttt{NR-01}--\texttt{NR-04} Compras ADMIN, invitado, pago externo y contacto & \texttt{CP-001}--\texttt{CP-007}, \texttt{CP-010}--\texttt{CP-012} \\ \hline
+\texttt{NR-05}--\texttt{NR-09} Precios/IVA congelados, historial único y sin recibo & \texttt{CP-008}--\texttt{CP-009}, \texttt{CP-028}--\texttt{CP-030} \\ \hline
+\texttt{NR-10} Operación Shop, idempotencia y pedidos sin fecha programada & \texttt{CP-022}--\texttt{CP-026}, \texttt{CP-052}--\texttt{CP-054} \\ \hline
+\texttt{NR-11}--\texttt{NR-15} Cobertura de tienda, horarios y trazado & \texttt{CP-013}--\texttt{CP-016}, \texttt{CP-031}--\texttt{CP-041}, \texttt{CP-049}--\texttt{CP-051} \\ \hline
+\texttt{NR-16}--\texttt{NR-22} Planificación diaria, margen horario, urgencias y motor vial & \texttt{CP-017}--\texttt{CP-021}, \texttt{CP-027}, \texttt{CP-042}--\texttt{CP-048}, \texttt{CP-061}--\texttt{CP-066}, \texttt{CP-082}--\texttt{CP-085} \\ \hline
+\texttt{NR-23} Seguridad y control de acceso por recurso & \texttt{CP-055}--\texttt{CP-060} \\ \hline
+\texttt{NR-24}--\texttt{NR-28} Fallos, retiro, cierre/retorno, emergencias y pérdidas & \texttt{CP-067}--\texttt{CP-081}, \texttt{CP-086}--\texttt{CP-099} \\ \hline
+\texttt{NR-29} y no funcionales: concurrencia, rollback y rendimiento \texttt{100/500/2000} & \texttt{CP-100}--\texttt{CP-107} \\ \hline
+\end{tabularx}
+\end{center}
+
+% ===========================================================================
+\subsubsection{Diseño de pruebas}
+Cada caso del catálogo incluye entradas, acciones, resultado esperado y criterio de aceptación
+verificable. Se utilizan cuentas sintéticas aisladas (\texttt{ADMIN}, \texttt{CLIENTE-A},
+\texttt{CLIENTE-B}, \texttt{REPARTIDOR-A}, \texttt{REPARTIDOR-B} e invitado) y las tres tarjetas
+ficticias del contrato del Shop con \texttt{SIMULATED\_PAYMENTS\_ENABLED=true}:
+
+\begin{center}
+\footnotesize
+\begin{tabularx}{\textwidth}{|l|l|l|c|c|L|}
+\hline
+\textbf{Fixture} & \textbf{Número ficticio} & \textbf{Titular} & \textbf{Vence} & \textbf{CVV} & \textbf{Saldo inicial} \\ \hline
+DEMO\_APPROVED & 9000 0000 0000 0001 & PRUEBA APROBADA & 12/30 & 111 & 50000 centavos (\$500,00) \\ \hline
+DEMO\_LIMITED & 9000 0000 0000 0002 & PRUEBA LIMITADA & 12/30 & 222 & 2000 centavos (\$20,00) \\ \hline
+DEMO\_EMPTY & 9000 0000 0000 0003 & PRUEBA SIN SALDO & 12/30 & 333 & 0 centavos \\ \hline
+\end{tabularx}
+\end{center}
+
+Las credenciales de prueba no se almacenan en este documento. Para el ejemplo monetario estándar se
+emplea subtotal \texttt{7300} centavos, IVA simulado \texttt{15\,\%} (\texttt{1095}), envío \texttt{0}
+y total \texttt{8395}.
+
+\clearpage
+\input{secciones/backend/disenio}
+\clearpage
+\input{secciones/frontend/disenio}
+\clearpage
+\input{secciones/movil/disenio}
+\clearpage
+\input{secciones/calidad/disenio}
+
+% ===========================================================================
+\clearpage
+\subsubsection{Preparación del entorno}
+% GUÍA PARA EL EQUIPO:
+% - Responsable del entorno común: Backend (Saimol Jimenez).
+% - Antes de compilar la versión final para entregar, completar cada fila de la tabla siguiente
+%   con el commit real (git rev-parse --short HEAD), versión de herramienta y observaciones.
+Las pruebas se ejecutaron sobre un entorno de validación aislado con datos sintéticos e integrado
+por los siguientes componentes:
+
+\begin{enumerate}
+    \item API Backend: PostgreSQL 16 aislado, migraciones Prisma 8 aplicadas, \texttt{StoreCoverage} y \texttt{ShopBusinessSettings} configurados, \texttt{ROAD\_ENGINE=OSRM} disponible y conjunto de datos sintéticos.
+    \item Aplicación Web: compilación y ejecución con \texttt{pnpm install} y \texttt{pnpm dev} conectada a la API local aislada.
+    \item Aplicación Móvil: cliente \texttt{app-movil-logistica} en Flutter (\texttt{flutter pub get}) ejecutado sobre emulador o dispositivo Android.
+    \item Carga y Concurrencia: JMeter con lotes sintéticos de \texttt{100}, \texttt{500} y \texttt{2000} pedidos, además de entorno de base de datos aislado para validación de rollback (\texttt{CP-107}).
+\end{enumerate}
+
+\begin{center}
+\footnotesize
+\begin{tabularx}{\textwidth}{|l|P{3.2cm}|P{2.8cm}|L|}
+\hline
+\textbf{Componente} & \textbf{Commit (git rev-parse --short HEAD)} & \textbf{Versión de herramienta} & \textbf{Observaciones} \\ \hline
+Backend & & Node: & \\ \hline
+Frontend web & & Node: & \\ \hline
+App móvil & & Flutter: & Emulador o dispositivo: \\ \hline
+Base de datos & & PostgreSQL: & Seed aislado: Sí / No \\ \hline
+Motor vial y rendimiento & --- & OSRM / JMeter: & CPU y RAM: \\ \hline
+\end{tabularx}
+\end{center}
+
+% ===========================================================================
+\subsubsection{Ejecución de pruebas}
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}[block]{\normalfont\small\bfseries}{\theparagraph}{0.6em}{}
+\titlespacing*{\paragraph}{0pt}{8pt}{3pt}
+\setcounter{paragraph}{0}
+% GUÍA PARA EL EQUIPO (instrucciones internas; no se muestran en el PDF):
+% Cada integrante completa únicamente su archivo secciones/<rol>/ejecucion.tex:
+% - Completar en cada \fila{ID}{resultado obtenido}{estado}{evidencia}{defecto}:
+%   * Estado: PASS (cumple criterio), FAIL (no cumple; registrar defecto), BLOCKED (bloqueado; explicar) o N/A (fuera de alcance; justificar).
+%   * Capturas: guardar cada captura representativa en evidencias/CP-XXX.png (el documento la inserta automáticamente).
+%   * API/automatizadas: indicar el log o reporte real (Jest, Newman, Playwright o JMeter).
+% - Ningún caso debe marcarse PASS sin haber sido ejecutado realmente.
+A continuación se detallan los resultados obtenidos tras la ejecución de los 107 casos de prueba
+del sistema REGALÍA, junto con la referencia de evidencia correspondiente a cada caso.
+
+\clearpage
+\input{secciones/backend/ejecucion}
+\clearpage
+\input{secciones/frontend/ejecucion}
+\clearpage
+\input{secciones/movil/ejecucion}
+\clearpage
+\input{secciones/calidad/ejecucion}
+
+% ===========================================================================
+\clearpage
+\setcounter{secnumdepth}{3}
+\subsubsection{Registro de incidentes}
+\input{secciones/defectos}
+
+% ===========================================================================
+\subsubsection{Verificación de resultados}
+% GUÍA PARA EL EQUIPO (Calidad consolida):
+% 1. Sumar PASS, FAIL, BLOCKED y N/A por cada módulo y calcular % de éxito = PASS / ejecutados.
+% 2. Completar las cifras totales y la conclusión en el párrafo inferior antes de entregar el PDF.
+Resumen consolidado de verificación frente a los criterios de aceptación del sistema. Un caso se
+considera exitoso (\texttt{PASS}) cuando cumple íntegramente el criterio establecido sin efectos
+parciales.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|c|c|c|c|c|L|}
+\hline
+\textbf{Módulo / Área} & \textbf{Casos} & \textbf{PASS} & \textbf{FAIL} & \textbf{BLOCKED} & \textbf{N/A} & \textbf{\% de éxito (PASS / ejecutados)} \\ \hline
+Backend y reglas de negocio & 27 & & & & & \\ \hline
+Aplicación Web REGALÍA & 27 & & & & & \\ \hline
+Aplicación Móvil & 27 & & & & & \\ \hline
+Calidad y Rendimiento & 26 & & & & & \\ \hline
+\textbf{Total} & \textbf{107} & & & & & \\ \hline
+\end{tabularx}
+\end{center}
+
+% GUÍA PARA EL EQUIPO: reemplazar los espacios subrayados con los conteos reales PASS/FAIL/BLOCKED/N/A, defectos S1..S4 y conclusión final.
+Se ejecutaron los 107 casos del catálogo: \underline{\hspace{1cm}} PASS,
+\underline{\hspace{1cm}} FAIL, \underline{\hspace{1cm}} BLOCKED y \underline{\hspace{1cm}} N/A. Se
+registraron \underline{\hspace{1cm}} defectos (S1: \underline{\hspace{0.6cm}}, S2:
+\underline{\hspace{0.6cm}}, S3: \underline{\hspace{0.6cm}}, S4: \underline{\hspace{0.6cm}}).
+Conclusión de la verificación: \underline{\hspace{9cm}}.
+
+% ===========================================================================
+\subsubsection{Entrega de evidencias}
+% GUÍA PARA EL EQUIPO: como solo se entrega el PDF final, no se duplican capturas aquí ni se referencia una carpeta externa.
+% Todas las capturas (evidencias/CP-XXX.png) y extractos de logs/reportes deben quedar embebidos en 2.7.4.
+Las capturas de pantalla y extractos de registros correspondientes a los 107 casos de prueba
+(\texttt{CP-001}--\texttt{CP-107}) se encuentran integrados directamente en cada ficha de ejecución
+de la sección~2.7.4. De acuerdo con el formato establecido, la entrega se consolida íntegramente en
+el presente documento PDF.
+
+\clearpage
+\subsection{Habilidades blandas empleadas en la práctica}
+ $\boxtimes$ Liderazgo \\
+ $\boxtimes$ Trabajo en equipo \\
+ $\square$ Comunicación asertiva \\
+ $\square$ La empatía \\
+ $\square$ Pensamiento crítico \\
+ $\square$ Flexibilidad \\
+ $\boxtimes$ La resolución de conflictos \\
+ $\square$ Adaptabilidad \\
+ $\boxtimes$ Responsabilidad \\
+
+\subsection{Conclusiones}
+% GUÍA PARA EL EQUIPO: si se desea, agregar cifras exactas (% de éxito y latencias observadas en 100/500/2000 pedidos) tras llenar las tablas.
+\begin{itemize}
+    \item La ejecución integral de los 107 casos de prueba (\texttt{CP-001}--\texttt{CP-107}) permitió validar los flujos operativos de la tienda en línea y el sistema de logística REGALÍA conforme a los requisitos definidos (\texttt{NR-01}--\texttt{NR-29}).
+    \item La matriz de trazabilidad implementada cubre de manera consistente la autenticación y autorización por rol, la validación geográfica de cobertura, la planificación diaria de rutas, la gestión de incidencias y la persistencia transaccional.
+    \item La evaluación de concurrencia, recuperación ante fallos y carga con lotes de \texttt{100}, \texttt{500} y \texttt{2000} pedidos permite verificar la estabilidad y comportamiento del sistema bajo condiciones controladas de operación.
+\end{itemize}
+
+\subsection{Recomendaciones}
+\begin{itemize}
+    \item Integrar de forma continua la ejecución automatizada de las suites unitarias, de integración y extremo a extremo vinculadas a los identificadores \texttt{CP-001}--\texttt{CP-107}.
+    \item Priorizar la corrección y revalidación de cualquier defecto de severidad \textbf{S1} o \textbf{S2} detectado durante las pruebas antes de su despliegue en producción.
+    \item Mantener el monitoreo periódico de los tiempos de respuesta en la planificación de rutas para volúmenes crecientes (\texttt{100}, \texttt{500} y \texttt{2000} pedidos).
+\end{itemize}
+
+\subsection{Referencias bibliográficas}
+\begin{enumerate}[label={[\arabic*]}]
+    \item J. Mejía Trejo, \textit{Principios de aseguramiento de la calidad para el diseño de software}, 1.\textsuperscript{a} ed. Jalisco, México: AMIDI, 2024.
+    \item T. Winters, \textit{Ingeniería de Software en Google}, 1.\textsuperscript{a} ed. MARCOMBO, 2022.
+    \item J. M. Ortega Candel, \textit{Desarrollo seguro en ingeniería del software}, 1.\textsuperscript{a} ed. España: MARCOMBO, 2020.
+    \item G. Pantaleo, \textit{Calidad en el desarrollo de software}, 2.\textsuperscript{a} ed. Buenos Aires: Alfaomega, 2016.
+    \item B. Coronado García, \textit{Despliegue y puesta en funcionamiento de componentes software. UF1291}, 1.\textsuperscript{a} ed. Logroño, España: Tutor Formación, 2025.
+\end{enumerate}
+
+\subsection{Anexos}
+Las capturas de pantalla, extractos de registro y resultados detallados de las suites Jest, Newman,
+Playwright, \texttt{flutter\_test} y JMeter (\texttt{100/500/2000} pedidos) se encuentran
+consolidados dentro de las fichas de ejecución (sección~2.7.4) del presente informe PDF.
+
+\end{document}

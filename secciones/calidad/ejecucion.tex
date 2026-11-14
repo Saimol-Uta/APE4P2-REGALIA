@@ -1,0 +1,35 @@
+% CALIDAD - fichas individuales de ejecución (26 casos: CP-082..CP-107)
+% GUÍA EQUIPO (José Mateo Auz): completar los parámetros de \casoejec{ID}{título}{resultado obtenido}{PASS|FAIL|BLOCKED|N/A}{evidencia o log}{DEF-XX}.
+% - Estado: solo PASS, FAIL, BLOCKED o N/A.
+% - Defecto: ID del defecto (ej. DEF-01) si falló, o Ninguno si pasó.
+% - Resultado obtenido: describir lo observado al ejecutar la prueba.
+% - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
+\par\medskip\noindent\textbf{Módulo Calidad --- Ruteo, incidencias, concurrencia y rendimiento (26 casos: CP-082 a CP-107).}\par\smallskip
+Pruebas ejecutadas sobre planificación de rutas, gestión de incidencias y emergencias, concurrencia y mediciones de rendimiento (\texttt{100}/\texttt{500}/\texttt{2000} pedidos).
+
+\casoejec{CP-082}{Agrupación horaria 10:\allowbreak{}00+10:\allowbreak{}20 y separación 15:\allowbreak{}00}{}{}{Log HTTP y JSON de propuesta}{}
+\casoejec{CP-083}{Ruta válida con 1 parada sin exigir mínimo de 4}{}{}{Log HTTP y JSON de propuesta}{}
+\casoejec{CP-084}{Lote de 4 pedidos compatibles forma ruta de 4 paradas}{}{}{Log HTTP y JSON de propuesta}{}
+\casoejec{CP-085}{Lote de 5 pedidos dividido en máximo 4 paradas por ruta}{}{}{Log HTTP y JSON de propuesta}{}
+\casoejec{CP-086}{Declarar emergencia pasa ruta a INTERRUPTED y bloquea}{}{}{Log JSON y estado en BD}{}
+\casoejec{CP-087}{Retorno individual desbloquea solo unidad confirmada}{}{}{Log JSON y estado en BD}{}
+\casoejec{CP-088}{Cierre de emergencia con pendientes mantiene bloqueo 409}{}{}{Log JSON y respuestas 409}{}
+\casoejec{CP-089}{Cierre de emergencia no libera repartidor si returnedAt NULL}{}{}{Log JSON y tabla DriverReservation}{}
+\casoejec{CP-090}{Liberación de repartidor por ADMIN respeta ausencias y 409}{}{}{Log JSON y respuestas 200/\allowbreak{}409}{}
+\casoejec{CP-091}{Declarar pérdida con stock \ensuremath{\geq} 1 prepara reemplazo y descuenta}{}{}{Log JSON y movimientos de stock}{}
+\casoejec{CP-092}{Reemplazo mantiene mismo pedido y no genera nuevo cobro}{}{}{Log pedido, recibo y saldo en BD}{}
+\casoejec{CP-093}{Declarar pérdida con stock 0 crea PENDING sin stock negativo}{}{}{Log JSON y verificación Product.\allowbreak{}stock}{}
+\casoejec{CP-094}{Contacto y reprogramación tras reemplazo sin entrega hoy}{}{}{Log JSON y tabla DispatchAudit}{}
+\casoejec{CP-095}{Preparación diferida al reponer stock y 409 NO\_FREE\_STOCK}{}{}{Log JSON 409/\allowbreak{}200 y stock en BD}{}
+\casoejec{CP-096}{Recuperación tardía SELLABLE suma +1 sin doble entrega}{}{}{Log JSON y movimientos de stock}{}
+\casoejec{CP-097}{Recuperación tardía DAMAGED registra estado sin sumar stock}{}{}{Log JSON y registro OrderItemLoss}{}
+\casoejec{CP-098}{Repetición de ORIGINAL\_RECOVER rechaza 409 sin doble suma}{}{}{Log HTTP 409 y stock en BD}{}
+\casoejec{CP-099}{Cancelación LOSS\_CANCEL restituye stock y bloquea si no aplica}{}{}{Log JSON 200/\allowbreak{}409 y stock en BD}{}
+\casoejec{CP-100}{Concurrencia UNIT\_RECOVERY\_CONFIRM vs LOSS\_DECLARE en unidad}{}{}{Log concurrencia y estado en BD}{}
+\casoejec{CP-101}{Idempotencia de intervenciones con requestId UUID y conflicto}{}{}{Log JSON 200/\allowbreak{}409 y DispatchAudit}{}
+\casoejec{CP-102}{Rendimiento generación de rutas con volumen de 100 pedidos}{}{}{Reporte JMeter/\allowbreak{}k6 y log entorno}{}
+\casoejec{CP-103}{Rendimiento generación de rutas con volumen de 500 pedidos}{}{}{Reporte JMeter/\allowbreak{}k6 y log entorno}{}
+\casoejec{CP-104}{Rendimiento generación de rutas con volumen de 2000 pedidos}{}{}{Reporte JMeter/\allowbreak{}k6 comparativo}{}
+\casoejec{CP-105}{Concurrencia Shop última unidad: [201, 409 STOCK\_UNAVAILABLE]}{}{}{Log concurrencia y BD Shop}{}
+\casoejec{CP-106}{Concurrencia Shop saldo: [201, 422 INSUFFICIENT\_DEMO\_FUNDS]}{}{}{Log concurrencia, saldo y stock}{}
+\casoejec{CP-107}{Fallo pre-commit Shop con trigger en purchaseReceipt: rollback}{}{}{Log HTTP 500 y consulta SQL pre/\allowbreak{}post}{}

@@ -1,0 +1,36 @@
+% MÓVIL - fichas individuales de ejecución (27 casos: CP-055..CP-081)
+% GUÍA EQUIPO (Carlos Ramos): completar los parámetros de \casoejec{ID}{título}{resultado obtenido}{PASS|FAIL|BLOCKED|N/A}{evidencia o log}{DEF-XX}.
+% - Estado: solo PASS, FAIL, BLOCKED o N/A.
+% - Defecto: ID del defecto (ej. DEF-01) si falló, o Ninguno si pasó.
+% - Resultado obtenido: describir lo observado al ejecutar la prueba.
+% - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
+\par\medskip\noindent\textbf{Módulo Móvil --- Seguridad y operación de entregas (27 casos: CP-055 a CP-081).}\par\smallskip
+Pruebas ejecutadas sobre la aplicación móvil Flutter en entorno Android junto con validaciones de seguridad y coordinación en tiempo real.
+
+\casoejec{CP-055}{Acceso sin sesión JWT a rutas, pedidos y configuración}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-056}{Aislamiento entre CLIENT-B y pedido/\allowbreak{}comprobante de CLIENT-A}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-057}{Aislamiento de DRIVER-B ante ruta y parada de DRIVER-A}{}{}{Captura móvil / log}{}
+\casoejec{CP-058}{Registro público con rol ADMIN rechazado sin escalación}{}{}{Log HTTP / consulta usuarios}{}
+\casoejec{CP-059}{Intento de CLIENT de modificar configuración o cobertura}{}{}{Log HTTP / JSON comparativo}{}
+\casoejec{CP-060}{Acceso autorizado por titular, ADMIN y DRIVER sobre recursos propios}{}{}{Captura móvil / log}{}
+\casoejec{CP-061}{Pedido de hoy elegible en propuesta, ruta y asignación}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-062}{Pedido futuro admitido en compra y bloqueado en ruta/\allowbreak{}assign}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-063}{Ausencia registrada hoy impide asignar repartidor}{}{}{Captura web / log HTTP}{}
+\casoejec{CP-064}{Ausencia futura no altera ni reasigna rutas activas de hoy}{}{}{Log HTTP / JSON comparativo}{}
+\casoejec{CP-065}{Pedido urgente con ruta IN\_PROGRESS no altera ruta iniciada}{}{}{Log HTTP / JSON comparativo}{}
+\casoejec{CP-066}{Decisión manual ADMIN en urgencias: INSERT con cupo o NEW\_ROUTE}{}{}{Log HTTP / auditoría dispatch}{}
+\casoejec{CP-067}{Entrega fallida en móvil conserva parada e historial pendiente}{}{}{Captura móvil / log}{}
+\casoejec{CP-068}{Registro de fallo por actor o conductor no autorizado rechazado}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-069}{Gestión post-fallo ADMIN: CONTACT y RESCHEDULE con nueva fecha}{}{}{Log HTTP / seguimiento pedido}{}
+\casoejec{CP-070}{Gestión post-fallo ADMIN: acuerdo de retiro en tienda (PICKUP\_AGREE)}{}{}{Log HTTP / vista seguimiento}{}
+\casoejec{CP-071}{Confirmación de retiro (PICKUP\_CONFIRM) y rechazo de repetición}{}{}{Log HTTP / auditoría despacho}{}
+\casoejec{CP-072}{Recorrido E2E: creación de compra y verificación de estado inicial}{}{}{Captura web / log HTTP}{}
+\casoejec{CP-073}{Recorrido E2E: propuesta, confirmación y asignación en día operativo}{}{}{Captura web / móvil / log}{}
+\casoejec{CP-074}{Recorrido E2E: progreso móvil reflejado en seguimiento del cliente}{}{}{Captura móvil / web / log}{}
+\casoejec{CP-075}{Recorrido E2E: desconexión móvil y recuperación al reconectar}{}{}{Captura móvil / log}{}
+\casoejec{CP-076}{Cierre de ruta móvil rechazado con visita aún PENDING}{}{}{Captura móvil / log}{}
+\casoejec{CP-077}{Cierre de ruta COMPLETED con visitas resueltas y una FAILED}{}{}{Captura móvil / log}{}
+\casoejec{CP-078}{Bloqueo de nueva salida antes de confirmar regreso (returnedAt)}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-079}{Confirmación de regreso por titular libera y actualiza disponibilidad}{}{}{Captura móvil / log}{}
+\casoejec{CP-080}{Repetición de regreso a tienda sin duplicar ni liberar dos veces}{}{}{Log HTTP / respuesta JSON}{}
+\casoejec{CP-081}{Intento de cierre o regreso por DRIVER-B rechazado sobre ruta ajena}{}{}{Log HTTP / respuesta JSON}{}
