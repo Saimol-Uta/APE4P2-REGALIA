@@ -1,0 +1,311 @@
+{
+  "caso": "CP-076",
+  "titulo": "Cierre de ruta móvil rechazado con visita aún PENDING",
+  "ejecutado": "2026-11-14T16:30:24.035Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "Existe una parada PENDING en la ruta",
+      "ok": true
+    },
+    {
+      "descripcion": "El cierre se rechaza con HTTP 409",
+      "ok": true,
+      "detalle": 409
+    },
+    {
+      "descripcion": "La ruta sigue IN_PROGRESS sin completedAt",
+      "ok": true
+    },
+    {
+      "descripcion": "El conductor sigue ocupado",
+      "ok": true,
+      "detalle": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "a14954ca-021d-4769-ab6b-88cbea04efd8"
+        ]
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 16,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:18.259932Z",
+        "date": "2026-11-14T21:00:00Z",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:19.883247Z",
+        "startedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+        "status": "IN_PROGRESS",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:28:43.640463Z",
+          "id": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+          "isAvailable": false,
+          "userId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "vehicle": "Camión Isuzu ABC-123",
+          "user": {
+            "id": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "name": "Carlos Chofer",
+            "email": "driver1@delivery.com",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:28:43.632876Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.053739Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:00",
+            "deliveryLat": -1.238,
+            "deliveryLng": -78.612,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": true,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          },
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.126692Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:10",
+            "deliveryLat": -1.245,
+            "deliveryLng": -78.625,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 2,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+            "isLegacy": false,
+            "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "outcome": "FAILED",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 1,
+            "attempts": [
+              {
+                "id": "fbc878b1-cdb5-4199-bb04-50aa855ac706",
+                "stopId": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+                "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+                "recordedAt": "2026-11-14T16:30:23.944278Z",
+                "outcome": "FAILED",
+                "failureReason": "RECIPIENT_ABSENT",
+                "context": "Nadie atendió en el domicilio"
+              }
+            ]
+          },
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+            "isLegacy": false,
+            "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 2,
+            "attempts": []
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "recordedAt": "2026-11-14T16:30:19.883247Z"
+          }
+        ]
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8/complete",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 409,
+      "ms": 23,
+      "response": {
+        "message": "One to four resolved verified visits required",
+        "error": "Conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 21,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:18.259932Z",
+        "date": "2026-11-14T21:00:00Z",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:19.883247Z",
+        "startedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+        "status": "IN_PROGRESS",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:28:43.640463Z",
+          "id": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+          "isAvailable": false,
+          "userId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "vehicle": "Camión Isuzu ABC-123",
+          "user": {
+            "id": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "name": "Carlos Chofer",
+            "email": "driver1@delivery.com",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:28:43.632876Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.053739Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:00",
+            "deliveryLat": -1.238,
+            "deliveryLng": -78.612,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": true,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          },
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.126692Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:10",
+            "deliveryLat": -1.245,
+            "deliveryLng": -78.625,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 2,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+            "isLegacy": false,
+            "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "outcome": "FAILED",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 1,
+            "attempts": [
+              {
+                "id": "fbc878b1-cdb5-4199-bb04-50aa855ac706",
+                "stopId": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+                "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+                "recordedAt": "2026-11-14T16:30:23.944278Z",
+                "outcome": "FAILED",
+                "failureReason": "RECIPIENT_ABSENT",
+                "context": "Nadie atendió en el domicilio"
+              }
+            ]
+          },
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+            "isLegacy": false,
+            "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 2,
+            "attempts": []
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "recordedAt": "2026-11-14T16:30:19.883247Z"
+          }
+        ]
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/me/availability",
+      "actor": "DRIVER-A",
+      "status": 200,
+      "ms": 11,
+      "response": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "a14954ca-021d-4769-ab6b-88cbea04efd8"
+        ]
+      }
+    }
+  ]
+}

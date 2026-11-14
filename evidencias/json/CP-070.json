@@ -1,0 +1,446 @@
+{
+  "caso": "CP-070",
+  "titulo": "Gestión post-fallo ADMIN: acuerdo de retiro en tienda (PICKUP_AGREE)",
+  "ejecutado": "2026-11-14T16:30:28.076Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "PICKUP_AGREE se aplica (200)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "El pedido queda pendiente de retiro sin marcarse entregado",
+      "ok": true,
+      "detalle": {
+        "status": "PENDING",
+        "pickup": {
+          "state": "PENDING_PICKUP",
+          "agreedAt": "2026-11-14T16:30:28.12259Z",
+          "pickedUpAt": null
+        }
+      }
+    },
+    {
+      "descripcion": "El seguimiento del cliente muestra \"pendiente de retiro\"",
+      "ok": true
+    },
+    {
+      "descripcion": "Se conserva el registro de la visita fallida",
+      "ok": true
+    },
+    {
+      "descripcion": "No se repone stock",
+      "ok": true,
+      "detalle": {
+        "stockAntes": 104,
+        "stockDesp": 104
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/shop/products/b8f3f595-54c7-4f60-ab22-d279836636d5",
+      "actor": "ANÓNIMO",
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+        "sku": "RG-AMI-002",
+        "name": "Caja de snacks para compartir",
+        "description": "Papas, galletas, frutos secos y dulces en caja.",
+        "categoryId": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+        "category": {
+          "id": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+          "name": "Amistad",
+          "slug": "amistad",
+          "description": "Pequeños detalles para quienes siempre están.",
+          "productCount": 20,
+          "sortOrder": 90
+        },
+        "priceCents": 2290,
+        "currency": "USD",
+        "stock": 104,
+        "isPublished": true,
+        "isFeatured": true,
+        "images": [
+          {
+            "id": "5de8936c-8111-45fc-906f-5fc1f2ceeaac",
+            "secureUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+            "publicId": "regalia/demo/rg-ami-002",
+            "altText": "Regalo: Caja de snacks para compartir",
+            "position": 0,
+            "isPrimary": true
+          }
+        ],
+        "primaryImageUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+        "isAvailable": true,
+        "createdAt": "2026-11-14T16:28:55.860165Z",
+        "updatedAt": "2026-11-14T16:30:27.089825Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/dispatch/interventions",
+      "actor": "ADMIN",
+      "body": {
+        "requestId": "88f348b4-533f-4be1-ae7e-0907b3c17fab",
+        "reason": "Gestión APE4 móvil",
+        "action": "PICKUP_AGREE",
+        "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+        "attemptId": "2d4919b2-4c2b-409c-aede-3b2d19204c40"
+      },
+      "status": 200,
+      "ms": 88,
+      "response": {
+        "id": "645787ba-9d20-47e6-a80e-917898ec4a65",
+        "requestId": "88f348b4-533f-4be1-ae7e-0907b3c17fab",
+        "actorId": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+        "routeId": "b1aa2ba2-2efb-4458-9b4d-f0f91c49e42d",
+        "action": "PICKUP_AGREE",
+        "reason": "Gestión APE4 móvil",
+        "outcome": "APPLIED",
+        "recordedAt": "2026-11-14T16:30:28.125474Z",
+        "result": {
+          "agreedAt": "2026-11-14T16:30:28.122590088Z",
+          "attemptId": "2d4919b2-4c2b-409c-aede-3b2d19204c40",
+          "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+          "pickupId": "6487c254-6fd3-4ebd-990b-cfa8bb1ef112",
+          "routeId": "b1aa2ba2-2efb-4458-9b4d-f0f91c49e42d"
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 9,
+      "response": {
+        "id": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 15:10",
+        "deliveryLat": -1.23,
+        "deliveryLng": -78.62,
+        "scheduledDeliveryDate": "2026-11-14T20:10:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:27.092831Z",
+        "items": [
+          {
+            "id": "9ce573e6-a43d-4b1b-b99f-65e3e4b9321d",
+            "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 104,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": {
+          "state": "PENDING_PICKUP",
+          "agreedAt": "2026-11-14T16:30:28.12259Z",
+          "pickedUpAt": null
+        },
+        "deliveryLocation": {
+          "lat": -1.23,
+          "lng": -78.62
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 13,
+      "response": {
+        "id": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+        "number": "RG-2026-3F5C0BC874EA43DE9D7A740FB08DAAE9",
+        "source": "ADMIN",
+        "pickup": {
+          "state": "PENDING_PICKUP",
+          "agreedAt": "2026-11-14T16:30:28.122Z",
+          "pickedUpAt": null
+        },
+        "pendingManagement": false,
+        "receiptAvailable": true,
+        "createdAt": "2026-11-14T16:30:27.092Z",
+        "scheduledDeliveryDate": "2026-11-14T20:10:00.000Z",
+        "status": "PENDING",
+        "routeId": null,
+        "currency": "USD",
+        "totalCents": 2634,
+        "paymentStatus": "APPROVED",
+        "buyer": {
+          "id": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente",
+          "phone": "0991234567"
+        },
+        "delivery": {
+          "zoneId": null,
+          "zoneName": null,
+          "address": "Pedido sintético APE4 15:10",
+          "location": {
+            "lat": -1.23,
+            "lng": -78.62
+          },
+          "scheduledDeliveryDate": "2026-11-14T20:10:00.000Z",
+          "notes": null
+        },
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "sku": "RG-AMI-002",
+            "name": "Caja de snacks para compartir",
+            "quantity": 1,
+            "unitPriceCents": 2290,
+            "lineTotalCents": 2290,
+            "imageUrl": null
+          }
+        ],
+        "timeline": [
+          {
+            "code": "PENDING",
+            "label": "Pedido registrado",
+            "at": "2026-11-14T16:30:27.092Z"
+          },
+          {
+            "code": "ASSIGNED",
+            "label": "Asignado a ruta",
+            "at": "2026-11-14T16:30:27.173Z"
+          },
+          {
+            "code": "ATTEMPT_FAILED",
+            "label": "Intento de entrega fallido: entrega rechazada",
+            "at": "2026-11-14T16:30:27.528Z"
+          },
+          {
+            "code": "CLAIM_RELEASED",
+            "label": "Reserva de ruta liberada",
+            "at": "2026-11-14T16:30:27.617Z"
+          },
+          {
+            "code": "PICKUP_AGREED",
+            "label": "Pendiente de retiro en tienda",
+            "at": "2026-11-14T16:30:28.122Z"
+          }
+        ],
+        "receiptId": "e3a6342b-3594-4d4c-89ef-1029ca1981f4",
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "taxEnabled": true
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/b1aa2ba2-2efb-4458-9b4d-f0f91c49e42d",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 14,
+      "response": {
+        "completedAt": "2026-11-14T16:30:27.617727Z",
+        "completedById": "53f38f71-63f5-4ab5-b8d1-ac4896c2f495",
+        "createdAt": "2026-11-14T16:30:27.151905Z",
+        "date": "2026-11-14T20:00:00Z",
+        "driverId": "7ee950ed-305d-44e8-9814-7590b44af0ca",
+        "id": "b1aa2ba2-2efb-4458-9b4d-f0f91c49e42d",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:27.37492Z",
+        "startedById": "53f38f71-63f5-4ab5-b8d1-ac4896c2f495",
+        "status": "COMPLETED",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:30:26.802758Z",
+          "id": "7ee950ed-305d-44e8-9814-7590b44af0ca",
+          "isAvailable": false,
+          "userId": "53f38f71-63f5-4ab5-b8d1-ac4896c2f495",
+          "vehicle": "Moto APE4",
+          "user": {
+            "id": "53f38f71-63f5-4ab5-b8d1-ac4896c2f495",
+            "name": "APE4 DriverD",
+            "email": "ape4.driverd.4f7682@fixture.invalid",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:30:26.802758Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:27.030046Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 15:00",
+            "deliveryLat": -1.25,
+            "deliveryLng": -78.61,
+            "deliveryWindowEnd": "2026-11-15T17:30:00Z",
+            "deliveryWindowStart": "2026-11-15T16:30:00Z",
+            "id": "ebb3b1ca-8de4-44de-9cee-a3b4ab9aecc8",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": null,
+            "scheduledDeliveryDate": "2026-11-15T17:00:00Z",
+            "status": "PENDING",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          },
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:27.092831Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 15:10",
+            "deliveryLat": -1.23,
+            "deliveryLng": -78.62,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": true,
+            "routeId": null,
+            "scheduledDeliveryDate": "2026-11-14T20:10:00Z",
+            "status": "PENDING",
+            "stopOrder": 2,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:27.173081Z",
+            "id": "4b8b0c16-2c1e-40ad-851f-271d125649be",
+            "isLegacy": false,
+            "orderId": "ebb3b1ca-8de4-44de-9cee-a3b4ab9aecc8",
+            "outcome": "FAILED",
+            "routeId": "b1aa2ba2-2efb-4458-9b4d-f0f91c49e42d",
+            "sequence": 1,
+            "attempts": [
+              {
+                "id": "60a0a82d-c29d-48fa-afd5-12248e3f6ab9",
+                "stopId": "4b8b0c16-2c1e-40ad-851f-271d125649be",
+                "driverId": "7ee950ed-305d-44e8-9814-7590b44af0ca",
+                "recordedAt": "2026-11-14T16:30:27.42475Z",
+                "outcome": "FAILED",
+                "failureReason": "RECIPIENT_REFUSED",
+                "context": "El destinatario pidió otra alternativa"
+              }
+            ]
+          },
+          {
+            "createdAt": "2026-11-14T16:30:27.173081Z",
+            "id": "2044fc2e-7715-4a04-bba0-deda71d5f360",
+            "isLegacy": false,
+            "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+            "outcome": "FAILED",
+            "routeId": "b1aa2ba2-2efb-4458-9b4d-f0f91c49e42d",
+            "sequence": 2,
+            "attempts": [
+              {
+                "id": "2d4919b2-4c2b-409c-aede-3b2d19204c40",
+                "stopId": "2044fc2e-7715-4a04-bba0-deda71d5f360",
+                "driverId": "7ee950ed-305d-44e8-9814-7590b44af0ca",
+                "recordedAt": "2026-11-14T16:30:27.528762Z",
+                "outcome": "FAILED",
+                "failureReason": "RECIPIENT_REFUSED",
+                "context": "El destinatario pidió otra alternativa"
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "53f38f71-63f5-4ab5-b8d1-ac4896c2f495",
+            "recordedAt": "2026-11-14T16:30:27.37492Z"
+          },
+          {
+            "kind": "COMPLETED",
+            "actorId": "53f38f71-63f5-4ab5-b8d1-ac4896c2f495",
+            "recordedAt": "2026-11-14T16:30:27.617727Z"
+          }
+        ]
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/products/b8f3f595-54c7-4f60-ab22-d279836636d5",
+      "actor": "ANÓNIMO",
+      "status": 200,
+      "ms": 14,
+      "response": {
+        "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+        "sku": "RG-AMI-002",
+        "name": "Caja de snacks para compartir",
+        "description": "Papas, galletas, frutos secos y dulces en caja.",
+        "categoryId": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+        "category": {
+          "id": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+          "name": "Amistad",
+          "slug": "amistad",
+          "description": "Pequeños detalles para quienes siempre están.",
+          "productCount": 20,
+          "sortOrder": 90
+        },
+        "priceCents": 2290,
+        "currency": "USD",
+        "stock": 104,
+        "isPublished": true,
+        "isFeatured": true,
+        "images": [
+          {
+            "id": "5de8936c-8111-45fc-906f-5fc1f2ceeaac",
+            "secureUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+            "publicId": "regalia/demo/rg-ami-002",
+            "altText": "Regalo: Caja de snacks para compartir",
+            "position": 0,
+            "isPrimary": true
+          }
+        ],
+        "primaryImageUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+        "isAvailable": true,
+        "createdAt": "2026-11-14T16:28:55.860165Z",
+        "updatedAt": "2026-11-14T16:30:27.089825Z"
+      }
+    }
+  ]
+}

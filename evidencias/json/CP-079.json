@@ -1,0 +1,348 @@
+{
+  "caso": "CP-079",
+  "titulo": "Confirmación de regreso por titular libera y actualiza disponibilidad",
+  "ejecutado": "2026-11-14T16:30:25.113Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "DRIVER-A confirma el regreso (200) con returnedAt",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "La reserva de la ruta queda liberada",
+      "ok": true,
+      "detalle": {
+        "reservasActivas": "0"
+      }
+    },
+    {
+      "descripcion": "Sin ausencia, DRIVER-A queda disponible",
+      "ok": true,
+      "detalle": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": []
+      }
+    },
+    {
+      "descripcion": "Con ausencia vigente, el regreso también se registra (200, returnedAt)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "La reserva de esa ruta se libera",
+      "ok": true,
+      "detalle": {
+        "reservasActivas": "0"
+      }
+    },
+    {
+      "descripcion": "Con ausencia vigente hoy el repartidor sigue NO disponible",
+      "ok": true,
+      "detalle": {
+        "isAvailable": false,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": [],
+        "date": "2026-11-14",
+        "absence": {
+          "id": "b6462855-ef7d-433f-9676-e089400af10e",
+          "startDate": "2026-11-14",
+          "endDate": "2026-11-14",
+          "reason": "Ausencia vigente APE4"
+        }
+      }
+    }
+  ],
+  "notas": [
+    "Ausencia anulada al terminar (HTTP 200)."
+  ],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8/return",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 200,
+      "ms": 49,
+      "response": {
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "status": "COMPLETED",
+        "returnedAt": "2026-11-14T16:30:25.130817Z",
+        "availability": {
+          "isAvailable": true,
+          "hasPersistedHolds": false,
+          "compatibilityFlagBlocks": false,
+          "blockingRouteIds": []
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/me/availability",
+      "actor": "DRIVER-A",
+      "status": 200,
+      "ms": 10,
+      "response": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": []
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/208d22db-e004-492c-ad4b-e9de3fe66805/start",
+      "actor": "DRIVER-C",
+      "body": {},
+      "status": 200,
+      "ms": 62,
+      "response": {
+        "id": "208d22db-e004-492c-ad4b-e9de3fe66805",
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:30:25.358595Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/208d22db-e004-492c-ad4b-e9de3fe66805",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:23.333079Z",
+        "date": "2026-11-14T21:35:00Z",
+        "driverId": "a1d2ae2c-0a75-4330-b1b0-f00b5af839b2",
+        "id": "208d22db-e004-492c-ad4b-e9de3fe66805",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:25.358595Z",
+        "startedById": "ce8c2cba-6fd4-4174-a02c-10c03d3d3c85",
+        "status": "IN_PROGRESS",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:30:21.19082Z",
+          "id": "a1d2ae2c-0a75-4330-b1b0-f00b5af839b2",
+          "isAvailable": false,
+          "userId": "ce8c2cba-6fd4-4174-a02c-10c03d3d3c85",
+          "vehicle": "Moto APE4",
+          "user": {
+            "id": "ce8c2cba-6fd4-4174-a02c-10c03d3d3c85",
+            "name": "APE4 DriverC",
+            "email": "ape4.driverc.5d1009@fixture.invalid",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:30:21.19082Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:23.262955Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:35",
+            "deliveryLat": -1.238,
+            "deliveryLng": -78.612,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "0a263584-02d2-4256-aae2-b911df8eaede",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "208d22db-e004-492c-ad4b-e9de3fe66805",
+            "scheduledDeliveryDate": "2026-11-14T21:35:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:23.456196Z",
+            "id": "98c5d4a5-459d-426f-ac4c-3b315a5971bb",
+            "isLegacy": false,
+            "orderId": "0a263584-02d2-4256-aae2-b911df8eaede",
+            "outcome": "PENDING",
+            "routeId": "208d22db-e004-492c-ad4b-e9de3fe66805",
+            "sequence": 1,
+            "attempts": []
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "ce8c2cba-6fd4-4174-a02c-10c03d3d3c85",
+            "recordedAt": "2026-11-14T16:30:25.358595Z"
+          }
+        ]
+      }
+    },
+    {
+      "request": "PATCH /api/v1/orders/0a263584-02d2-4256-aae2-b911df8eaede/status",
+      "actor": "DRIVER-C",
+      "body": {
+        "status": "IN_TRANSIT"
+      },
+      "status": 200,
+      "ms": 66,
+      "response": {
+        "id": "0a263584-02d2-4256-aae2-b911df8eaede",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 16:35",
+        "deliveryLat": -1.238,
+        "deliveryLng": -78.612,
+        "scheduledDeliveryDate": "2026-11-14T21:35:00Z",
+        "status": "IN_TRANSIT",
+        "total": 22.9,
+        "routeId": "208d22db-e004-492c-ad4b-e9de3fe66805",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:23.262955Z"
+      }
+    },
+    {
+      "request": "PATCH /api/v1/orders/0a263584-02d2-4256-aae2-b911df8eaede/status",
+      "actor": "DRIVER-C",
+      "body": {
+        "status": "DELIVERED"
+      },
+      "status": 200,
+      "ms": 80,
+      "response": {
+        "id": "0a263584-02d2-4256-aae2-b911df8eaede",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 16:35",
+        "deliveryLat": -1.238,
+        "deliveryLng": -78.612,
+        "scheduledDeliveryDate": "2026-11-14T21:35:00Z",
+        "status": "DELIVERED",
+        "total": 22.9,
+        "routeId": "208d22db-e004-492c-ad4b-e9de3fe66805",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:23.262955Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/208d22db-e004-492c-ad4b-e9de3fe66805/complete",
+      "actor": "DRIVER-C",
+      "body": {},
+      "status": 200,
+      "ms": 43,
+      "response": {
+        "id": "208d22db-e004-492c-ad4b-e9de3fe66805",
+        "status": "COMPLETED",
+        "completedAt": "2026-11-14T16:30:25.5872Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/drivers/a1d2ae2c-0a75-4330-b1b0-f00b5af839b2/absences",
+      "actor": "ADMIN",
+      "body": {
+        "startDate": "2026-11-14",
+        "endDate": "2026-11-14",
+        "reason": "Ausencia vigente APE4"
+      },
+      "status": 201,
+      "ms": 22,
+      "response": {
+        "id": "b6462855-ef7d-433f-9676-e089400af10e",
+        "driverId": "a1d2ae2c-0a75-4330-b1b0-f00b5af839b2",
+        "startDate": "2026-11-14",
+        "endDate": "2026-11-14",
+        "reason": "Ausencia vigente APE4",
+        "status": "ACTIVE",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "createdAt": "2026-11-14T16:30:25.611235Z",
+        "cancelledAt": null,
+        "cancelledById": null,
+        "cancelReason": null,
+        "conflicts": []
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/208d22db-e004-492c-ad4b-e9de3fe66805/return",
+      "actor": "DRIVER-C",
+      "body": {},
+      "status": 200,
+      "ms": 79,
+      "response": {
+        "id": "208d22db-e004-492c-ad4b-e9de3fe66805",
+        "status": "COMPLETED",
+        "returnedAt": "2026-11-14T16:30:25.64481Z",
+        "availability": {
+          "isAvailable": true,
+          "hasPersistedHolds": false,
+          "compatibilityFlagBlocks": false,
+          "blockingRouteIds": []
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/a1d2ae2c-0a75-4330-b1b0-f00b5af839b2/availability?date=2026-11-14",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 13,
+      "response": {
+        "isAvailable": false,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": [],
+        "date": "2026-11-14",
+        "absence": {
+          "id": "b6462855-ef7d-433f-9676-e089400af10e",
+          "startDate": "2026-11-14",
+          "endDate": "2026-11-14",
+          "reason": "Ausencia vigente APE4"
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/drivers/a1d2ae2c-0a75-4330-b1b0-f00b5af839b2/absences/b6462855-ef7d-433f-9676-e089400af10e/cancel",
+      "actor": "ADMIN",
+      "body": {
+        "reason": "Restaurar datos APE4"
+      },
+      "status": 200,
+      "ms": 49,
+      "response": {
+        "id": "b6462855-ef7d-433f-9676-e089400af10e",
+        "driverId": "a1d2ae2c-0a75-4330-b1b0-f00b5af839b2",
+        "startDate": "2026-11-14",
+        "endDate": "2026-11-14",
+        "reason": "Ausencia vigente APE4",
+        "status": "CANCELLED",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "createdAt": "2026-11-14T16:30:25.611235Z",
+        "cancelledAt": "2026-11-14T16:30:25.91322Z",
+        "cancelledById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "cancelReason": "Restaurar datos APE4",
+        "conflicts": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,472 @@
+{
+  "caso": "CP-061",
+  "titulo": "Pedido de hoy elegible en propuesta, ruta y asignación",
+  "ejecutado": "2026-11-14T16:30:18.001Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "La propuesta del día operativo responde 200 con isToday=true",
+      "ok": true,
+      "detalle": {
+        "status": 200,
+        "isToday": true
+      }
+    },
+    {
+      "descripcion": "La propuesta incluye los pedidos de hoy",
+      "ok": true
+    },
+    {
+      "descripcion": "POST /routes crea la ruta en DRAFT (201)",
+      "ok": true,
+      "detalle": 201
+    },
+    {
+      "descripcion": "POST /routes/:id/assign asigna DRIVER-A (200, ASSIGNED)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "La ruta persistida queda ASSIGNED con 2 paradas y fecha de hoy",
+      "ok": true
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/orders/admin",
+      "actor": "ADMIN",
+      "body": {
+        "buyer": {
+          "type": "REGISTERED_CLIENT",
+          "clientId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "contactPhone": "0991234567"
+        },
+        "payment": {
+          "method": "CASH"
+        },
+        "deliveryAddress": "Pedido sintético APE4 16:00",
+        "deliveryLat": -1.238,
+        "deliveryLng": -78.612,
+        "scheduledDeliveryDate": "2026-11-14T16:00:00-05:00",
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ]
+      },
+      "status": 201,
+      "ms": 80,
+      "response": {
+        "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 16:00",
+        "deliveryLat": -1.238,
+        "deliveryLng": -78.612,
+        "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:18.053739Z",
+        "items": [
+          {
+            "id": "43ed01a7-ab84-4b75-bfd3-328c35cdda59",
+            "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 117,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "deliveryLocation": {
+          "lat": -1.238,
+          "lng": -78.612
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        },
+        "receipt": {
+          "id": "6eba406b-2e0d-44a0-9beb-bdefa98815dd",
+          "number": "CMP-RG-2026-ADB99C30A6CF4489887F85CDBF21DAE1"
+        },
+        "payment": {
+          "kind": "ADMIN_DECLARED_EXTERNAL",
+          "status": "DECLARED",
+          "method": "CASH",
+          "declaredById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+          "declaredAt": "2026-11-14T16:30:18.059Z"
+        },
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "totalCents": 2634
+      }
+    },
+    {
+      "request": "POST /api/v1/orders/admin",
+      "actor": "ADMIN",
+      "body": {
+        "buyer": {
+          "type": "REGISTERED_CLIENT",
+          "clientId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "contactPhone": "0991234567"
+        },
+        "payment": {
+          "method": "CASH"
+        },
+        "deliveryAddress": "Pedido sintético APE4 16:10",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T16:10:00-05:00",
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ]
+      },
+      "status": 201,
+      "ms": 101,
+      "response": {
+        "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 16:10",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:18.126692Z",
+        "items": [
+          {
+            "id": "f1824f36-5c50-4de5-a7c6-9116ec61b874",
+            "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 116,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "deliveryLocation": {
+          "lat": -1.245,
+          "lng": -78.625
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        },
+        "receipt": {
+          "id": "87e2b879-34eb-48b0-814d-312f312623ee",
+          "number": "CMP-RG-2026-C55585F1FEFD45D291E1E16AE979397F"
+        },
+        "payment": {
+          "kind": "ADMIN_DECLARED_EXTERNAL",
+          "status": "DECLARED",
+          "method": "CASH",
+          "declaredById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+          "declaredAt": "2026-11-14T16:30:18.130Z"
+        },
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "totalCents": 2634
+      }
+    },
+    {
+      "request": "GET /api/v1/route-proposals?date=2026-11-14",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 72,
+      "response": {
+        "date": "2026-11-14",
+        "timeZone": "America/Guayaquil",
+        "isToday": true,
+        "canConfirm": true,
+        "capacity": 4,
+        "timeWindowMarginMinutes": 30,
+        "distanceMethod": "HAVERSINE_STRAIGHT_LINE",
+        "proposals": [
+          {
+            "zoneId": null,
+            "zoneCode": null,
+            "depot": {
+              "lat": -1.24908,
+              "lng": -78.61675
+            },
+            "orderIds": [
+              "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb"
+            ],
+            "stops": [
+              {
+                "sequence": 1,
+                "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+                "location": {
+                  "lat": -1.242,
+                  "lng": -78.619
+                },
+                "deliveryAddress": "Compra Shop APE4, Ambato",
+                "scheduledDeliveryDate": "2026-11-14T19:00:00Z"
+              }
+            ],
+            "totalDistanceKm": 1.652,
+            "baselineKm": 1.652,
+            "savingsKm": 0,
+            "savingsPercent": 0,
+            "scheduledInstants": [
+              "2026-11-14T19:00:00Z"
+            ],
+            "routeDate": "2026-11-14T19:00:00Z"
+          },
+          {
+            "zoneId": null,
+            "zoneCode": null,
+            "depot": {
+              "lat": -1.24908,
+              "lng": -78.61675
+            },
+            "orderIds": [
+              "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+              "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc"
+            ],
+            "stops": [
+              {
+                "sequence": 1,
+                "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+                "location": {
+                  "lat": -1.238,
+                  "lng": -78.612
+                },
+                "deliveryAddress": "Pedido sintético APE4 16:00",
+                "scheduledDeliveryDate": "2026-11-14T21:00:00Z"
+              },
+              {
+                "sequence": 2,
+                "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+                "location": {
+                  "lat": -1.245,
+                  "lng": -78.625
+                },
+                "deliveryAddress": "Pedido sintético APE4 16:10",
+                "scheduledDeliveryDate": "2026-11-14T21:10:00Z"
+              }
+            ],
+            "totalDistanceKm": 4.005,
+            "baselineKm": 4.727,
+            "savingsKm": 0.722,
+            "savingsPercent": 15.27,
+            "scheduledInstants": [
+              "2026-11-14T21:00:00Z",
+              "2026-11-14T21:10:00Z"
+            ],
+            "routeDate": "2026-11-14T21:00:00Z"
+          }
+        ],
+        "excluded": [],
+        "summary": {
+          "candidateOrders": 3,
+          "plannedOrders": 3,
+          "excludedOrders": 0,
+          "routes": 2,
+          "baselineKm": 6.379,
+          "plannedKm": 5.657,
+          "savingsKm": 0.722,
+          "savingsPercent": 11.32
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/routes",
+      "actor": "ADMIN",
+      "body": {
+        "routeDate": "2026-11-14T16:00:00-05:00",
+        "orderIds": [
+          "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+          "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc"
+        ]
+      },
+      "status": 201,
+      "ms": 83,
+      "response": {
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "status": "DRAFT",
+        "driverId": null,
+        "zoneId": null,
+        "date": "2026-11-14T21:00:00Z",
+        "createdAt": "2026-11-14T16:30:18.259932Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8/assign",
+      "actor": "ADMIN",
+      "body": {
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f"
+      },
+      "status": 200,
+      "ms": 142,
+      "response": {
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "status": "ASSIGNED",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "zoneId": null,
+        "date": "2026-11-14T21:00:00Z",
+        "createdAt": "2026-11-14T16:30:18.259932Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 24,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:18.259932Z",
+        "date": "2026-11-14T21:00:00Z",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": null,
+        "startedById": null,
+        "status": "ASSIGNED",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:28:43.640463Z",
+          "id": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+          "isAvailable": false,
+          "userId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "vehicle": "Camión Isuzu ABC-123",
+          "user": {
+            "id": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "name": "Carlos Chofer",
+            "email": "driver1@delivery.com",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:28:43.632876Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.053739Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:00",
+            "deliveryLat": -1.238,
+            "deliveryLng": -78.612,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          },
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.126692Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:10",
+            "deliveryLat": -1.245,
+            "deliveryLng": -78.625,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 2,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+            "isLegacy": false,
+            "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 1,
+            "attempts": []
+          },
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+            "isLegacy": false,
+            "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 2,
+            "attempts": []
+          }
+        ],
+        "events": []
+      }
+    }
+  ]
+}

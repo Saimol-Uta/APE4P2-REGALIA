@@ -1,0 +1,406 @@
+{
+  "caso": "CP-062",
+  "titulo": "Pedido futuro admitido en compra y bloqueado en ruta/assign",
+  "ejecutado": "2026-11-14T16:30:28.612Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "Compra Shop para mañana creada (201)",
+      "ok": true,
+      "detalle": 201
+    },
+    {
+      "descripcion": "Pedido ADMIN para mañana creado (201)",
+      "ok": true
+    },
+    {
+      "descripcion": "La propuesta (preview) de mañana responde 200 con isToday=false",
+      "ok": true,
+      "detalle": {
+        "isToday": false,
+        "canConfirm": false
+      }
+    },
+    {
+      "descripcion": "Los pedidos futuros aparecen en la vista previa",
+      "ok": true
+    },
+    {
+      "descripcion": "POST /routes para mañana se rechaza con 409 ROUTE_DATE_NOT_TODAY",
+      "ok": true,
+      "detalle": 409
+    },
+    {
+      "descripcion": "POST /routes/assign directo para mañana se rechaza (409)",
+      "ok": true,
+      "detalle": {
+        "status": 409
+      }
+    },
+    {
+      "descripcion": "No se crean rutas nuevas",
+      "ok": true
+    },
+    {
+      "descripcion": "Los pedidos futuros siguen PENDING",
+      "ok": true,
+      "detalle": "PENDING,PENDING"
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/shop/checkout/quote",
+      "actor": "CLIENT-A",
+      "body": {
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ],
+        "delivery": {
+          "recipient": {
+            "name": "Ana Cliente",
+            "phone": "0991234567"
+          },
+          "deliveryAddress": "Compra Shop APE4, Ambato",
+          "deliveryLocation": {
+            "lat": -1.242,
+            "lng": -78.619
+          },
+          "scheduledDeliveryDate": "2026-11-15T10:00:00-05:00"
+        }
+      },
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "currency": "USD",
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "name": "Caja de snacks para compartir",
+            "quantity": 1,
+            "unitPriceCents": 2290,
+            "lineTotalCents": 2290,
+            "availableStock": 104,
+            "available": true
+          }
+        ],
+        "subtotalCents": 2290,
+        "shipping": {
+          "status": "FREE_INCLUDED",
+          "amountCents": 0,
+          "includedInPrices": true
+        },
+        "tax": {
+          "mode": "SIMULATED",
+          "enabled": true,
+          "rateBps": 1500,
+          "ratePercent": 15,
+          "amountCents": 344
+        },
+        "totalCents": 2634,
+        "settingsVersion": 1,
+        "validUntil": "2026-11-14T16:45:28.802044Z",
+        "quoteToken": "qtk_v1.eyJidXllclVzZXJJZCI6ImJlZmJlY2EzLTJhZDUtNDRiMC04MjM2LWIzZDUwYTA2ZGQyMSIsImlzc3VlZEF0IjoiMjAyNi0xMS0xNFQxNjozMDoyOC44MDIwNDRaIiwidmFsaWRVbnRpbCI6IjIwMjYtMTEtMTRUMTY6NDU6MjguODAyMDQ0WiIsInNldHRpbmdzVmVyc2lvbiI6MSwiY3VycmVuY3kiOiJVU0QiLCJ0YXgiOnsibW9kZSI6IlNJTVVMQVRFRCIsImVuYWJsZWQiOnRydWUsInJhdGVCcHMiOjE1MDAsImFtb3VudENlbnRzIjozNDR9LCJzdWJ0b3RhbENlbnRzIjoyMjkwLCJzaGlwcGluZ0Ftb3VudENlbnRzIjowLCJ0b3RhbENlbnRzIjoyNjM0LCJpdGVtcyI6W3sicHJvZHVjdElkIjoiYjhmM2Y1OTUtNTRjNy00ZjYwLWFiMjItZDI3OTgzNjYzNmQ1IiwicXVhbnRpdHkiOjEsInVuaXRQcmljZUNlbnRzIjoyMjkwLCJsaW5lVG90YWxDZW50cyI6MjI5MH1dLCJkZWxpdmVyeSI6eyJyZWNpcGllbnQiOnsibmFtZSI6IkFuYSBDbGllbnRlIiwicGhvbmUiOiIwOTkxMjM0NTY3In0sImRlbGl2ZXJ5QWRkcmVzcyI6IkNvbXByYSBTaG9wIEFQRTQsIEFtYmF0byIsImRlbGl2ZXJ5TG9jYXRpb24iOnsibGF0IjotMS4yNDIsImxuZyI6LTc4LjYxOX0sInNjaGVkdWxlZERlbGl2ZXJ5RGF0ZSI6IjIwMjYtMTEtMTVUMTU6MDA6MDBaIn19.1_tGEw9_x5D4pXqTiRn-k06S2ydYD4chKz7uac1S9jk"
+      }
+    },
+    {
+      "request": "POST /api/v1/shop/checkout",
+      "actor": "CLIENT-A",
+      "body": {
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ],
+        "delivery": {
+          "recipient": {
+            "name": "Ana Cliente",
+            "phone": "0991234567"
+          },
+          "deliveryAddress": "Compra Shop APE4, Ambato",
+          "deliveryLocation": {
+            "lat": -1.242,
+            "lng": -78.619
+          },
+          "scheduledDeliveryDate": "2026-11-15T10:00:00-05:00"
+        },
+        "paymentCard": {
+          "number": "**** 0001",
+          "holderName": "PRUEBA APROBADA",
+          "expiresMonth": 12,
+          "expiresYear": 2030,
+          "cvv": "***"
+        },
+        "quoteToken": "<token de cotización>"
+      },
+      "status": 201,
+      "ms": 87,
+      "response": {
+        "checkoutAttemptId": "be7a1df7-30df-455c-9fc1-588bdc8d5560",
+        "status": "SUCCEEDED",
+        "order": {
+          "id": "3980298b-e4ec-4ab4-879a-404a66969a7a",
+          "number": "RG-2026-BFD57895967B47569327DDE8246CDC7C",
+          "status": "PENDING",
+          "subtotalCents": 2290,
+          "taxAmountCents": 344,
+          "taxRateBps": 1500,
+          "shippingAmountCents": 0,
+          "totalCents": 2634,
+          "taxEnabled": true,
+          "currency": "USD",
+          "scheduledDeliveryDate": "2026-11-15T15:00:00.000Z"
+        },
+        "payment": {
+          "status": "APPROVED",
+          "amountCents": 2634,
+          "cardLast4": "0001",
+          "reference": "PAY-DEMO-2026-BFD57895967B47569327DDE8246CDC7C"
+        },
+        "receipt": {
+          "id": "018daddc-4453-4a20-86a4-f610fcc72dfc",
+          "number": "CMP-RG-2026-BFD57895967B47569327DDE8246CDC7C"
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/orders/admin",
+      "actor": "ADMIN",
+      "body": {
+        "buyer": {
+          "type": "REGISTERED_CLIENT",
+          "clientId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "contactPhone": "0991234567"
+        },
+        "payment": {
+          "method": "CASH"
+        },
+        "deliveryAddress": "Pedido sintético APE4 10:30",
+        "deliveryLat": -1.238,
+        "deliveryLng": -78.612,
+        "scheduledDeliveryDate": "2026-11-15T10:30:00-05:00",
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ]
+      },
+      "status": 201,
+      "ms": 48,
+      "response": {
+        "id": "46fdb411-fdf2-4eea-9328-ce1ed8ae04d5",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 10:30",
+        "deliveryLat": -1.238,
+        "deliveryLng": -78.612,
+        "scheduledDeliveryDate": "2026-11-15T15:30:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:28.924867Z",
+        "items": [
+          {
+            "id": "9ceb9620-91ba-41c1-90c3-8ffbde332032",
+            "orderId": "46fdb411-fdf2-4eea-9328-ce1ed8ae04d5",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 102,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "deliveryLocation": {
+          "lat": -1.238,
+          "lng": -78.612
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        },
+        "receipt": {
+          "id": "7b66fee7-05f6-48c0-8e1f-dce3d2c73b73",
+          "number": "CMP-RG-2026-CEE9B73A728040E0A104119849ED0E91"
+        },
+        "payment": {
+          "kind": "ADMIN_DECLARED_EXTERNAL",
+          "status": "DECLARED",
+          "method": "CASH",
+          "declaredById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+          "declaredAt": "2026-11-14T16:30:28.928Z"
+        },
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "totalCents": 2634
+      }
+    },
+    {
+      "request": "GET /api/v1/route-proposals?date=2026-11-15",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 12,
+      "response": {
+        "date": "2026-11-15",
+        "timeZone": "America/Guayaquil",
+        "isToday": false,
+        "canConfirm": false,
+        "capacity": 4,
+        "timeWindowMarginMinutes": 30,
+        "distanceMethod": "HAVERSINE_STRAIGHT_LINE",
+        "proposals": [
+          {
+            "zoneId": null,
+            "zoneCode": null,
+            "depot": {
+              "lat": -1.24908,
+              "lng": -78.61675
+            },
+            "orderIds": [
+              "3980298b-e4ec-4ab4-879a-404a66969a7a",
+              "46fdb411-fdf2-4eea-9328-ce1ed8ae04d5"
+            ],
+            "stops": [
+              {
+                "sequence": 1,
+                "orderId": "3980298b-e4ec-4ab4-879a-404a66969a7a",
+                "location": {
+                  "lat": -1.242,
+                  "lng": -78.619
+                },
+                "deliveryAddress": "Compra Shop APE4, Ambato",
+                "scheduledDeliveryDate": "2026-11-15T15:00:00Z"
+              },
+              {
+                "sequence": 2,
+                "orderId": "46fdb411-fdf2-4eea-9328-ce1ed8ae04d5",
+                "location": {
+                  "lat": -1.238,
+                  "lng": -78.612
+                },
+                "deliveryAddress": "Pedido sintético APE4 10:30",
+                "scheduledDeliveryDate": "2026-11-15T15:30:00Z"
+              }
+            ],
+            "totalDistanceKm": 3.063,
+            "baselineKm": 4.333,
+            "savingsKm": 1.27,
+            "savingsPercent": 29.31,
+            "scheduledInstants": [
+              "2026-11-15T15:00:00Z",
+              "2026-11-15T15:30:00Z"
+            ],
+            "routeDate": "2026-11-15T15:00:00Z"
+          },
+          {
+            "zoneId": null,
+            "zoneCode": null,
+            "depot": {
+              "lat": -1.24908,
+              "lng": -78.61675
+            },
+            "orderIds": [
+              "ebb3b1ca-8de4-44de-9cee-a3b4ab9aecc8"
+            ],
+            "stops": [
+              {
+                "sequence": 1,
+                "orderId": "ebb3b1ca-8de4-44de-9cee-a3b4ab9aecc8",
+                "location": {
+                  "lat": -1.25,
+                  "lng": -78.61
+                },
+                "deliveryAddress": "Pedido sintético APE4 15:00",
+                "scheduledDeliveryDate": "2026-11-15T17:00:00Z"
+              }
+            ],
+            "totalDistanceKm": 1.515,
+            "baselineKm": 1.515,
+            "savingsKm": 0,
+            "savingsPercent": 0,
+            "scheduledInstants": [
+              "2026-11-15T17:00:00Z"
+            ],
+            "routeDate": "2026-11-15T17:00:00Z"
+          }
+        ],
+        "excluded": [],
+        "summary": {
+          "candidateOrders": 3,
+          "plannedOrders": 3,
+          "excludedOrders": 0,
+          "routes": 2,
+          "baselineKm": 5.848,
+          "plannedKm": 4.578,
+          "savingsKm": 1.27,
+          "savingsPercent": 21.72
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/routes",
+      "actor": "ADMIN",
+      "body": {
+        "routeDate": "2026-11-15T10:00:00-05:00",
+        "orderIds": [
+          "3980298b-e4ec-4ab4-879a-404a66969a7a",
+          "46fdb411-fdf2-4eea-9328-ce1ed8ae04d5"
+        ]
+      },
+      "status": 409,
+      "ms": 8,
+      "response": {
+        "statusCode": 409,
+        "message": "Routes can only be confirmed or assigned for the current America/Guayaquil operational day (2026-11-14)",
+        "error": "Conflict",
+        "code": "ROUTE_DATE_NOT_TODAY",
+        "operationalDay": "2026-11-14",
+        "routeDay": "2026-11-15"
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/assign",
+      "actor": "ADMIN",
+      "body": {
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "orderIds": [
+          "3980298b-e4ec-4ab4-879a-404a66969a7a",
+          "46fdb411-fdf2-4eea-9328-ce1ed8ae04d5"
+        ]
+      },
+      "status": 409,
+      "ms": 17,
+      "response": {
+        "message": "Legacy assignment requires an exact common non-null scheduled timestamp",
+        "error": "Conflict",
+        "statusCode": 409
+      }
+    }
+  ]
+}

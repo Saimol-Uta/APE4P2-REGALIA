@@ -1,0 +1,153 @@
+{
+  "ejecutado": "2026-11-14T16:30:30.357Z",
+  "resultados": [
+    {
+      "caso": "CP-055",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-056",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-057",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-058",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-059",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-060",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-061",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-062",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-063",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-064",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-065",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-066",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-067",
+      "estado": "FAIL",
+      "fallidas": [],
+      "estadoAPI": "PASS",
+      "defecto": "DEF-07"
+    },
+    {
+      "caso": "CP-068",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-069",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-070",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-071",
+      "estado": "FAIL",
+      "fallidas": [
+        "La repetición se rechaza con 409 PICKUP_ALREADY_CONFIRMED"
+      ],
+      "defecto": "DEF-05"
+    },
+    {
+      "caso": "CP-072",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-073",
+      "estado": "FAIL",
+      "fallidas": [],
+      "estadoAPI": "PASS",
+      "defecto": "DEF-06"
+    },
+    {
+      "caso": "CP-074",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-075",
+      "estado": "PASS",
+      "fallidas": [],
+      "nota": "Ejecutado en el teléfono"
+    },
+    {
+      "caso": "CP-076",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-077",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-078",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-079",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-080",
+      "estado": "PASS",
+      "fallidas": []
+    },
+    {
+      "caso": "CP-081",
+      "estado": "PASS",
+      "fallidas": []
+    }
+  ],
+  "totales": {
+    "casos": 27,
+    "PASS": 24,
+    "FAIL": 3
+  }
+}

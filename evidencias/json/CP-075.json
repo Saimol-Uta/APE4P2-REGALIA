@@ -1,0 +1,131 @@
+{
+  "caso": "CP-075",
+  "titulo": "Recorrido E2E: desconexión móvil y recuperación al reconectar",
+  "estado": "PASS",
+  "dispositivo": "Xiaomi M2101K6G (Android 13, API 33) por USB; API vía adb reverse tcp:3003",
+  "procedimiento": [
+    "Se quitó el túnel adb reverse tcp:3003 (la app pierde el servidor) y se pulsó Iniciar ruta en la app.",
+    "La app mostró: No se pudo conectar con el servidor. Actualiza la lista antes de volver a intentar iniciar una ruta. La ruta siguió Asignada y se ocultó el botón de inicio.",
+    "Se restauró adb reverse y se actualizó la lista: la app mostró el estado real (Asignada) y volvió a ofrecer Iniciar ruta; luego el inicio se registró una sola vez."
+  ],
+  "verificaciones": [
+    {
+      "descripcion": "Sin red la app no finge éxito",
+      "ok": true
+    },
+    {
+      "descripcion": "El backend no registró inicio durante la desconexión (ASSIGNED, startedAt null)",
+      "ok": true
+    },
+    {
+      "descripcion": "Al reconectar, la app refleja el estado del servidor sin duplicar ni encolar acciones",
+      "ok": true
+    },
+    {
+      "descripcion": "El inicio posterior queda registrado una sola vez",
+      "ok": true
+    }
+  ],
+  "estadoBackend": [
+    {
+      "etiqueta": "CP-075 sin red: intento de iniciar ruta en la app",
+      "momento": "2026-11-14T16:37:09.677Z",
+      "ruta": {
+        "status": "ASSIGNED",
+        "startedAt": null,
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "PENDING",
+          "intentos": []
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "ASSIGNED"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-075 reconectado y lista actualizada",
+      "momento": "2026-11-14T16:37:15.358Z",
+      "ruta": {
+        "status": "ASSIGNED",
+        "startedAt": null,
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "PENDING",
+          "intentos": []
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "ASSIGNED"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    }
+  ]
+}

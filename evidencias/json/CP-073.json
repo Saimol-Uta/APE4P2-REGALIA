@@ -1,0 +1,356 @@
+{
+  "caso": "CP-073",
+  "titulo": "Recorrido E2E: propuesta, confirmación y asignación en día operativo",
+  "ejecutado": "2026-11-14T16:30:29.509Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "FAIL",
+  "verificaciones": [
+    {
+      "descripcion": "DRIVER-A disponible antes de asignar",
+      "ok": true,
+      "detalle": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": [],
+        "date": "2026-11-14",
+        "absence": null
+      }
+    },
+    {
+      "descripcion": "La propuesta de hoy incluye el pedido del E2E",
+      "ok": true
+    },
+    {
+      "descripcion": "El borrador se persiste (201, DRAFT)",
+      "ok": true
+    },
+    {
+      "descripcion": "La ruta queda ASSIGNED a DRIVER-A",
+      "ok": true
+    },
+    {
+      "descripcion": "La ruta aparece una sola vez en Mi Ruta de DRIVER-A con su parada",
+      "ok": true
+    },
+    {
+      "descripcion": "Existe exactamente una reserva del conductor para la ruta",
+      "ok": true,
+      "detalle": {
+        "reservas": "1"
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/drivers/37b6a1bd-4258-4c30-a181-db454a1feb5f/availability?date=2026-11-14",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 17,
+      "response": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": [],
+        "date": "2026-11-14",
+        "absence": null
+      }
+    },
+    {
+      "request": "GET /api/v1/route-proposals?date=2026-11-14",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 16,
+      "response": {
+        "date": "2026-11-14",
+        "timeZone": "America/Guayaquil",
+        "isToday": true,
+        "canConfirm": true,
+        "capacity": 4,
+        "timeWindowMarginMinutes": 30,
+        "distanceMethod": "HAVERSINE_STRAIGHT_LINE",
+        "proposals": [
+          {
+            "zoneId": null,
+            "zoneCode": null,
+            "depot": {
+              "lat": -1.24908,
+              "lng": -78.61675
+            },
+            "orderIds": [
+              "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb"
+            ],
+            "stops": [
+              {
+                "sequence": 1,
+                "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+                "location": {
+                  "lat": -1.242,
+                  "lng": -78.619
+                },
+                "deliveryAddress": "Compra Shop APE4, Ambato",
+                "scheduledDeliveryDate": "2026-11-14T19:00:00Z"
+              }
+            ],
+            "totalDistanceKm": 1.652,
+            "baselineKm": 1.652,
+            "savingsKm": 0,
+            "savingsPercent": 0,
+            "scheduledInstants": [
+              "2026-11-14T19:00:00Z"
+            ],
+            "routeDate": "2026-11-14T19:00:00Z"
+          },
+          {
+            "zoneId": null,
+            "zoneCode": null,
+            "depot": {
+              "lat": -1.24908,
+              "lng": -78.61675
+            },
+            "orderIds": [
+              "7f0abd4e-fe23-481c-b694-29030ef68448"
+            ],
+            "stops": [
+              {
+                "sequence": 1,
+                "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+                "location": {
+                  "lat": -1.245,
+                  "lng": -78.625
+                },
+                "deliveryAddress": "Compra Shop APE4, Ambato",
+                "scheduledDeliveryDate": "2026-11-14T21:30:00Z"
+              }
+            ],
+            "totalDistanceKm": 2.046,
+            "baselineKm": 2.046,
+            "savingsKm": 0,
+            "savingsPercent": 0,
+            "scheduledInstants": [
+              "2026-11-14T21:30:00Z"
+            ],
+            "routeDate": "2026-11-14T21:30:00Z"
+          }
+        ],
+        "excluded": [
+          {
+            "orderId": "7e90350d-453c-46c7-9e24-92523900ab85",
+            "zoneId": null,
+            "reasons": [
+              "ACTIVE_ROUTE_CLAIM"
+            ]
+          },
+          {
+            "orderId": "be25ebdc-2448-4637-bc34-3bfd34b462f2",
+            "zoneId": null,
+            "reasons": [
+              "ACTIVE_ROUTE_CLAIM"
+            ]
+          },
+          {
+            "orderId": "c14bba3a-43b8-4e5d-8410-90d71ea6a560",
+            "zoneId": null,
+            "reasons": [
+              "ACTIVE_ROUTE_CLAIM"
+            ]
+          },
+          {
+            "orderId": "fc251570-abd2-454d-adcd-e249e9a94a46",
+            "zoneId": null,
+            "reasons": [
+              "ACTIVE_ROUTE_CLAIM"
+            ]
+          },
+          {
+            "orderId": "fde635ba-05c9-4ee3-9a0b-74509046a639",
+            "zoneId": null,
+            "reasons": [
+              "ACTIVE_ROUTE_CLAIM"
+            ]
+          }
+        ],
+        "summary": {
+          "candidateOrders": 7,
+          "plannedOrders": 2,
+          "excludedOrders": 5,
+          "routes": 2,
+          "baselineKm": 3.698,
+          "plannedKm": 3.698,
+          "savingsKm": 0,
+          "savingsPercent": 0
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/routes",
+      "actor": "ADMIN",
+      "body": {
+        "routeDate": "2026-11-14T16:30:00-05:00",
+        "orderIds": [
+          "7f0abd4e-fe23-481c-b694-29030ef68448"
+        ]
+      },
+      "status": 201,
+      "ms": 64,
+      "response": {
+        "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "status": "DRAFT",
+        "driverId": null,
+        "zoneId": null,
+        "date": "2026-11-14T21:30:00Z",
+        "createdAt": "2026-11-14T16:30:29.549066Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/6411fa79-bf05-4468-9be6-3962a4031be6/assign",
+      "actor": "ADMIN",
+      "body": {
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f"
+      },
+      "status": 200,
+      "ms": 102,
+      "response": {
+        "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "status": "ASSIGNED",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "zoneId": null,
+        "date": "2026-11-14T21:30:00Z",
+        "createdAt": "2026-11-14T16:30:29.549066Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/me/routes",
+      "actor": "DRIVER-A",
+      "status": 200,
+      "ms": 21,
+      "response": [
+        {
+          "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+          "date": "2026-11-14T21:00:00Z",
+          "status": "COMPLETED",
+          "startedAt": "2026-11-14T16:30:19.883247Z",
+          "startedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "completedAt": "2026-11-14T16:30:24.311577Z",
+          "completedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "returnedAt": "2026-11-14T16:30:25.130817Z",
+          "returnedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "zone": null,
+          "orders": [
+            {
+              "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+              "deliveryAddress": "Pedido sintético APE4 16:00",
+              "status": "ASSIGNED",
+              "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+              "stopOrder": 1
+            },
+            {
+              "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+              "deliveryAddress": "Pedido sintético APE4 16:10",
+              "status": "DELIVERED",
+              "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+              "stopOrder": 2
+            }
+          ],
+          "stops": [
+            {
+              "createdAt": "2026-11-14T16:30:18.298502Z",
+              "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+              "isLegacy": false,
+              "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+              "outcome": "FAILED",
+              "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+              "sequence": 1,
+              "attempts": [
+                {
+                  "id": "fbc878b1-cdb5-4199-bb04-50aa855ac706",
+                  "stopId": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+                  "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+                  "recordedAt": "2026-11-14T16:30:23.944278Z",
+                  "outcome": "FAILED",
+                  "failureReason": "RECIPIENT_ABSENT",
+                  "context": "Nadie atendió en el domicilio"
+                }
+              ]
+            },
+            {
+              "createdAt": "2026-11-14T16:30:18.298502Z",
+              "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+              "isLegacy": false,
+              "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+              "outcome": "SUCCESSFUL",
+              "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+              "sequence": 2,
+              "attempts": [
+                {
+                  "id": "68eb17ed-50b9-42ba-b0ae-efdc78c299af",
+                  "stopId": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+                  "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+                  "recordedAt": "2026-11-14T16:30:24.23075Z",
+                  "outcome": "SUCCESSFUL",
+                  "failureReason": null,
+                  "context": null
+                }
+              ]
+            }
+          ],
+          "events": [
+            {
+              "kind": "STARTED",
+              "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+              "recordedAt": "2026-11-14T16:30:19.883247Z"
+            },
+            {
+              "kind": "COMPLETED",
+              "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+              "recordedAt": "2026-11-14T16:30:24.311577Z"
+            },
+            {
+              "kind": "RETURNED",
+              "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+              "recordedAt": "2026-11-14T16:30:25.130817Z"
+            }
+          ]
+        },
+        {
+          "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+          "date": "2026-11-14T21:30:00Z",
+          "status": "ASSIGNED",
+          "startedAt": null,
+          "startedById": null,
+          "completedAt": null,
+          "completedById": null,
+          "returnedAt": null,
+          "returnedById": null,
+          "zone": null,
+          "orders": [
+            {
+              "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+              "deliveryAddress": "Compra Shop APE4, Ambato",
+              "status": "ASSIGNED",
+              "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+              "stopOrder": 1
+            }
+          ],
+          "stops": [
+            {
+              "createdAt": "2026-11-14T16:30:29.563481Z",
+              "id": "e5ee6da0-de45-4774-8421-77ab60238ebc",
+              "isLegacy": false,
+              "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+              "outcome": "PENDING",
+              "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+              "sequence": 1,
+              "attempts": []
+            }
+          ],
+          "events": []
+        }
+      ]
+    }
+  ],
+  "estadoAPI": "PASS",
+  "defecto": "DEF-06",
+  "observacionTelefono": "Con la ruta confirmada desde la propuesta (zone null) la app muestra: No se pudieron cargar tus rutas. El servidor devolvió rutas inválidas. La app exige zone como objeto (driver_route.dart:48). Con una ruta creada con zona, la app la lista correctamente."
+}

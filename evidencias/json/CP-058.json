@@ -1,0 +1,76 @@
+{
+  "caso": "CP-058",
+  "titulo": "Registro público con rol ADMIN rechazado sin escalación",
+  "ejecutado": "2026-11-14T16:30:18.644Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "El registro con role ADMIN se rechaza con 400 o 403",
+      "ok": true,
+      "detalle": 400
+    },
+    {
+      "descripcion": "El inicio de sesión posterior falla (401)",
+      "ok": true,
+      "detalle": 401
+    },
+    {
+      "descripcion": "No existe ninguna cuenta con el correo enviado",
+      "ok": true,
+      "detalle": {
+        "cuentas": "0"
+      }
+    },
+    {
+      "descripcion": "La cantidad de cuentas ADMIN sigue siendo 1 (solo la del seed)",
+      "ok": true,
+      "detalle": {
+        "admins": "1"
+      }
+    }
+  ],
+  "notas": [],
+  "consultaBD": {
+    "cuentasConEseCorreo": 0,
+    "cuentasAdmin": 1
+  },
+  "peticiones": [
+    {
+      "request": "POST /api/v1/auth/register",
+      "actor": "ANÓNIMO",
+      "body": {
+        "name": "Intento Admin",
+        "email": "ape4.escalacion.4ba3b1e1@fixture.invalid",
+        "password": "***",
+        "role": "ADMIN"
+      },
+      "status": 400,
+      "ms": 4,
+      "response": {
+        "statusCode": 400,
+        "message": [
+          "property role should not exist"
+        ],
+        "error": "Bad Request",
+        "code": "VALIDATION_ERROR"
+      }
+    },
+    {
+      "request": "POST /api/v1/auth/login",
+      "actor": "ANÓNIMO",
+      "body": {
+        "email": "ape4.escalacion.4ba3b1e1@fixture.invalid",
+        "password": "***"
+      },
+      "status": 401,
+      "ms": 8,
+      "response": {
+        "statusCode": 401,
+        "message": "Credenciales inválidas",
+        "error": "Unauthorized",
+        "code": "INVALID_CREDENTIALS"
+      }
+    }
+  ]
+}
