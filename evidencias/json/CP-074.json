@@ -1,0 +1,639 @@
+{
+  "caso": "CP-074",
+  "titulo": "Recorrido E2E: progreso móvil reflejado en seguimiento del cliente",
+  "ejecutado": "2026-11-14T16:30:29.905Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "Inicio de ruta: el cliente ve el mismo estado que el backend (ASSIGNED)",
+      "ok": true,
+      "detalle": {
+        "http": 200,
+        "backend": "ASSIGNED",
+        "cliente": "ASSIGNED"
+      }
+    },
+    {
+      "descripcion": "La ruta queda IN_PROGRESS",
+      "ok": true
+    },
+    {
+      "descripcion": "En camino: el cliente ve el mismo estado que el backend (IN_TRANSIT)",
+      "ok": true,
+      "detalle": {
+        "http": 200,
+        "backend": "IN_TRANSIT",
+        "cliente": "IN_TRANSIT"
+      }
+    },
+    {
+      "descripcion": "Entregado: el cliente ve el mismo estado que el backend (DELIVERED)",
+      "ok": true,
+      "detalle": {
+        "http": 200,
+        "backend": "DELIVERED",
+        "cliente": "DELIVERED"
+      }
+    },
+    {
+      "descripcion": "El seguimiento no inventa ubicación GPS",
+      "ok": true
+    }
+  ],
+  "notas": [
+    "Al terminar se cerró la ruta y se confirmó el regreso para dejar libre a DRIVER-A."
+  ],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/routes/6411fa79-bf05-4468-9be6-3962a4031be6/start",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 200,
+      "ms": 66,
+      "response": {
+        "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:30:29.929539Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 8,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+        "status": "ASSIGNED",
+        "total": 51.8,
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:29.443867Z",
+        "items": [
+          {
+            "id": "cecc1fcd-54fc-4c85-9824-1c922b4a5380",
+            "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "quantity": 2,
+            "price": 25.9,
+            "product": {
+              "id": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+              "name": "Caja de postres surtidos",
+              "description": "Seis postres individuales en caja refrigerada.",
+              "price": 25.9,
+              "stock": 107,
+              "createdAt": "2026-11-14T16:28:55.92712Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": null,
+        "deliveryLocation": {
+          "lat": -1.245,
+          "lng": -78.625
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 14,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "number": "RG-2026-D1FE656161C0462FB0DC37924E6EBC02",
+        "source": "SHOP",
+        "pickup": null,
+        "pendingManagement": false,
+        "receiptAvailable": true,
+        "createdAt": "2026-11-14T16:30:29.443Z",
+        "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+        "status": "ASSIGNED",
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "currency": "USD",
+        "totalCents": 5957,
+        "paymentStatus": "APPROVED",
+        "buyer": {
+          "id": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente",
+          "phone": "0991234567"
+        },
+        "delivery": {
+          "zoneId": null,
+          "zoneName": null,
+          "address": "Compra Shop APE4, Ambato",
+          "location": {
+            "lat": -1.245,
+            "lng": -78.625
+          },
+          "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+          "notes": null
+        },
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "sku": "RG-AGR-018",
+            "name": "Caja de postres surtidos",
+            "quantity": 2,
+            "unitPriceCents": 2590,
+            "lineTotalCents": 5180,
+            "imageUrl": null
+          }
+        ],
+        "timeline": [
+          {
+            "code": "PENDING",
+            "label": "Pedido registrado",
+            "at": "2026-11-14T16:30:29.443Z"
+          },
+          {
+            "code": "ASSIGNED",
+            "label": "Asignado a ruta",
+            "at": "2026-11-14T16:30:29.563Z"
+          },
+          {
+            "code": "IN_TRANSIT",
+            "label": "En camino",
+            "at": "2026-11-14T16:30:29.929Z"
+          }
+        ],
+        "receiptId": "495a7bf1-ce3e-4af6-9cb8-5efd1e96f97e",
+        "subtotalCents": 5180,
+        "taxAmountCents": 777,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "taxEnabled": true
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/6411fa79-bf05-4468-9be6-3962a4031be6",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:29.549066Z",
+        "date": "2026-11-14T21:30:00Z",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:29.929539Z",
+        "startedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+        "status": "IN_PROGRESS",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:28:43.640463Z",
+          "id": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+          "isAvailable": false,
+          "userId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "vehicle": "Camión Isuzu ABC-123",
+          "user": {
+            "id": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "name": "Carlos Chofer",
+            "email": "driver1@delivery.com",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:28:43.632876Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": null,
+            "buyerPhone": null,
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:29.443867Z",
+            "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "deliveryAddress": "Compra Shop APE4, Ambato",
+            "deliveryLat": -1.245,
+            "deliveryLng": -78.625,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+            "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 51.8,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:29.563481Z",
+            "id": "e5ee6da0-de45-4774-8421-77ab60238ebc",
+            "isLegacy": false,
+            "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+            "outcome": "PENDING",
+            "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+            "sequence": 1,
+            "attempts": []
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "recordedAt": "2026-11-14T16:30:29.929539Z"
+          }
+        ]
+      }
+    },
+    {
+      "request": "PATCH /api/v1/orders/7f0abd4e-fe23-481c-b694-29030ef68448/status",
+      "actor": "DRIVER-A",
+      "body": {
+        "status": "IN_TRANSIT"
+      },
+      "status": 200,
+      "ms": 66,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+        "status": "IN_TRANSIT",
+        "total": 51.8,
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:29.443867Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 8,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+        "status": "IN_TRANSIT",
+        "total": 51.8,
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:29.443867Z",
+        "items": [
+          {
+            "id": "cecc1fcd-54fc-4c85-9824-1c922b4a5380",
+            "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "quantity": 2,
+            "price": 25.9,
+            "product": {
+              "id": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+              "name": "Caja de postres surtidos",
+              "description": "Seis postres individuales en caja refrigerada.",
+              "price": 25.9,
+              "stock": 107,
+              "createdAt": "2026-11-14T16:28:55.92712Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": null,
+        "deliveryLocation": {
+          "lat": -1.245,
+          "lng": -78.625
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "number": "RG-2026-D1FE656161C0462FB0DC37924E6EBC02",
+        "source": "SHOP",
+        "pickup": null,
+        "pendingManagement": false,
+        "receiptAvailable": true,
+        "createdAt": "2026-11-14T16:30:29.443Z",
+        "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+        "status": "IN_TRANSIT",
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "currency": "USD",
+        "totalCents": 5957,
+        "paymentStatus": "APPROVED",
+        "buyer": {
+          "id": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente",
+          "phone": "0991234567"
+        },
+        "delivery": {
+          "zoneId": null,
+          "zoneName": null,
+          "address": "Compra Shop APE4, Ambato",
+          "location": {
+            "lat": -1.245,
+            "lng": -78.625
+          },
+          "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+          "notes": null
+        },
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "sku": "RG-AGR-018",
+            "name": "Caja de postres surtidos",
+            "quantity": 2,
+            "unitPriceCents": 2590,
+            "lineTotalCents": 5180,
+            "imageUrl": null
+          }
+        ],
+        "timeline": [
+          {
+            "code": "PENDING",
+            "label": "Pedido registrado",
+            "at": "2026-11-14T16:30:29.443Z"
+          },
+          {
+            "code": "ASSIGNED",
+            "label": "Asignado a ruta",
+            "at": "2026-11-14T16:30:29.563Z"
+          },
+          {
+            "code": "IN_TRANSIT",
+            "label": "En camino",
+            "at": "2026-11-14T16:30:29.929Z"
+          }
+        ],
+        "receiptId": "495a7bf1-ce3e-4af6-9cb8-5efd1e96f97e",
+        "subtotalCents": 5180,
+        "taxAmountCents": 777,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "taxEnabled": true
+      }
+    },
+    {
+      "request": "PATCH /api/v1/orders/7f0abd4e-fe23-481c-b694-29030ef68448/status",
+      "actor": "DRIVER-A",
+      "body": {
+        "status": "DELIVERED"
+      },
+      "status": 200,
+      "ms": 87,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+        "status": "DELIVERED",
+        "total": 51.8,
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:29.443867Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 8,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.245,
+        "deliveryLng": -78.625,
+        "scheduledDeliveryDate": "2026-11-14T21:30:00Z",
+        "status": "DELIVERED",
+        "total": 51.8,
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "stopOrder": 1,
+        "createdAt": "2026-11-14T16:30:29.443867Z",
+        "items": [
+          {
+            "id": "cecc1fcd-54fc-4c85-9824-1c922b4a5380",
+            "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "quantity": 2,
+            "price": 25.9,
+            "product": {
+              "id": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+              "name": "Caja de postres surtidos",
+              "description": "Seis postres individuales en caja refrigerada.",
+              "price": 25.9,
+              "stock": 107,
+              "createdAt": "2026-11-14T16:28:55.92712Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": null,
+        "deliveryLocation": {
+          "lat": -1.245,
+          "lng": -78.625
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 14,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "number": "RG-2026-D1FE656161C0462FB0DC37924E6EBC02",
+        "source": "SHOP",
+        "pickup": null,
+        "pendingManagement": false,
+        "receiptAvailable": true,
+        "createdAt": "2026-11-14T16:30:29.443Z",
+        "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+        "status": "DELIVERED",
+        "routeId": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "currency": "USD",
+        "totalCents": 5957,
+        "paymentStatus": "APPROVED",
+        "buyer": {
+          "id": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente",
+          "phone": "0991234567"
+        },
+        "delivery": {
+          "zoneId": null,
+          "zoneName": null,
+          "address": "Compra Shop APE4, Ambato",
+          "location": {
+            "lat": -1.245,
+            "lng": -78.625
+          },
+          "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+          "notes": null
+        },
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "sku": "RG-AGR-018",
+            "name": "Caja de postres surtidos",
+            "quantity": 2,
+            "unitPriceCents": 2590,
+            "lineTotalCents": 5180,
+            "imageUrl": null
+          }
+        ],
+        "timeline": [
+          {
+            "code": "PENDING",
+            "label": "Pedido registrado",
+            "at": "2026-11-14T16:30:29.443Z"
+          },
+          {
+            "code": "ASSIGNED",
+            "label": "Asignado a ruta",
+            "at": "2026-11-14T16:30:29.563Z"
+          },
+          {
+            "code": "IN_TRANSIT",
+            "label": "En camino",
+            "at": "2026-11-14T16:30:29.929Z"
+          },
+          {
+            "code": "DELIVERED",
+            "label": "Entregado",
+            "at": "2026-11-14T16:30:30.134Z"
+          }
+        ],
+        "receiptId": "495a7bf1-ce3e-4af6-9cb8-5efd1e96f97e",
+        "subtotalCents": 5180,
+        "taxAmountCents": 777,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "taxEnabled": true
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/6411fa79-bf05-4468-9be6-3962a4031be6/complete",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 200,
+      "ms": 64,
+      "response": {
+        "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "status": "COMPLETED",
+        "completedAt": "2026-11-14T16:30:30.229024Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/6411fa79-bf05-4468-9be6-3962a4031be6/return",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 200,
+      "ms": 83,
+      "response": {
+        "id": "6411fa79-bf05-4468-9be6-3962a4031be6",
+        "status": "COMPLETED",
+        "returnedAt": "2026-11-14T16:30:30.29025Z",
+        "availability": {
+          "isAvailable": true,
+          "hasPersistedHolds": false,
+          "compatibilityFlagBlocks": false,
+          "blockingRouteIds": []
+        }
+      }
+    }
+  ]
+}

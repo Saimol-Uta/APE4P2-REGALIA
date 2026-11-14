@@ -1,0 +1,239 @@
+{
+  "caso": "CP-071",
+  "titulo": "Confirmación de retiro (PICKUP_CONFIRM) y rechazo de repetición",
+  "ejecutado": "2026-11-14T16:30:28.232Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "FAIL",
+  "verificaciones": [
+    {
+      "descripcion": "La primera confirmación se aplica (200)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "El pedido queda DELIVERED por retiro (PICKED_UP)",
+      "ok": true,
+      "detalle": {
+        "status": "DELIVERED",
+        "pickup": {
+          "state": "PICKED_UP",
+          "agreedAt": "2026-11-14T16:30:28.12259Z",
+          "pickedUpAt": "2026-11-14T16:30:28.264673Z"
+        }
+      }
+    },
+    {
+      "descripcion": "La repetición se rechaza con 409 PICKUP_ALREADY_CONFIRMED",
+      "ok": false,
+      "detalle": {
+        "status": 409
+      }
+    },
+    {
+      "descripcion": "Existe un solo registro de retiro",
+      "ok": true,
+      "detalle": {
+        "retiros": "1"
+      }
+    },
+    {
+      "descripcion": "Sin movimientos adicionales de inventario",
+      "ok": true,
+      "detalle": {
+        "stockAntes": 104,
+        "stockDesp": 104
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/shop/products/b8f3f595-54c7-4f60-ab22-d279836636d5",
+      "actor": "ANÓNIMO",
+      "status": 200,
+      "ms": 13,
+      "response": {
+        "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+        "sku": "RG-AMI-002",
+        "name": "Caja de snacks para compartir",
+        "description": "Papas, galletas, frutos secos y dulces en caja.",
+        "categoryId": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+        "category": {
+          "id": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+          "name": "Amistad",
+          "slug": "amistad",
+          "description": "Pequeños detalles para quienes siempre están.",
+          "productCount": 20,
+          "sortOrder": 90
+        },
+        "priceCents": 2290,
+        "currency": "USD",
+        "stock": 104,
+        "isPublished": true,
+        "isFeatured": true,
+        "images": [
+          {
+            "id": "5de8936c-8111-45fc-906f-5fc1f2ceeaac",
+            "secureUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+            "publicId": "regalia/demo/rg-ami-002",
+            "altText": "Regalo: Caja de snacks para compartir",
+            "position": 0,
+            "isPrimary": true
+          }
+        ],
+        "primaryImageUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+        "isAvailable": true,
+        "createdAt": "2026-11-14T16:28:55.860165Z",
+        "updatedAt": "2026-11-14T16:30:27.089825Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/dispatch/interventions",
+      "actor": "ADMIN",
+      "body": {
+        "requestId": "e15fd6b9-4526-4579-82d5-5fc592dc5e3a",
+        "reason": "Gestión APE4 móvil",
+        "action": "PICKUP_CONFIRM",
+        "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c"
+      },
+      "status": 200,
+      "ms": 50,
+      "response": {
+        "id": "7973274e-16ff-442d-8f4f-47ded9763f6f",
+        "requestId": "e15fd6b9-4526-4579-82d5-5fc592dc5e3a",
+        "actorId": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+        "routeId": null,
+        "action": "PICKUP_CONFIRM",
+        "reason": "Gestión APE4 móvil",
+        "outcome": "APPLIED",
+        "recordedAt": "2026-11-14T16:30:28.268615Z",
+        "result": {
+          "confirmedAt": "2026-11-14T16:30:28.264673096Z",
+          "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+          "pickupId": "6487c254-6fd3-4ebd-990b-cfa8bb1ef112",
+          "routeId": null
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 8,
+      "response": {
+        "id": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 15:10",
+        "deliveryLat": -1.23,
+        "deliveryLng": -78.62,
+        "scheduledDeliveryDate": "2026-11-14T20:10:00Z",
+        "status": "DELIVERED",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:27.092831Z",
+        "items": [
+          {
+            "id": "9ce573e6-a43d-4b1b-b99f-65e3e4b9321d",
+            "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 104,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": {
+          "state": "PICKED_UP",
+          "agreedAt": "2026-11-14T16:30:28.12259Z",
+          "pickedUpAt": "2026-11-14T16:30:28.264673Z"
+        },
+        "deliveryLocation": {
+          "lat": -1.23,
+          "lng": -78.62
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/dispatch/interventions",
+      "actor": "ADMIN",
+      "body": {
+        "requestId": "4ba3caa5-f5e6-4644-9b7a-e80ade3a6bba",
+        "reason": "Gestión APE4 móvil",
+        "action": "PICKUP_CONFIRM",
+        "orderId": "78cbd7cc-34a1-46f1-8503-546cee2aa75c"
+      },
+      "status": 409,
+      "ms": 18,
+      "response": {
+        "message": "Commercially resolved order cannot be managed for pickup",
+        "error": "Conflict",
+        "statusCode": 409
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/products/b8f3f595-54c7-4f60-ab22-d279836636d5",
+      "actor": "ANÓNIMO",
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+        "sku": "RG-AMI-002",
+        "name": "Caja de snacks para compartir",
+        "description": "Papas, galletas, frutos secos y dulces en caja.",
+        "categoryId": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+        "category": {
+          "id": "10e1c442-693b-4c4a-8c88-47a2f3a96be3",
+          "name": "Amistad",
+          "slug": "amistad",
+          "description": "Pequeños detalles para quienes siempre están.",
+          "productCount": 20,
+          "sortOrder": 90
+        },
+        "priceCents": 2290,
+        "currency": "USD",
+        "stock": 104,
+        "isPublished": true,
+        "isFeatured": true,
+        "images": [
+          {
+            "id": "5de8936c-8111-45fc-906f-5fc1f2ceeaac",
+            "secureUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+            "publicId": "regalia/demo/rg-ami-002",
+            "altText": "Regalo: Caja de snacks para compartir",
+            "position": 0,
+            "isPrimary": true
+          }
+        ],
+        "primaryImageUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823046/regalia/demo/rg-ami-002.png",
+        "isAvailable": true,
+        "createdAt": "2026-11-14T16:28:55.860165Z",
+        "updatedAt": "2026-11-14T16:30:27.089825Z"
+      }
+    }
+  ]
+}

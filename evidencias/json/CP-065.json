@@ -1,0 +1,466 @@
+{
+  "caso": "CP-065",
+  "titulo": "Pedido urgente con ruta IN_PROGRESS no altera ruta iniciada",
+  "ejecutado": "2026-11-14T16:30:19.849Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "DRIVER-A inicia R1 (IN_PROGRESS)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "La propuesta de urgencia es NEW_ROUTE o BLOCKED",
+      "ok": true,
+      "detalle": {
+        "status": 200,
+        "kind": "NEW_ROUTE"
+      }
+    },
+    {
+      "descripcion": "La propuesta no inserta el pedido en la ruta iniciada",
+      "ok": true
+    },
+    {
+      "descripcion": "La bandeja de despacho responde 200",
+      "ok": true
+    },
+    {
+      "descripcion": "Paradas, orden y estado de R1 son idénticos antes y después",
+      "ok": true
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8/start",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 200,
+      "ms": 77,
+      "response": {
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:30:19.883247Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 20,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:18.259932Z",
+        "date": "2026-11-14T21:00:00Z",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:19.883247Z",
+        "startedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+        "status": "IN_PROGRESS",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:28:43.640463Z",
+          "id": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+          "isAvailable": false,
+          "userId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "vehicle": "Camión Isuzu ABC-123",
+          "user": {
+            "id": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "name": "Carlos Chofer",
+            "email": "driver1@delivery.com",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:28:43.632876Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.053739Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:00",
+            "deliveryLat": -1.238,
+            "deliveryLng": -78.612,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          },
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.126692Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:10",
+            "deliveryLat": -1.245,
+            "deliveryLng": -78.625,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 2,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+            "isLegacy": false,
+            "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 1,
+            "attempts": []
+          },
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+            "isLegacy": false,
+            "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 2,
+            "attempts": []
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "recordedAt": "2026-11-14T16:30:19.883247Z"
+          }
+        ]
+      }
+    },
+    {
+      "request": "POST /api/v1/orders/admin",
+      "actor": "ADMIN",
+      "body": {
+        "buyer": {
+          "type": "REGISTERED_CLIENT",
+          "clientId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "contactPhone": "0991234567"
+        },
+        "payment": {
+          "method": "CASH"
+        },
+        "deliveryAddress": "Pedido sintético APE4 16:20",
+        "deliveryLat": -1.25,
+        "deliveryLng": -78.61,
+        "scheduledDeliveryDate": "2026-11-14T16:20:00-05:00",
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ]
+      },
+      "status": 201,
+      "ms": 91,
+      "response": {
+        "id": "4477b1df-6a0d-4d37-adf6-3a062c10ead6",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 16:20",
+        "deliveryLat": -1.25,
+        "deliveryLng": -78.61,
+        "scheduledDeliveryDate": "2026-11-14T21:20:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:19.985462Z",
+        "items": [
+          {
+            "id": "5bbf3622-7437-4345-bd92-f4ce872f87a2",
+            "orderId": "4477b1df-6a0d-4d37-adf6-3a062c10ead6",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 115,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "deliveryLocation": {
+          "lat": -1.25,
+          "lng": -78.61
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        },
+        "receipt": {
+          "id": "9b0aba86-0329-41ab-af69-ff1f6e000976",
+          "number": "CMP-RG-2026-33FCD3F42F2B4E10ADDBCC9C888D57B3"
+        },
+        "payment": {
+          "kind": "ADMIN_DECLARED_EXTERNAL",
+          "status": "DECLARED",
+          "method": "CASH",
+          "declaredById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+          "declaredAt": "2026-11-14T16:30:19.989Z"
+        },
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "totalCents": 2634
+      }
+    },
+    {
+      "request": "GET /api/v1/dispatch/orders/4477b1df-6a0d-4d37-adf6-3a062c10ead6/proposal",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 40,
+      "response": {
+        "orderId": "4477b1df-6a0d-4d37-adf6-3a062c10ead6",
+        "date": "2026-11-14",
+        "timeZone": "America/Guayaquil",
+        "kind": "NEW_ROUTE",
+        "routeId": null,
+        "zoneId": null,
+        "routeDate": "2026-11-14T21:20:00Z",
+        "orderIds": [
+          "4477b1df-6a0d-4d37-adf6-3a062c10ead6"
+        ],
+        "stops": [
+          {
+            "orderId": "4477b1df-6a0d-4d37-adf6-3a062c10ead6",
+            "sequence": 1
+          }
+        ],
+        "availableDriverIds": [
+          "4cf905e1-a2e3-49f7-b390-82cf5c2d4059"
+        ],
+        "reasons": [],
+        "totalDistanceKm": 1.515,
+        "fingerprint": "77219d694b954bca4074d7e942d41ced4c603aa875beb8d720494618f33f2c21",
+        "distanceMethod": "HAVERSINE_STRAIGHT_LINE"
+      }
+    },
+    {
+      "request": "GET /api/v1/dispatch/inbox",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 84,
+      "response": {
+        "date": "2026-11-14",
+        "timeZone": "America/Guayaquil",
+        "urgencies": [
+          {
+            "orderId": "4477b1df-6a0d-4d37-adf6-3a062c10ead6",
+            "date": "2026-11-14",
+            "timeZone": "America/Guayaquil",
+            "kind": "NEW_ROUTE",
+            "routeId": null,
+            "zoneId": null,
+            "routeDate": "2026-11-14T21:20:00Z",
+            "orderIds": [
+              "4477b1df-6a0d-4d37-adf6-3a062c10ead6"
+            ],
+            "stops": [
+              {
+                "orderId": "4477b1df-6a0d-4d37-adf6-3a062c10ead6",
+                "sequence": 1
+              }
+            ],
+            "availableDriverIds": [
+              "4cf905e1-a2e3-49f7-b390-82cf5c2d4059"
+            ],
+            "reasons": [],
+            "totalDistanceKm": 1.515,
+            "fingerprint": "77219d694b954bca4074d7e942d41ced4c603aa875beb8d720494618f33f2c21",
+            "distanceMethod": "HAVERSINE_STRAIGHT_LINE"
+          },
+          {
+            "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+            "date": "2026-11-14",
+            "timeZone": "America/Guayaquil",
+            "kind": "NEW_ROUTE",
+            "routeId": null,
+            "zoneId": null,
+            "routeDate": "2026-11-14T19:00:00Z",
+            "orderIds": [
+              "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb"
+            ],
+            "stops": [
+              {
+                "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+                "sequence": 1
+              }
+            ],
+            "availableDriverIds": [
+              "4cf905e1-a2e3-49f7-b390-82cf5c2d4059"
+            ],
+            "reasons": [],
+            "totalDistanceKm": 1.652,
+            "fingerprint": "2658faffece5fb18efd7a210bf17697f470decfd7d5e1b62391e7155ea818232",
+            "distanceMethod": "HAVERSINE_STRAIGHT_LINE"
+          }
+        ],
+        "incidents": [],
+        "interruptedRoutes": [],
+        "pendingRecoveries": []
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 21,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:18.259932Z",
+        "date": "2026-11-14T21:00:00Z",
+        "driverId": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": "2026-11-14T16:30:19.883247Z",
+        "startedById": "e941e1af-e012-40b1-a8dd-d993f193955d",
+        "status": "IN_PROGRESS",
+        "zoneId": null,
+        "driver": {
+          "createdAt": "2026-11-14T16:28:43.640463Z",
+          "id": "37b6a1bd-4258-4c30-a181-db454a1feb5f",
+          "isAvailable": false,
+          "userId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+          "vehicle": "Camión Isuzu ABC-123",
+          "user": {
+            "id": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "name": "Carlos Chofer",
+            "email": "driver1@delivery.com",
+            "role": "DRIVER",
+            "createdAt": "2026-11-14T16:28:43.632876Z"
+          }
+        },
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.053739Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:00",
+            "deliveryLat": -1.238,
+            "deliveryLng": -78.612,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          },
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:18.126692Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 16:10",
+            "deliveryLat": -1.245,
+            "deliveryLng": -78.625,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+            "status": "ASSIGNED",
+            "stopOrder": 2,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+            "isLegacy": false,
+            "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 1,
+            "attempts": []
+          },
+          {
+            "createdAt": "2026-11-14T16:30:18.298502Z",
+            "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+            "isLegacy": false,
+            "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "outcome": "PENDING",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "sequence": 2,
+            "attempts": []
+          }
+        ],
+        "events": [
+          {
+            "kind": "STARTED",
+            "actorId": "e941e1af-e012-40b1-a8dd-d993f193955d",
+            "recordedAt": "2026-11-14T16:30:19.883247Z"
+          }
+        ]
+      }
+    }
+  ]
+}

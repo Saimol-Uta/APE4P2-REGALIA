@@ -1,0 +1,221 @@
+{
+  "caso": "CP-056",
+  "titulo": "Aislamiento entre CLIENT-B y pedido/comprobante de CLIENT-A",
+  "ejecutado": "2026-11-14T16:30:17.890Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "GET /shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb como CLIENT-B responde 403 o 404",
+      "ok": true,
+      "detalle": 404
+    },
+    {
+      "descripcion": "GET /shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb no expone datos de CLIENT-A",
+      "ok": true
+    },
+    {
+      "descripcion": "GET /shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/receipt como CLIENT-B responde 403 o 404",
+      "ok": true,
+      "detalle": 404
+    },
+    {
+      "descripcion": "GET /shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/receipt no expone datos de CLIENT-A",
+      "ok": true
+    },
+    {
+      "descripcion": "GET /orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb como CLIENT-B responde 403 o 404",
+      "ok": true,
+      "detalle": 403
+    },
+    {
+      "descripcion": "GET /orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb no expone datos de CLIENT-A",
+      "ok": true
+    },
+    {
+      "descripcion": "PATCH /orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/status como CLIENT-B responde 403 o 404",
+      "ok": true,
+      "detalle": 403
+    },
+    {
+      "descripcion": "PATCH /orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/status no expone datos de CLIENT-A",
+      "ok": true
+    },
+    {
+      "descripcion": "El pedido de CLIENT-A permanece sin cambios",
+      "ok": true
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 24,
+      "response": {
+        "id": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.242,
+        "deliveryLng": -78.619,
+        "scheduledDeliveryDate": "2026-11-14T19:00:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:17.807209Z",
+        "items": [
+          {
+            "id": "c90c14da-c5fc-48bd-92c7-28a9bd8866a9",
+            "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 118,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": null,
+        "deliveryLocation": {
+          "lat": -1.242,
+          "lng": -78.619
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+      "actor": "CLIENT-B",
+      "status": 404,
+      "ms": 14,
+      "response": {
+        "error": {
+          "code": "ORDER_NOT_FOUND",
+          "message": "Pedido no encontrado",
+          "details": {},
+          "requestId": "1ad7ff13-b931-4609-9134-8d40bf026ec2"
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/receipt",
+      "actor": "CLIENT-B",
+      "status": 404,
+      "ms": 13,
+      "response": {
+        "error": {
+          "code": "ORDER_NOT_FOUND",
+          "message": "Pedido o comprobante no encontrado",
+          "details": {},
+          "requestId": "4a163c5b-e806-4f72-8a0f-123a58af812f"
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+      "actor": "CLIENT-B",
+      "status": 403,
+      "ms": 11,
+      "response": {
+        "message": "No tiene permisos para consultar este pedido",
+        "error": "Forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "request": "PATCH /api/v1/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/status",
+      "actor": "CLIENT-B",
+      "body": {
+        "status": "CANCELLED"
+      },
+      "status": 403,
+      "ms": 5,
+      "response": {
+        "message": "Acceso denegado: se requiere uno de los siguientes roles [DRIVER, ADMIN]",
+        "error": "Forbidden",
+        "statusCode": 403
+      }
+    },
+    {
+      "request": "GET /api/v1/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 11,
+      "response": {
+        "id": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": null,
+        "buyerPhone": null,
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Compra Shop APE4, Ambato",
+        "deliveryLat": -1.242,
+        "deliveryLng": -78.619,
+        "scheduledDeliveryDate": "2026-11-14T19:00:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:17.807209Z",
+        "items": [
+          {
+            "id": "c90c14da-c5fc-48bd-92c7-28a9bd8866a9",
+            "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 118,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "pickup": null,
+        "deliveryLocation": {
+          "lat": -1.242,
+          "lng": -78.619
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        }
+      }
+    }
+  ]
+}

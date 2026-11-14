@@ -1,0 +1,71 @@
+{
+  "caso": "CP-080",
+  "titulo": "Repetición de regreso a tienda sin duplicar ni liberar dos veces",
+  "ejecutado": "2026-11-14T16:30:25.954Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "La repetición responde de forma idempotente (200) o con conflicto controlado (409)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "La respuesta repetida es idéntica a la original",
+      "ok": true
+    },
+    {
+      "descripcion": "returnedAt y returnedById se mantienen sin cambios",
+      "ok": true,
+      "detalle": "2026-11-14 16:30:25.130817+00|e941e1af-e012-40b1-a8dd-d993f193955d"
+    },
+    {
+      "descripcion": "No se crea ni libera otra reserva",
+      "ok": true,
+      "detalle": "1|2026-11-14 16:30:25.130817+00"
+    },
+    {
+      "descripcion": "La disponibilidad del conductor no cambia (sigue disponible)",
+      "ok": true,
+      "detalle": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": []
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/routes/a14954ca-021d-4769-ab6b-88cbea04efd8/return",
+      "actor": "DRIVER-A",
+      "body": {},
+      "status": 200,
+      "ms": 26,
+      "response": {
+        "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+        "status": "COMPLETED",
+        "returnedAt": "2026-11-14T16:30:25.130817Z",
+        "availability": {
+          "isAvailable": true,
+          "hasPersistedHolds": false,
+          "compatibilityFlagBlocks": false,
+          "blockingRouteIds": []
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/me/availability",
+      "actor": "DRIVER-A",
+      "status": 200,
+      "ms": 12,
+      "response": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": []
+      }
+    }
+  ]
+}

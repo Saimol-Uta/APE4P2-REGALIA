@@ -1,0 +1,389 @@
+{
+  "caso": "CP-060",
+  "titulo": "Acceso autorizado por titular, ADMIN y DRIVER sobre recursos propios",
+  "ejecutado": "2026-11-14T16:30:19.073Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "CLIENT-A lee su propio pedido (200)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "CLIENT-A lee su propio comprobante (200)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "El historial de CLIENT-A no contiene pedidos de otros clientes",
+      "ok": true,
+      "detalle": {
+        "pedidos": 3,
+        "ajenos": "0"
+      }
+    },
+    {
+      "descripcion": "ADMIN consulta la configuración (200)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "ADMIN consulta la bandeja de despacho (200)",
+      "ok": true,
+      "detalle": 200
+    },
+    {
+      "descripcion": "DRIVER-A ve su ruta asignada (200) y solo rutas propias",
+      "ok": true,
+      "detalle": {
+        "rutas": 1,
+        "deOtro": "0"
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 15,
+      "response": {
+        "id": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+        "number": "RG-2026-AB391918A50547A7B2ACA19D961B320F",
+        "source": "SHOP",
+        "pickup": null,
+        "pendingManagement": false,
+        "receiptAvailable": true,
+        "createdAt": "2026-11-14T16:30:17.807Z",
+        "scheduledDeliveryDate": "2026-11-14T19:00:00.000Z",
+        "status": "PENDING",
+        "routeId": null,
+        "currency": "USD",
+        "totalCents": 2634,
+        "paymentStatus": "APPROVED",
+        "buyer": {
+          "id": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente",
+          "phone": "0991234567"
+        },
+        "delivery": {
+          "zoneId": null,
+          "zoneName": null,
+          "address": "Compra Shop APE4, Ambato",
+          "location": {
+            "lat": -1.242,
+            "lng": -78.619
+          },
+          "scheduledDeliveryDate": "2026-11-14T19:00:00.000Z",
+          "notes": null
+        },
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "sku": "RG-AMI-002",
+            "name": "Caja de snacks para compartir",
+            "quantity": 1,
+            "unitPriceCents": 2290,
+            "lineTotalCents": 2290,
+            "imageUrl": null
+          }
+        ],
+        "timeline": [
+          {
+            "code": "PENDING",
+            "label": "Pedido registrado",
+            "at": "2026-11-14T16:30:17.807Z"
+          }
+        ],
+        "receiptId": "9d0dcea8-ff09-4c45-aa8b-81ef947c321b",
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "taxEnabled": true
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb/receipt",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 9,
+      "response": {
+        "id": "9d0dcea8-ff09-4c45-aa8b-81ef947c321b",
+        "number": "CMP-RG-2026-AB391918A50547A7B2ACA19D961B320F",
+        "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+        "issuedAt": "2026-11-14T16:30:17.861Z",
+        "merchantName": "REGALÍA",
+        "buyer": {
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente"
+        },
+        "items": [
+          {
+            "sku": "RG-AMI-002",
+            "name": "Caja de snacks para compartir",
+            "quantity": 1,
+            "unitPriceCents": 2290,
+            "lineTotalCents": 2290
+          }
+        ],
+        "currency": "USD",
+        "subtotalCents": 2290,
+        "totalCents": 2634,
+        "payment": {
+          "status": "APPROVED",
+          "reference": "PAY-DEMO-2026-AB391918A50547A7B2ACA19D961B320F",
+          "cardLast4": "0001"
+        },
+        "disclaimer": "COMPROBANTE DE COMPRA SIMULADO — SIN VALIDEZ TRIBUTARIA",
+        "tax": {
+          "mode": "SIMULATED",
+          "enabled": true,
+          "rateBps": 1500,
+          "ratePercent": 15,
+          "amountCents": 344
+        },
+        "shipping": {
+          "status": "FREE_INCLUDED",
+          "amountCents": 0,
+          "includedInPrices": true
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders?pageSize=50",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 13,
+      "response": {
+        "items": [
+          {
+            "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+            "number": "RG-2026-C55585F1FEFD45D291E1E16AE979397F",
+            "source": "ADMIN",
+            "pickup": null,
+            "pendingManagement": false,
+            "receiptAvailable": true,
+            "createdAt": "2026-11-14T16:30:18.126Z",
+            "scheduledDeliveryDate": "2026-11-14T21:10:00.000Z",
+            "status": "ASSIGNED",
+            "totalCents": 2634,
+            "currency": "USD",
+            "paymentStatus": "APPROVED",
+            "receiptId": "87e2b879-34eb-48b0-814d-312f312623ee",
+            "itemsCount": 1,
+            "primaryImageUrl": null,
+            "primaryProductId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "subtotalCents": 2290,
+            "taxAmountCents": 344,
+            "taxRateBps": 1500,
+            "shippingAmountCents": 0,
+            "taxEnabled": true
+          },
+          {
+            "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+            "number": "RG-2026-ADB99C30A6CF4489887F85CDBF21DAE1",
+            "source": "ADMIN",
+            "pickup": null,
+            "pendingManagement": false,
+            "receiptAvailable": true,
+            "createdAt": "2026-11-14T16:30:18.053Z",
+            "scheduledDeliveryDate": "2026-11-14T21:00:00.000Z",
+            "status": "ASSIGNED",
+            "totalCents": 2634,
+            "currency": "USD",
+            "paymentStatus": "APPROVED",
+            "receiptId": "6eba406b-2e0d-44a0-9beb-bdefa98815dd",
+            "itemsCount": 1,
+            "primaryImageUrl": null,
+            "primaryProductId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "subtotalCents": 2290,
+            "taxAmountCents": 344,
+            "taxRateBps": 1500,
+            "shippingAmountCents": 0,
+            "taxEnabled": true
+          },
+          {
+            "id": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+            "number": "RG-2026-AB391918A50547A7B2ACA19D961B320F",
+            "source": "SHOP",
+            "pickup": null,
+            "pendingManagement": false,
+            "receiptAvailable": true,
+            "createdAt": "2026-11-14T16:30:17.807Z",
+            "scheduledDeliveryDate": "2026-11-14T19:00:00.000Z",
+            "status": "PENDING",
+            "totalCents": 2634,
+            "currency": "USD",
+            "paymentStatus": "APPROVED",
+            "receiptId": "9d0dcea8-ff09-4c45-aa8b-81ef947c321b",
+            "itemsCount": 1,
+            "primaryImageUrl": null,
+            "primaryProductId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "subtotalCents": 2290,
+            "taxAmountCents": 344,
+            "taxRateBps": 1500,
+            "shippingAmountCents": 0,
+            "taxEnabled": true
+          }
+        ],
+        "total": 3,
+        "page": 1,
+        "pageSize": 50,
+        "totalPages": 1
+      }
+    },
+    {
+      "request": "GET /api/v1/admin/shop-settings",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 7,
+      "response": {
+        "version": 1,
+        "currency": "USD",
+        "shipping": {
+          "status": "FREE_INCLUDED",
+          "amountCents": 0,
+          "includedInPrices": true
+        },
+        "tax": {
+          "mode": "SIMULATED",
+          "enabled": true,
+          "rateBps": 1500,
+          "ratePercent": 15
+        },
+        "limits": {
+          "maxUnitsPerSkuPerOrder": 10
+        },
+        "deliverySchedule": {
+          "timeZone": "America/Guayaquil",
+          "startTime": "07:00",
+          "endTime": "17:00",
+          "boundariesInclusive": true
+        },
+        "routePlanning": {
+          "timeWindowMarginMinutes": 30
+        },
+        "updatedAt": "2026-11-14T16:28:31.957Z",
+        "updatedById": null,
+        "createdAt": "2026-11-14T16:28:31.957Z"
+      }
+    },
+    {
+      "request": "GET /api/v1/dispatch/inbox",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 39,
+      "response": {
+        "date": "2026-11-14",
+        "timeZone": "America/Guayaquil",
+        "urgencies": [
+          {
+            "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+            "date": "2026-11-14",
+            "timeZone": "America/Guayaquil",
+            "kind": "INSERT",
+            "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+            "zoneId": null,
+            "routeDate": "2026-11-14T21:00:00Z",
+            "orderIds": [
+              "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+              "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+              "6045425d-39e1-4e9a-99c7-4490e7ea3b3e"
+            ],
+            "stops": [
+              {
+                "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+                "sequence": 1
+              },
+              {
+                "orderId": "9fa5c494-aadd-4ad8-a661-7a7f9f5d22fb",
+                "sequence": 2
+              },
+              {
+                "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+                "sequence": 3
+              }
+            ],
+            "availableDriverIds": [],
+            "reasons": [],
+            "totalDistanceKm": 4.006,
+            "fingerprint": "84b26352df17d3ff8cc53432ff724d40b24b0515d72a7dfb88b3cedbd665f767",
+            "distanceMethod": "HAVERSINE_STRAIGHT_LINE"
+          }
+        ],
+        "incidents": [],
+        "interruptedRoutes": [],
+        "pendingRecoveries": []
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/me/routes",
+      "actor": "DRIVER-A",
+      "status": 200,
+      "ms": 18,
+      "response": [
+        {
+          "id": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+          "date": "2026-11-14T21:00:00Z",
+          "status": "ASSIGNED",
+          "startedAt": null,
+          "startedById": null,
+          "completedAt": null,
+          "completedById": null,
+          "returnedAt": null,
+          "returnedById": null,
+          "zone": null,
+          "orders": [
+            {
+              "id": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+              "deliveryAddress": "Pedido sintético APE4 16:00",
+              "status": "ASSIGNED",
+              "scheduledDeliveryDate": "2026-11-14T21:00:00Z",
+              "stopOrder": 1
+            },
+            {
+              "id": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+              "deliveryAddress": "Pedido sintético APE4 16:10",
+              "status": "ASSIGNED",
+              "scheduledDeliveryDate": "2026-11-14T21:10:00Z",
+              "stopOrder": 2
+            }
+          ],
+          "stops": [
+            {
+              "createdAt": "2026-11-14T16:30:18.298502Z",
+              "id": "abb9819f-dc30-4759-9693-8868c6a9bac5",
+              "isLegacy": false,
+              "orderId": "6045425d-39e1-4e9a-99c7-4490e7ea3b3e",
+              "outcome": "PENDING",
+              "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+              "sequence": 1,
+              "attempts": []
+            },
+            {
+              "createdAt": "2026-11-14T16:30:18.298502Z",
+              "id": "7b3221f6-de56-4c36-b8a9-801594cb9960",
+              "isLegacy": false,
+              "orderId": "5a6ed3c9-38d3-425d-bdd7-3fdb9fef3cdc",
+              "outcome": "PENDING",
+              "routeId": "a14954ca-021d-4769-ab6b-88cbea04efd8",
+              "sequence": 2,
+              "attempts": []
+            }
+          ],
+          "events": []
+        }
+      ]
+    }
+  ]
+}

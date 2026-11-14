@@ -1,0 +1,517 @@
+{
+  "dispositivo": "Xiaomi M2101K6G (Android 13, API 33) por USB; API vía adb reverse tcp:3003",
+  "pasos": [
+    {
+      "etiqueta": "prep",
+      "momento": "2026-11-14T16:34:53.013Z",
+      "checkout": 201,
+      "ruta": "DRAFT",
+      "asignacion": 200
+    },
+    {
+      "etiqueta": "CP-073 ruta con zona asignada al repartidor del teléfono",
+      "momento": "2026-11-14T16:34:53.612Z",
+      "ruta": {
+        "status": "ASSIGNED",
+        "startedAt": null,
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "PENDING",
+          "intentos": []
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "ASSIGNED"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-075 sin red: intento de iniciar ruta en la app",
+      "momento": "2026-11-14T16:37:09.677Z",
+      "ruta": {
+        "status": "ASSIGNED",
+        "startedAt": null,
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "PENDING",
+          "intentos": []
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "ASSIGNED"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-075 reconectado y lista actualizada",
+      "momento": "2026-11-14T16:37:15.358Z",
+      "ruta": {
+        "status": "ASSIGNED",
+        "startedAt": null,
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "PENDING",
+          "intentos": []
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "ASSIGNED"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-074 ruta iniciada desde la app",
+      "momento": "2026-11-14T16:42:44.464Z",
+      "ruta": {
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:42:38.884112Z",
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "PENDING",
+          "intentos": []
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "ASSIGNED"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED",
+          "IN_TRANSIT"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-067/CP-076 fallo parada 1 (API) e intento de cierre con parada 2 pendiente",
+      "momento": "2026-11-14T16:43:41.334Z",
+      "ruta": {
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:42:38.884112Z",
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "FAILED",
+          "intentos": [
+            {
+              "context": "Nadie atendió (registrado por API: la app no ofrece la acción)",
+              "recordedAt": "2026-11-14T16:43:40.593214Z"
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "IN_TRANSIT"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "ASSIGNED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "ASSIGNED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED",
+          "IN_TRANSIT"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-074 parada 2 En camino desde la app",
+      "momento": "2026-11-14T16:44:41.679Z",
+      "ruta": {
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:42:38.884112Z",
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "FAILED",
+          "intentos": [
+            {
+              "context": "Nadie atendió (registrado por API: la app no ofrece la acción)",
+              "recordedAt": "2026-11-14T16:43:40.593214Z"
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "PENDING",
+          "intentos": []
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "IN_TRANSIT"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "IN_TRANSIT"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "IN_TRANSIT",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED",
+          "IN_TRANSIT"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-074 parada 2 Entregado desde la app",
+      "momento": "2026-11-14T16:44:58.325Z",
+      "ruta": {
+        "status": "IN_PROGRESS",
+        "startedAt": "2026-11-14T16:42:38.884112Z",
+        "completedAt": null,
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "FAILED",
+          "intentos": [
+            {
+              "context": "Nadie atendió (registrado por API: la app no ofrece la acción)",
+              "recordedAt": "2026-11-14T16:43:40.593214Z"
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "SUCCESSFUL",
+          "intentos": [
+            {
+              "context": null,
+              "recordedAt": "2026-11-14T16:44:54.150269Z"
+            }
+          ]
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "IN_TRANSIT"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "DELIVERED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "DELIVERED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED",
+          "IN_TRANSIT",
+          "DELIVERED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-077 cierre de ruta (API, token del repartidor)",
+      "momento": "2026-11-14T16:45:15.771Z",
+      "ruta": {
+        "status": "COMPLETED",
+        "startedAt": "2026-11-14T16:42:38.884112Z",
+        "completedAt": "2026-11-14T16:45:15.045909Z",
+        "returnedAt": null
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "FAILED",
+          "intentos": [
+            {
+              "context": "Nadie atendió (registrado por API: la app no ofrece la acción)",
+              "recordedAt": "2026-11-14T16:43:40.593214Z"
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "SUCCESSFUL",
+          "intentos": [
+            {
+              "context": null,
+              "recordedAt": "2026-11-14T16:44:54.150269Z"
+            }
+          ]
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "IN_TRANSIT"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "DELIVERED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "DELIVERED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED",
+          "IN_TRANSIT",
+          "DELIVERED",
+          "CLAIM_RELEASED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": false,
+        "hasPersistedHolds": true,
+        "compatibilityFlagBlocks": true,
+        "blockingRouteIds": [
+          "0b1cb3eb-6289-4077-9e21-0540064d39cf"
+        ]
+      }
+    },
+    {
+      "etiqueta": "CP-079 regreso confirmado (API, token del repartidor)",
+      "momento": "2026-11-14T16:45:35.219Z",
+      "ruta": {
+        "status": "COMPLETED",
+        "startedAt": "2026-11-14T16:42:38.884112Z",
+        "completedAt": "2026-11-14T16:45:15.045909Z",
+        "returnedAt": "2026-11-14T16:45:34.405056Z"
+      },
+      "paradas": [
+        {
+          "sequence": 1,
+          "orderId": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "outcome": "FAILED",
+          "intentos": [
+            {
+              "context": "Nadie atendió (registrado por API: la app no ofrece la acción)",
+              "recordedAt": "2026-11-14T16:43:40.593214Z"
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "orderId": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "outcome": "SUCCESSFUL",
+          "intentos": [
+            {
+              "context": null,
+              "recordedAt": "2026-11-14T16:44:54.150269Z"
+            }
+          ]
+        }
+      ],
+      "pedidos": [
+        {
+          "id": "403c1fab-61df-4aee-be3f-776e0c41365b",
+          "status": "IN_TRANSIT"
+        },
+        {
+          "id": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+          "status": "DELIVERED"
+        }
+      ],
+      "seguimientoCliente": {
+        "status": "DELIVERED",
+        "pendingManagement": false,
+        "timeline": [
+          "PENDING",
+          "ASSIGNED",
+          "IN_TRANSIT",
+          "DELIVERED",
+          "CLAIM_RELEASED"
+        ]
+      },
+      "disponibilidadRepartidor": {
+        "isAvailable": true,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": []
+      }
+    }
+  ],
+  "zoneId": "d02244ee-2453-49b9-8fa2-e7de28af8a08",
+  "routeId": "0b1cb3eb-6289-4077-9e21-0540064d39cf",
+  "driverId": "d4bcd742-c76a-4b7e-b487-aeae605b1131",
+  "pedidoAdmin": "403c1fab-61df-4aee-be3f-776e0c41365b",
+  "pedidoShop": "7e05d357-5e15-4483-9a7b-eff119af9b03",
+  "numeroShop": "RG-2026-3C600C9DDFD0496EB09E75BD58657B8F"
+}

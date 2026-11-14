@@ -1,0 +1,77 @@
+{
+  "caso": "CP-055",
+  "titulo": "Acceso sin sesión JWT a rutas, pedidos y configuración",
+  "ejecutado": "2026-11-14T16:30:17.877Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "GET /drivers/me/routes sin token responde 401",
+      "ok": true,
+      "detalle": 401
+    },
+    {
+      "descripcion": "GET /drivers/me/routes no devuelve listados ni configuración",
+      "ok": true
+    },
+    {
+      "descripcion": "GET /shop/orders sin token responde 401",
+      "ok": true,
+      "detalle": 401
+    },
+    {
+      "descripcion": "GET /shop/orders no devuelve listados ni configuración",
+      "ok": true
+    },
+    {
+      "descripcion": "GET /admin/shop-settings sin token responde 401",
+      "ok": true,
+      "detalle": 401
+    },
+    {
+      "descripcion": "GET /admin/shop-settings no devuelve listados ni configuración",
+      "ok": true
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/drivers/me/routes",
+      "actor": "ANÓNIMO",
+      "status": 401,
+      "ms": 4,
+      "response": {
+        "message": "Unauthorized",
+        "statusCode": 401
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders",
+      "actor": "ANÓNIMO",
+      "status": 401,
+      "ms": 3,
+      "response": {
+        "error": {
+          "code": "UNAUTHENTICATED",
+          "message": "Authentication required",
+          "details": {},
+          "requestId": "28a6ed7d-149b-4686-899a-d1411496e407"
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/admin/shop-settings",
+      "actor": "ANÓNIMO",
+      "status": 401,
+      "ms": 2,
+      "response": {
+        "error": {
+          "code": "UNAUTHENTICATED",
+          "message": "Authentication required",
+          "details": {},
+          "requestId": "d4a14d29-963e-42d3-88af-bb0102d5d79c"
+        }
+      }
+    }
+  ]
+}

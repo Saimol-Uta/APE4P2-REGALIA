@@ -1,0 +1,360 @@
+{
+  "caso": "CP-072",
+  "titulo": "Recorrido E2E: creación de compra y verificación de estado inicial",
+  "ejecutado": "2026-11-14T16:30:29.342Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "El checkout con tarjeta demo aprobada responde 201",
+      "ok": true,
+      "detalle": 201
+    },
+    {
+      "descripcion": "Pedido creado en estado inicial PENDING",
+      "ok": true
+    },
+    {
+      "descripcion": "Importes congelados: total = subtotal + IVA 15 %",
+      "ok": true,
+      "detalle": {
+        "subtotal": 5180,
+        "iva": 777,
+        "total": 5957,
+        "cotizado": 5957
+      }
+    },
+    {
+      "descripcion": "El seguimiento de CLIENT-A muestra el pedido PENDING",
+      "ok": true
+    },
+    {
+      "descripcion": "El comprobante está disponible y coincide en total",
+      "ok": true
+    },
+    {
+      "descripcion": "Stock descontado en la cantidad comprada (2)",
+      "ok": true,
+      "detalle": {
+        "stockAntes": 109,
+        "stockDesp": 107
+      }
+    }
+  ],
+  "notas": [],
+  "peticiones": [
+    {
+      "request": "GET /api/v1/shop/products/f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+      "actor": "ANÓNIMO",
+      "status": 200,
+      "ms": 16,
+      "response": {
+        "id": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+        "sku": "RG-AGR-018",
+        "name": "Caja de postres surtidos",
+        "description": "Seis postres individuales en caja refrigerada.",
+        "categoryId": "233fde22-cc14-4271-9967-ca5d19141cb7",
+        "category": {
+          "id": "233fde22-cc14-4271-9967-ca5d19141cb7",
+          "name": "Agradecimiento",
+          "slug": "agradecimiento",
+          "description": "Gestos para decir gracias.",
+          "productCount": 20,
+          "sortOrder": 100
+        },
+        "priceCents": 2590,
+        "currency": "USD",
+        "stock": 109,
+        "isPublished": true,
+        "isFeatured": false,
+        "images": [
+          {
+            "id": "dffb0b32-a175-4738-bcbf-1a08862c6bec",
+            "secureUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823070/regalia/demo/rg-agr-018.png",
+            "publicId": "regalia/demo/rg-agr-018",
+            "altText": "Regalo: Caja de postres surtidos",
+            "position": 0,
+            "isPrimary": true
+          }
+        ],
+        "primaryImageUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823070/regalia/demo/rg-agr-018.png",
+        "isAvailable": true,
+        "createdAt": "2026-11-14T16:28:55.92712Z",
+        "updatedAt": "2026-11-14T16:28:57.256173Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/shop/checkout/quote",
+      "actor": "CLIENT-A",
+      "body": {
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "quantity": 2
+          }
+        ],
+        "delivery": {
+          "recipient": {
+            "name": "Ana Cliente",
+            "phone": "0991234567"
+          },
+          "deliveryAddress": "Compra Shop APE4, Ambato",
+          "deliveryLocation": {
+            "lat": -1.245,
+            "lng": -78.625
+          },
+          "scheduledDeliveryDate": "2026-11-14T16:30:00-05:00"
+        }
+      },
+      "status": 200,
+      "ms": 14,
+      "response": {
+        "currency": "USD",
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "name": "Caja de postres surtidos",
+            "quantity": 2,
+            "unitPriceCents": 2590,
+            "lineTotalCents": 5180,
+            "availableStock": 109,
+            "available": true
+          }
+        ],
+        "subtotalCents": 5180,
+        "shipping": {
+          "status": "FREE_INCLUDED",
+          "amountCents": 0,
+          "includedInPrices": true
+        },
+        "tax": {
+          "mode": "SIMULATED",
+          "enabled": true,
+          "rateBps": 1500,
+          "ratePercent": 15,
+          "amountCents": 777
+        },
+        "totalCents": 5957,
+        "settingsVersion": 1,
+        "validUntil": "2026-11-14T16:45:29.367678Z",
+        "quoteToken": "qtk_v1.eyJidXllclVzZXJJZCI6ImJlZmJlY2EzLTJhZDUtNDRiMC04MjM2LWIzZDUwYTA2ZGQyMSIsImlzc3VlZEF0IjoiMjAyNi0xMS0xNFQxNjozMDoyOS4zNjc2NzhaIiwidmFsaWRVbnRpbCI6IjIwMjYtMTEtMTRUMTY6NDU6MjkuMzY3Njc4WiIsInNldHRpbmdzVmVyc2lvbiI6MSwiY3VycmVuY3kiOiJVU0QiLCJ0YXgiOnsibW9kZSI6IlNJTVVMQVRFRCIsImVuYWJsZWQiOnRydWUsInJhdGVCcHMiOjE1MDAsImFtb3VudENlbnRzIjo3Nzd9LCJzdWJ0b3RhbENlbnRzIjo1MTgwLCJzaGlwcGluZ0Ftb3VudENlbnRzIjowLCJ0b3RhbENlbnRzIjo1OTU3LCJpdGVtcyI6W3sicHJvZHVjdElkIjoiZjAzYWJjNmMtNDVlNC00YmU3LWFiMDYtZjZlNWI1YjMxYWU1IiwicXVhbnRpdHkiOjIsInVuaXRQcmljZUNlbnRzIjoyNTkwLCJsaW5lVG90YWxDZW50cyI6NTE4MH1dLCJkZWxpdmVyeSI6eyJyZWNpcGllbnQiOnsibmFtZSI6IkFuYSBDbGllbnRlIiwicGhvbmUiOiIwOTkxMjM0NTY3In0sImRlbGl2ZXJ5QWRkcmVzcyI6IkNvbXByYSBTaG9wIEFQRTQsIEFtYmF0byIsImRlbGl2ZXJ5TG9jYXRpb24iOnsibGF0IjotMS4yNDUsImxuZyI6LTc4LjYyNX0sInNjaGVkdWxlZERlbGl2ZXJ5RGF0ZSI6IjIwMjYtMTEtMTRUMjE6MzA6MDBaIn19.gG6ripXDebRRA5lXPKnmtMN_MiLGiYQEykexs1PsA5g"
+      }
+    },
+    {
+      "request": "POST /api/v1/shop/checkout",
+      "actor": "CLIENT-A",
+      "body": {
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "quantity": 2
+          }
+        ],
+        "delivery": {
+          "recipient": {
+            "name": "Ana Cliente",
+            "phone": "0991234567"
+          },
+          "deliveryAddress": "Compra Shop APE4, Ambato",
+          "deliveryLocation": {
+            "lat": -1.245,
+            "lng": -78.625
+          },
+          "scheduledDeliveryDate": "2026-11-14T16:30:00-05:00"
+        },
+        "paymentCard": {
+          "number": "**** 0001",
+          "holderName": "PRUEBA APROBADA",
+          "expiresMonth": 12,
+          "expiresYear": 2030,
+          "cvv": "***"
+        },
+        "quoteToken": "<token de cotización>"
+      },
+      "status": 201,
+      "ms": 91,
+      "response": {
+        "checkoutAttemptId": "5a1985e0-b578-402c-a831-303f4a76ab66",
+        "status": "SUCCEEDED",
+        "order": {
+          "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+          "number": "RG-2026-D1FE656161C0462FB0DC37924E6EBC02",
+          "status": "PENDING",
+          "subtotalCents": 5180,
+          "taxAmountCents": 777,
+          "taxRateBps": 1500,
+          "shippingAmountCents": 0,
+          "totalCents": 5957,
+          "taxEnabled": true,
+          "currency": "USD",
+          "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z"
+        },
+        "payment": {
+          "status": "APPROVED",
+          "amountCents": 5957,
+          "cardLast4": "0001",
+          "reference": "PAY-DEMO-2026-D1FE656161C0462FB0DC37924E6EBC02"
+        },
+        "receipt": {
+          "id": "495a7bf1-ce3e-4af6-9cb8-5efd1e96f97e",
+          "number": "CMP-RG-2026-D1FE656161C0462FB0DC37924E6EBC02"
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/7f0abd4e-fe23-481c-b694-29030ef68448",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 17,
+      "response": {
+        "id": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "number": "RG-2026-D1FE656161C0462FB0DC37924E6EBC02",
+        "source": "SHOP",
+        "pickup": null,
+        "pendingManagement": false,
+        "receiptAvailable": true,
+        "createdAt": "2026-11-14T16:30:29.443Z",
+        "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+        "status": "PENDING",
+        "routeId": null,
+        "currency": "USD",
+        "totalCents": 5957,
+        "paymentStatus": "APPROVED",
+        "buyer": {
+          "id": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente",
+          "phone": "0991234567"
+        },
+        "delivery": {
+          "zoneId": null,
+          "zoneName": null,
+          "address": "Compra Shop APE4, Ambato",
+          "location": {
+            "lat": -1.245,
+            "lng": -78.625
+          },
+          "scheduledDeliveryDate": "2026-11-14T21:30:00.000Z",
+          "notes": null
+        },
+        "items": [
+          {
+            "productId": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+            "sku": "RG-AGR-018",
+            "name": "Caja de postres surtidos",
+            "quantity": 2,
+            "unitPriceCents": 2590,
+            "lineTotalCents": 5180,
+            "imageUrl": null
+          }
+        ],
+        "timeline": [
+          {
+            "code": "PENDING",
+            "label": "Pedido registrado",
+            "at": "2026-11-14T16:30:29.443Z"
+          }
+        ],
+        "receiptId": "495a7bf1-ce3e-4af6-9cb8-5efd1e96f97e",
+        "subtotalCents": 5180,
+        "taxAmountCents": 777,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "taxEnabled": true
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/orders/7f0abd4e-fe23-481c-b694-29030ef68448/receipt",
+      "actor": "CLIENT-A",
+      "status": 200,
+      "ms": 11,
+      "response": {
+        "id": "495a7bf1-ce3e-4af6-9cb8-5efd1e96f97e",
+        "number": "CMP-RG-2026-D1FE656161C0462FB0DC37924E6EBC02",
+        "orderId": "7f0abd4e-fe23-481c-b694-29030ef68448",
+        "issuedAt": "2026-11-14T16:30:29.450Z",
+        "merchantName": "REGALÍA",
+        "buyer": {
+          "name": "Ana Cliente",
+          "email": "client1@delivery.com"
+        },
+        "recipient": {
+          "name": "Ana Cliente"
+        },
+        "items": [
+          {
+            "sku": "RG-AGR-018",
+            "name": "Caja de postres surtidos",
+            "quantity": 2,
+            "unitPriceCents": 2590,
+            "lineTotalCents": 5180
+          }
+        ],
+        "currency": "USD",
+        "subtotalCents": 5180,
+        "totalCents": 5957,
+        "payment": {
+          "status": "APPROVED",
+          "reference": "PAY-DEMO-2026-D1FE656161C0462FB0DC37924E6EBC02",
+          "cardLast4": "0001"
+        },
+        "disclaimer": "COMPROBANTE DE COMPRA SIMULADO — SIN VALIDEZ TRIBUTARIA",
+        "tax": {
+          "mode": "SIMULATED",
+          "enabled": true,
+          "rateBps": 1500,
+          "ratePercent": 15,
+          "amountCents": 777
+        },
+        "shipping": {
+          "status": "FREE_INCLUDED",
+          "amountCents": 0,
+          "includedInPrices": true
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/shop/products/f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+      "actor": "ANÓNIMO",
+      "status": 200,
+      "ms": 17,
+      "response": {
+        "id": "f03abc6c-45e4-4be7-ab06-f6e5b5b31ae5",
+        "sku": "RG-AGR-018",
+        "name": "Caja de postres surtidos",
+        "description": "Seis postres individuales en caja refrigerada.",
+        "categoryId": "233fde22-cc14-4271-9967-ca5d19141cb7",
+        "category": {
+          "id": "233fde22-cc14-4271-9967-ca5d19141cb7",
+          "name": "Agradecimiento",
+          "slug": "agradecimiento",
+          "description": "Gestos para decir gracias.",
+          "productCount": 20,
+          "sortOrder": 100
+        },
+        "priceCents": 2590,
+        "currency": "USD",
+        "stock": 107,
+        "isPublished": true,
+        "isFeatured": false,
+        "images": [
+          {
+            "id": "dffb0b32-a175-4738-bcbf-1a08862c6bec",
+            "secureUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823070/regalia/demo/rg-agr-018.png",
+            "publicId": "regalia/demo/rg-agr-018",
+            "altText": "Regalo: Caja de postres surtidos",
+            "position": 0,
+            "isPrimary": true
+          }
+        ],
+        "primaryImageUrl": "https://res.cloudinary.com/dwwvecqnu/image/upload/v1793823070/regalia/demo/rg-agr-018.png",
+        "isAvailable": true,
+        "createdAt": "2026-11-14T16:28:55.92712Z",
+        "updatedAt": "2026-11-14T16:28:57.256173Z"
+      }
+    }
+  ]
+}

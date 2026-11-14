@@ -1,0 +1,291 @@
+{
+  "caso": "CP-063",
+  "titulo": "Ausencia registrada hoy impide asignar repartidor",
+  "ejecutado": "2026-11-14T16:30:20.185Z",
+  "api": "http://127.0.0.1:3003/api/v1",
+  "estado": "PASS",
+  "verificaciones": [
+    {
+      "descripcion": "Ausencia de hoy registrada (201)",
+      "ok": true,
+      "detalle": 201
+    },
+    {
+      "descripcion": "Disponibilidad reporta isAvailable=false",
+      "ok": true,
+      "detalle": {
+        "isAvailable": false,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": [],
+        "date": "2026-11-14",
+        "absence": {
+          "id": "96b312e6-bff2-49a2-aed2-51046905b289",
+          "startDate": "2026-11-14",
+          "endDate": "2026-11-14",
+          "reason": "Ausencia de hoy APE4"
+        }
+      }
+    },
+    {
+      "descripcion": "El intento de asignación se rechaza (4xx)",
+      "ok": true,
+      "detalle": 409
+    },
+    {
+      "descripcion": "La ruta permanece DRAFT sin conductor",
+      "ok": true
+    },
+    {
+      "descripcion": "No se generó reserva para el repartidor ausente",
+      "ok": true,
+      "detalle": {
+        "reservas": "0"
+      }
+    }
+  ],
+  "notas": [
+    "Se usó un segundo repartidor sintético sin rutas (DRIVER-B2), para que la ausencia sea la única causa de no disponibilidad."
+  ],
+  "peticiones": [
+    {
+      "request": "POST /api/v1/orders/admin",
+      "actor": "ADMIN",
+      "body": {
+        "buyer": {
+          "type": "REGISTERED_CLIENT",
+          "clientId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+          "contactPhone": "0991234567"
+        },
+        "payment": {
+          "method": "CASH"
+        },
+        "deliveryAddress": "Pedido sintético APE4 15:30",
+        "deliveryLat": -1.23,
+        "deliveryLng": -78.62,
+        "scheduledDeliveryDate": "2026-11-14T15:30:00-05:00",
+        "items": [
+          {
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1
+          }
+        ]
+      },
+      "status": 201,
+      "ms": 120,
+      "response": {
+        "id": "c14bba3a-43b8-4e5d-8410-90d71ea6a560",
+        "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "recipientType": "REGISTERED_CLIENT",
+        "recipientName": "Ana Cliente",
+        "recipientPhone": "0991234567",
+        "buyerName": "Ana Cliente",
+        "buyerPhone": "0991234567",
+        "contactRevision": 0,
+        "deliveryWindowStart": null,
+        "deliveryWindowEnd": null,
+        "zoneId": null,
+        "deliveryAddress": "Pedido sintético APE4 15:30",
+        "deliveryLat": -1.23,
+        "deliveryLng": -78.62,
+        "scheduledDeliveryDate": "2026-11-14T20:30:00Z",
+        "status": "PENDING",
+        "total": 22.9,
+        "routeId": null,
+        "stopOrder": null,
+        "createdAt": "2026-11-14T16:30:20.73058Z",
+        "items": [
+          {
+            "id": "ae269e0b-0605-4866-b1bf-d3941d8d3e8b",
+            "orderId": "c14bba3a-43b8-4e5d-8410-90d71ea6a560",
+            "productId": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+            "quantity": 1,
+            "price": 22.9,
+            "product": {
+              "id": "b8f3f595-54c7-4f60-ab22-d279836636d5",
+              "name": "Caja de snacks para compartir",
+              "description": "Papas, galletas, frutos secos y dulces en caja.",
+              "price": 22.9,
+              "stock": 114,
+              "createdAt": "2026-11-14T16:28:55.860165Z"
+            }
+          }
+        ],
+        "zone": null,
+        "deliveryLocation": {
+          "lat": -1.23,
+          "lng": -78.62
+        },
+        "planningEligibility": {
+          "eligible": false,
+          "reasons": [
+            "MISSING_ZONE"
+          ]
+        },
+        "receipt": {
+          "id": "f1577430-a385-4f9f-bd1f-76e482b824d7",
+          "number": "CMP-RG-2026-F0DAFA022061406EA08C408BCEA0B5BE"
+        },
+        "payment": {
+          "kind": "ADMIN_DECLARED_EXTERNAL",
+          "status": "DECLARED",
+          "method": "CASH",
+          "declaredById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+          "declaredAt": "2026-11-14T16:30:20.735Z"
+        },
+        "subtotalCents": 2290,
+        "taxAmountCents": 344,
+        "taxRateBps": 1500,
+        "shippingAmountCents": 0,
+        "totalCents": 2634
+      }
+    },
+    {
+      "request": "POST /api/v1/routes",
+      "actor": "ADMIN",
+      "body": {
+        "routeDate": "2026-11-14T15:30:00-05:00",
+        "orderIds": [
+          "c14bba3a-43b8-4e5d-8410-90d71ea6a560"
+        ]
+      },
+      "status": 201,
+      "ms": 31,
+      "response": {
+        "id": "55cb8ee0-ac10-4b88-8ea7-b943cb53d4f7",
+        "status": "DRAFT",
+        "driverId": null,
+        "zoneId": null,
+        "date": "2026-11-14T20:30:00Z",
+        "createdAt": "2026-11-14T16:30:20.788274Z"
+      }
+    },
+    {
+      "request": "POST /api/v1/drivers/84a13228-2e2a-43cc-8408-3320192c9a2f/absences",
+      "actor": "ADMIN",
+      "body": {
+        "startDate": "2026-11-14",
+        "endDate": "2026-11-14",
+        "reason": "Ausencia de hoy APE4"
+      },
+      "status": 201,
+      "ms": 23,
+      "response": {
+        "id": "96b312e6-bff2-49a2-aed2-51046905b289",
+        "driverId": "84a13228-2e2a-43cc-8408-3320192c9a2f",
+        "startDate": "2026-11-14",
+        "endDate": "2026-11-14",
+        "reason": "Ausencia de hoy APE4",
+        "status": "ACTIVE",
+        "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+        "createdAt": "2026-11-14T16:30:20.819882Z",
+        "cancelledAt": null,
+        "cancelledById": null,
+        "cancelReason": null,
+        "conflicts": []
+      }
+    },
+    {
+      "request": "GET /api/v1/drivers/84a13228-2e2a-43cc-8408-3320192c9a2f/availability?date=2026-11-14",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 14,
+      "response": {
+        "isAvailable": false,
+        "hasPersistedHolds": false,
+        "compatibilityFlagBlocks": false,
+        "blockingRouteIds": [],
+        "date": "2026-11-14",
+        "absence": {
+          "id": "96b312e6-bff2-49a2-aed2-51046905b289",
+          "startDate": "2026-11-14",
+          "endDate": "2026-11-14",
+          "reason": "Ausencia de hoy APE4"
+        }
+      }
+    },
+    {
+      "request": "POST /api/v1/routes/55cb8ee0-ac10-4b88-8ea7-b943cb53d4f7/assign",
+      "actor": "ADMIN",
+      "body": {
+        "driverId": "84a13228-2e2a-43cc-8408-3320192c9a2f"
+      },
+      "status": 409,
+      "ms": 27,
+      "response": {
+        "statusCode": 409,
+        "message": "Driver is absent on the route date",
+        "error": "Conflict",
+        "code": "DRIVER_ABSENT",
+        "absence": {
+          "id": "96b312e6-bff2-49a2-aed2-51046905b289",
+          "startDate": "2026-11-14",
+          "endDate": "2026-11-14",
+          "reason": "Ausencia de hoy APE4"
+        }
+      }
+    },
+    {
+      "request": "GET /api/v1/routes/55cb8ee0-ac10-4b88-8ea7-b943cb53d4f7",
+      "actor": "ADMIN",
+      "status": 200,
+      "ms": 16,
+      "response": {
+        "completedAt": null,
+        "completedById": null,
+        "createdAt": "2026-11-14T16:30:20.788274Z",
+        "date": "2026-11-14T20:30:00Z",
+        "driverId": null,
+        "id": "55cb8ee0-ac10-4b88-8ea7-b943cb53d4f7",
+        "returnedAt": null,
+        "returnedById": null,
+        "startedAt": null,
+        "startedById": null,
+        "status": "DRAFT",
+        "zoneId": null,
+        "driver": null,
+        "zone": null,
+        "orders": [
+          {
+            "buyerName": "Ana Cliente",
+            "buyerPhone": "0991234567",
+            "contactRevision": 0,
+            "createdAt": "2026-11-14T16:30:20.73058Z",
+            "createdById": "52a1fa80-1d05-4046-9ec6-a93459e15f74",
+            "deliveryAddress": "Pedido sintético APE4 15:30",
+            "deliveryLat": -1.23,
+            "deliveryLng": -78.62,
+            "deliveryWindowEnd": null,
+            "deliveryWindowStart": null,
+            "id": "c14bba3a-43b8-4e5d-8410-90d71ea6a560",
+            "recipientName": "Ana Cliente",
+            "recipientPhone": "0991234567",
+            "recipientType": "REGISTERED_CLIENT",
+            "requiresAdministrativeReview": false,
+            "routeId": null,
+            "scheduledDeliveryDate": "2026-11-14T20:30:00Z",
+            "status": "PENDING",
+            "stopOrder": 1,
+            "total": 22.9,
+            "userId": "befbeca3-2ad5-44b0-8236-b3d50a06dd21",
+            "zoneId": null
+          }
+        ],
+        "stops": [
+          {
+            "createdAt": "2026-11-14T16:30:20.803415Z",
+            "id": "d0e8a659-b0ea-472c-8e9d-864f4a017c2b",
+            "isLegacy": false,
+            "orderId": "c14bba3a-43b8-4e5d-8410-90d71ea6a560",
+            "outcome": "PENDING",
+            "routeId": "55cb8ee0-ac10-4b88-8ea7-b943cb53d4f7",
+            "sequence": 1,
+            "attempts": []
+          }
+        ],
+        "events": []
+      }
+    }
+  ]
+}

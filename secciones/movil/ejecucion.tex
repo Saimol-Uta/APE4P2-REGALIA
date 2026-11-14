@@ -5,32 +5,242 @@
 % - Resultado obtenido: describir lo observado al ejecutar la prueba.
 % - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
 \par\medskip\noindent\textbf{Módulo Móvil --- Seguridad y operación de entregas (27 casos: CP-055 a CP-081).}\par\smallskip
-Pruebas ejecutadas sobre la aplicación móvil Flutter en entorno Android junto con validaciones de seguridad y coordinación en tiempo real.
+En esta sección se presentan los resultados de la ejecución de los 27 casos de prueba del módulo
+móvil (\texttt{CP-055} a \texttt{CP-081}): control de acceso por rol y por recurso, planificación del
+día operativo, urgencias, entregas fallidas y su gestión posterior, recorrido de extremo a extremo y
+cierre de ruta con regreso a tienda.
 
-\casoejec{CP-055}{Acceso sin sesión JWT a rutas, pedidos y configuración}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-056}{Aislamiento entre CLIENT-B y pedido/\allowbreak{}comprobante de CLIENT-A}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-057}{Aislamiento de DRIVER-B ante ruta y parada de DRIVER-A}{}{}{Captura móvil / log}{}
-\casoejec{CP-058}{Registro público con rol ADMIN rechazado sin escalación}{}{}{Log HTTP / consulta usuarios}{}
-\casoejec{CP-059}{Intento de CLIENT de modificar configuración o cobertura}{}{}{Log HTTP / JSON comparativo}{}
-\casoejec{CP-060}{Acceso autorizado por titular, ADMIN y DRIVER sobre recursos propios}{}{}{Captura móvil / log}{}
-\casoejec{CP-061}{Pedido de hoy elegible en propuesta, ruta y asignación}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-062}{Pedido futuro admitido en compra y bloqueado en ruta/\allowbreak{}assign}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-063}{Ausencia registrada hoy impide asignar repartidor}{}{}{Captura web / log HTTP}{}
-\casoejec{CP-064}{Ausencia futura no altera ni reasigna rutas activas de hoy}{}{}{Log HTTP / JSON comparativo}{}
-\casoejec{CP-065}{Pedido urgente con ruta IN\_PROGRESS no altera ruta iniciada}{}{}{Log HTTP / JSON comparativo}{}
-\casoejec{CP-066}{Decisión manual ADMIN en urgencias: INSERT con cupo o NEW\_ROUTE}{}{}{Log HTTP / auditoría dispatch}{}
-\casoejec{CP-067}{Entrega fallida en móvil conserva parada e historial pendiente}{}{}{Captura móvil / log}{}
-\casoejec{CP-068}{Registro de fallo por actor o conductor no autorizado rechazado}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-069}{Gestión post-fallo ADMIN: CONTACT y RESCHEDULE con nueva fecha}{}{}{Log HTTP / seguimiento pedido}{}
-\casoejec{CP-070}{Gestión post-fallo ADMIN: acuerdo de retiro en tienda (PICKUP\_AGREE)}{}{}{Log HTTP / vista seguimiento}{}
-\casoejec{CP-071}{Confirmación de retiro (PICKUP\_CONFIRM) y rechazo de repetición}{}{}{Log HTTP / auditoría despacho}{}
-\casoejec{CP-072}{Recorrido E2E: creación de compra y verificación de estado inicial}{}{}{Captura web / log HTTP}{}
-\casoejec{CP-073}{Recorrido E2E: propuesta, confirmación y asignación en día operativo}{}{}{Captura web / móvil / log}{}
-\casoejec{CP-074}{Recorrido E2E: progreso móvil reflejado en seguimiento del cliente}{}{}{Captura móvil / web / log}{}
-\casoejec{CP-075}{Recorrido E2E: desconexión móvil y recuperación al reconectar}{}{}{Captura móvil / log}{}
-\casoejec{CP-076}{Cierre de ruta móvil rechazado con visita aún PENDING}{}{}{Captura móvil / log}{}
-\casoejec{CP-077}{Cierre de ruta COMPLETED con visitas resueltas y una FAILED}{}{}{Captura móvil / log}{}
-\casoejec{CP-078}{Bloqueo de nueva salida antes de confirmar regreso (returnedAt)}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-079}{Confirmación de regreso por titular libera y actualiza disponibilidad}{}{}{Captura móvil / log}{}
-\casoejec{CP-080}{Repetición de regreso a tienda sin duplicar ni liberar dos veces}{}{}{Log HTTP / respuesta JSON}{}
-\casoejec{CP-081}{Intento de cierre o regreso por DRIVER-B rechazado sobre ruta ajena}{}{}{Log HTTP / respuesta JSON}{}
+Todas las pruebas se ejecutaron en local. El backend NestJS (commit \texttt{9b17cce}) se levantó en
+el puerto \texttt{3003} sobre una base PostgreSQL~16 aislada creada solo para esta ejecución
+(\texttt{logistica\_ape4\_movil}, 22 migraciones aplicadas y datos demo sintéticos), con el simulador
+de pagos habilitado. La aplicación Flutter (\texttt{app-movil-logistica}, commit \texttt{89f7050}) se
+compiló en modo \emph{debug} y se instaló en un teléfono físico Xiaomi M2101K6G con Android~13
+conectado por cable USB; el teléfono alcanzó la API local mediante \texttt{adb reverse tcp:3003}.
+
+Los casos de API se automatizaron con el script \texttt{evidencias/scripts/ape4-movil.mjs}, que inicia
+sesión con cuentas reales (\texttt{ADMIN}, \texttt{CLIENT-A}, \texttt{CLIENT-B}, \texttt{DRIVER-A},
+\texttt{DRIVER-B}) y llama a la API por HTTP con sus tokens JWT. Cada caso guarda en
+\texttt{evidencias/json/CP-XXX.json} las peticiones, las respuestas y cada verificación del criterio de
+aceptación; cuando el criterio exige comprobar persistencia (reservas, cuentas, retiros) se consultó
+además la base de datos. En los casos de rechazo se comparó el estado antes y después de cada intento:
+un caso solo se consideró exitoso si, además del código HTTP esperado, no dejó efectos parciales. Las
+ausencias registradas durante las pruebas se anularon al terminar cada caso.
+
+Los casos que involucran la pantalla del repartidor (\texttt{CP-057}, \texttt{CP-060},
+\texttt{CP-067}, \texttt{CP-073} a \texttt{CP-077} y \texttt{CP-079}) se repitieron en el teléfono con
+el script de apoyo \texttt{evidencias/scripts/ape4-movil-telefono.mjs}, que registra el estado real
+del backend después de cada acción en la app (\texttt{evidencias/json/movil-telefono.json}). La
+ejecución en el teléfono reveló dos defectos de la app: no carga rutas creadas sin zona
+(\texttt{DEF-06}) y no ofrece las acciones de entrega fallida, cierre de ruta ni confirmación de
+regreso (\texttt{DEF-07}). Ambos se detallan en las fichas y en el registro de incidentes.
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Seguridad y control de acceso (CP-055 a CP-060).}\par\smallskip
+Se comprobó que cada actor solo accede a sus propios recursos y que ningún rechazo filtra datos ni
+modifica el estado.
+
+\casoejec{CP-055}{Acceso sin sesión JWT a rutas, pedidos y configuración}{Las tres peticiones sin
+cabecera \texttt{Authorization} (\texttt{GET /drivers/me/routes}, \texttt{GET /shop/orders} y
+\texttt{GET /admin/shop-settings}) respondieron HTTP 401. Ninguna respuesta incluyó listados, rutas,
+paradas ni parámetros de configuración.}{PASS}{Script \texttt{ape4-movil.mjs};
+JSON: \texttt{evidencias/json/CP-055.json}}{Ninguno}
+
+\casoejec{CP-056}{Aislamiento entre CLIENT-B y pedido/\allowbreak{}comprobante de CLIENT-A}{Con el JWT de
+CLIENT-B sobre una compra Shop de CLIENT-A: \texttt{GET /shop/orders/:id} y \texttt{/receipt}
+respondieron 404, y \texttt{GET /orders/:id} y \texttt{PATCH /orders/:id/status} respondieron 403.
+Ninguna respuesta contenía el destinatario, la dirección, el número comercial ni el total de CLIENT-A,
+y el pedido consultado como ADMIN quedó idéntico antes y después.}{PASS}{JSON:
+\texttt{evidencias/json/CP-056.json}}{Ninguno}
+
+\casoejec{CP-057}{Aislamiento de DRIVER-B ante ruta y parada de DRIVER-A}{\emph{API:} Mi Ruta de
+DRIVER-B no incluyó la ruta de DRIVER-A; consultarla (\texttt{GET /routes/:id}), iniciarla, registrar
+un fallo en su parada y cerrarla como DRIVER-B respondieron 403, y la ruta y sus paradas conservaron el
+mismo estado. \emph{Teléfono:} con la sesión del segundo repartidor la app mostró ``No tienes rutas
+para hoy'', sin listar la ruta asignada al primer repartidor.}{PASS}{JSON:
+\texttt{evidencias/json/CP-057.json}; captura del teléfono}{Ninguno}
+
+\casoejec{CP-058}{Registro público con rol ADMIN rechazado sin escalación}{\texttt{POST
+/auth/register} con un correo nuevo y el campo adicional \texttt{role: ADMIN} respondió 400. El inicio
+de sesión posterior con esas credenciales respondió 401. En la base de datos no existe ninguna cuenta
+con ese correo y el número de cuentas ADMIN siguió siendo 1 (la del seed).}{PASS}{JSON y consulta a
+la base: \texttt{evidencias/json/CP-058.json}}{Ninguno}
+
+\casoejec{CP-059}{Intento de CLIENT de modificar configuración o cobertura}{Como CLIENT-A,
+\texttt{PATCH /admin/shop-settings} y \texttt{PUT /admin/store-coverage} (nuevo polígono) respondieron
+403. La configuración de la tienda y la cobertura (ubicación y polígono) leídas como ADMIN fueron
+idénticas antes y después.}{PASS}{JSON comparativo: \texttt{evidencias/json/CP-059.json}}{Ninguno}
+
+\casoejec{CP-060}{Acceso autorizado por titular, ADMIN y DRIVER sobre recursos propios}{CLIENT-A
+leyó su pedido y su comprobante (200); su historial devolvió 3 pedidos, todos propios. ADMIN consultó
+la configuración y la bandeja de despacho (200). DRIVER-A obtuvo 200 en Mi Ruta solo con su ruta
+asignada (0 rutas de otros repartidores). En el teléfono, el repartidor vio su ruta del día (zona
+Centro, Asignada, 0 de 2 entregados); esta prueba se hizo con una ruta creada con zona, por el defecto
+\texttt{DEF-06} descrito en \texttt{CP-073}.}{PASS}{JSON: \texttt{evidencias/json/CP-060.json}; captura
+del teléfono}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Planificación del día operativo y urgencias (CP-061 a CP-066).}\par\smallskip
+Se verificó que solo los pedidos del día operativo (America/Guayaquil) se conviertan en rutas y que
+las urgencias nunca alteren una ruta iniciada sin decisión del ADMIN.
+
+\casoejec{CP-061}{Pedido de hoy elegible en propuesta, ruta y asignación}{Con dos pedidos para hoy
+(16:00 y 16:10), \texttt{GET /route-proposals} respondió 200 con \texttt{isToday=true} e incluyó
+ambos. \texttt{POST /routes} creó la ruta en \texttt{DRAFT} (201) y \texttt{POST
+/routes/:id/assign} la dejó \texttt{ASSIGNED} a DRIVER-A (200), con 2 paradas y la fecha de
+hoy.}{PASS}{JSON: \texttt{evidencias/json/CP-061.json}}{Ninguno}
+
+\casoejec{CP-062}{Pedido futuro admitido en compra y bloqueado en ruta/\allowbreak{}assign}{La compra
+Shop y el pedido ADMIN para mañana se crearon (201). La vista previa de mañana respondió 200 con
+\texttt{isToday=false} y \texttt{canConfirm=false} e incluyó ambos pedidos. \texttt{POST /routes} para
+mañana respondió 409 \texttt{ROUTE\_DATE\_NOT\_TODAY} y la asignación directa \texttt{POST
+/routes/assign} también 409. No se creó ninguna ruta y los dos pedidos siguieron
+\texttt{PENDING}.}{PASS}{JSON: \texttt{evidencias/json/CP-062.json}}{Ninguno}
+
+\casoejec{CP-063}{Ausencia registrada hoy impide asignar repartidor}{Se registró una ausencia de hoy
+(201) a un repartidor sin rutas, para que la ausencia fuera la única causa posible. Su disponibilidad
+devolvió \texttt{isAvailable=false} con la ausencia indicada y el intento de asignarle una ruta
+respondió 409. La ruta quedó en \texttt{DRAFT} sin conductor y no se creó ninguna reserva (0
+reservas).}{PASS}{JSON: \texttt{evidencias/json/CP-063.json}}{Ninguno}
+
+\casoejec{CP-064}{Ausencia futura no altera ni reasigna rutas activas de hoy}{Con la ruta de hoy de
+DRIVER-A asignada, se registró una ausencia de mañana a pasado mañana (201, \texttt{ACTIVE}). La ruta
+mantuvo el mismo conductor, estado, paradas e intentos y su reserva siguió activa (1 reserva): no hubo
+reasignación, cancelación ni liberación automática. La ausencia se anuló al terminar.}{PASS}{JSON
+comparativo: \texttt{evidencias/json/CP-064.json}}{Ninguno}
+
+\casoejec{CP-065}{Pedido urgente con ruta IN\_PROGRESS no altera ruta iniciada}{Con la ruta de
+DRIVER-A ya iniciada (\texttt{IN\_PROGRESS}), un pedido urgente creado para hoy obtuvo la propuesta
+\texttt{NEW\_ROUTE} en \texttt{GET /dispatch/orders/:id/proposal}, sin proponer la ruta iniciada. Las
+paradas, el orden y el estado de la ruta iniciada fueron idénticos antes y después.}{PASS}{JSON
+comparativo: \texttt{evidencias/json/CP-065.json}}{Ninguno}
+
+\casoejec{CP-066}{Decisión manual ADMIN en urgencias: INSERT con cupo o NEW\_ROUTE}{Mientras había
+rutas no iniciadas con cupo, cada urgente obtuvo la propuesta \texttt{INSERT}. La ruta destino no
+cambió hasta que el ADMIN confirmó explícitamente (\texttt{CONFIRM}, 200 \texttt{APPLIED}); cada
+confirmación agregó exactamente una parada con secuencia contigua. Se hicieron 5 inserciones en dos
+rutas hasta llenarlas (4 paradas cada una). El siguiente urgente obtuvo \texttt{NEW\_ROUTE} y, al
+confirmarlo con un repartidor libre, se creó una ruta nueva. Ninguna ruta superó 4 paradas, las
+decisiones quedaron auditadas con el actor ADMIN y la ruta iniciada no recibió
+inserciones.}{PASS}{JSON y auditoría de despacho: \texttt{evidencias/json/CP-066.json}}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Entrega fallida y gestión posterior (CP-067 a CP-071).}\par\smallskip
+Se verificó que una visita fallida se conserve en el historial, que solo el repartidor titular pueda
+registrarla y que las gestiones del ADMIN (reprogramar o retiro en tienda) no dupliquen entregas.
+
+\casoejec{CP-067}{Entrega fallida en móvil conserva parada e historial pendiente}{\emph{API:} DRIVER-A
+registró la entrega fallida con motivo \texttt{RECIPIENT\_ABSENT} (200). La parada pasó a
+\texttt{FAILED} conservando el intento con su motivo, el pedido no quedó \texttt{DELIVERED} ni
+\texttt{CANCELLED} y el seguimiento del cliente lo mostró pendiente de gestión.
+\emph{Teléfono:} la app no permite registrar el fallo; la parada en curso solo ofrece ``En camino'' y
+``Entregado''. El fallo tuvo que registrarse por API y la app solo lo mostró después (``Intento
+fallido''). El paso ``registrar entrega fallida desde móvil'' no se puede ejecutar.}{FAIL}{JSON:
+\texttt{evidencias/json/CP-067.json} y \texttt{movil-telefono.json}; captura del teléfono}{DEF-07}
+
+\casoejec{CP-068}{Registro de fallo por actor o conductor no autorizado rechazado}{El intento de
+registrar un fallo sobre la parada de DRIVER-A respondió 403 tanto con el JWT de DRIVER-B como con el
+de CLIENT-A. La parada siguió \texttt{PENDING} sin intentos y el pedido no cambió de
+estado.}{PASS}{JSON: \texttt{evidencias/json/CP-068.json}}{Ninguno}
+
+\casoejec{CP-069}{Gestión post-fallo ADMIN: CONTACT y RESCHEDULE con nueva fecha}{Tras una visita
+fallida y la ruta cerrada, \texttt{CONTACT} con acuerdo explícito (mañana 12:00, ventana 11:30--12:30)
+y \texttt{RESCHEDULE} con ese acuerdo respondieron 200 \texttt{APPLIED}. El pedido quedó
+\texttt{PENDING}, sin ruta y con la nueva fecha (\texttt{2026-11-15T17:00:00Z}). La ruta original
+conservó la parada \texttt{FAILED} con su intento, no quedó ninguna asignación activa duplicada y el
+pedido apareció en la propuesta de mañana.}{PASS}{JSON: \texttt{evidencias/json/CP-069.json}}{Ninguno}
+
+\casoejec{CP-070}{Gestión post-fallo ADMIN: acuerdo de retiro en tienda (PICKUP\_AGREE)}{\texttt{PICKUP\_AGREE}
+respondió 200 \texttt{APPLIED}. El pedido quedó \texttt{PENDING} con el retiro en
+\texttt{PENDING\_PICKUP} (sin \texttt{pickedUpAt}), sin marcarse entregado. El seguimiento del cliente
+mostró el hito ``Pendiente de retiro en tienda'', la visita fallida se conservó y el stock no cambió
+(104 $\rightarrow$ 104).}{PASS}{JSON: \texttt{evidencias/json/CP-070.json}}{Ninguno}
+
+\casoejec{CP-071}{Confirmación de retiro (PICKUP\_CONFIRM) y rechazo de repetición}{La primera
+\texttt{PICKUP\_CONFIRM} respondió 200: el pedido quedó \texttt{DELIVERED} con el retiro en
+\texttt{PICKED\_UP}. La repetición se rechazó con 409, pero con el mensaje genérico ``Commercially
+resolved order cannot be managed for pickup'' y sin el código \texttt{PICKUP\_ALREADY\_CONFIRMED} que
+exige el caso. La integridad sí se cumplió: un solo registro de retiro y stock sin cambio (104
+$\rightarrow$ 104).}{FAIL}{JSON: \texttt{evidencias/json/CP-071.json}}{DEF-05}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Recorrido de extremo a extremo (CP-072 a CP-075).}\par\smallskip
+Se recorrió el flujo completo, desde la compra del cliente hasta la entrega en el teléfono del
+repartidor, contrastando lo que muestra la app con lo que registra el servidor.
+
+\casoejec{CP-072}{Recorrido E2E: creación de compra y verificación de estado inicial}{CLIENT-A compró 2
+unidades con la tarjeta demo aprobada (201). El pedido se creó en \texttt{PENDING} con importes
+congelados: subtotal 5180, IVA 15\,\% 777 y total 5957 centavos, igual a lo cotizado. El seguimiento y
+el comprobante de CLIENT-A mostraron el mismo pedido y total, y el stock bajó de 109 a 107.}{PASS}{JSON:
+\texttt{evidencias/json/CP-072.json}}{Ninguno}
+
+\casoejec{CP-073}{Recorrido E2E: propuesta, confirmación y asignación en día operativo}{\emph{API:} la
+propuesta de hoy incluyó el pedido; el borrador se persistió (201, \texttt{DRAFT}) y quedó
+\texttt{ASSIGNED} a DRIVER-A, con una sola reserva y una sola aparición en \texttt{GET
+/drivers/me/routes}. \emph{Teléfono:} la ruta confirmada desde la propuesta no tiene zona
+(\texttt{"zone": null}) y la app no la muestra. Mi Ruta respondió ``No se pudieron cargar tus rutas. El
+servidor devolvió rutas inválidas''. La app exige que \texttt{zone} sea un objeto, y con una sola ruta
+sin zona el repartidor no ve ninguna de sus rutas. Con una ruta creada con zona, la app la listó
+correctamente.}{FAIL}{JSON: \texttt{evidencias/json/CP-073.json}; captura del
+teléfono}{DEF-06}
+
+\casoejec{CP-074}{Recorrido E2E: progreso móvil reflejado en seguimiento del cliente}{\emph{API:} con
+la compra de CP-072, cada transición (inicio, \texttt{IN\_TRANSIT}, \texttt{DELIVERED}) se reflejó
+igual en el backend y en el seguimiento de CLIENT-A, sin coordenadas GPS en la línea de tiempo.
+\emph{Teléfono:} el repartidor inició la ruta y marcó ``En camino'' y ``Entregado'' en la parada de una
+compra Shop. Tras cada acción, el seguimiento del cliente coincidió con el backend: \texttt{IN\_TRANSIT}
+y luego \texttt{DELIVERED}, con la línea de tiempo PENDING $\rightarrow$ ASSIGNED $\rightarrow$
+IN\_TRANSIT $\rightarrow$ DELIVERED.}{PASS}{JSON: \texttt{evidencias/json/CP-074.json} y
+\texttt{movil-telefono.json}; captura del teléfono}{Ninguno}
+
+\casoejec{CP-075}{Recorrido E2E: desconexión móvil y recuperación al reconectar}{En el teléfono se
+cortó la conexión con el servidor (se quitó \texttt{adb reverse}) y se pulsó ``Iniciar ruta''. La app
+no fingió éxito: mostró ``No se pudo conectar con el servidor. Actualiza la lista antes de volver a
+intentar iniciar una ruta'', la ruta siguió ``Asignada'' y en el backend continuó \texttt{ASSIGNED} con
+\texttt{startedAt} nulo. Al reconectar y actualizar, la app mostró el estado real del servidor, sin
+cola offline. El inicio posterior se registró una sola vez.}{PASS}{JSON:
+\texttt{evidencias/json/CP-075.json}; captura del teléfono}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Cierre de ruta y regreso a tienda (CP-076 a CP-081).}\par\smallskip
+Se verificó que la ruta solo se cierre con todas las visitas resueltas y que el repartidor quede
+ocupado hasta confirmar su regreso físico a la tienda.
+
+\casoejec{CP-076}{Cierre de ruta móvil rechazado con visita aún PENDING}{Con una parada todavía
+\texttt{PENDING}, \texttt{POST /routes/:id/complete} de DRIVER-A respondió 409. La ruta siguió
+\texttt{IN\_PROGRESS} sin \texttt{completedAt} y el repartidor siguió ocupado. En el teléfono se
+repitió el escenario (parada 1 con intento fallido y parada 2 pendiente): el backend rechazó el cierre
+con 409 (``One to four resolved verified visits required'') y la app mostró la ruta ``En curso'' con la
+parada pendiente. La app no tiene botón de cierre (\texttt{DEF-07}).}{PASS}{JSON:
+\texttt{evidencias/json/CP-076.json}; captura del teléfono}{Ninguno}
+
+\casoejec{CP-077}{Cierre de ruta COMPLETED con visitas resueltas y una FAILED}{DRIVER-A entregó la
+segunda parada y cerró la ruta: 200 \texttt{COMPLETED} con \texttt{completedAt}. La parada fallida
+siguió \texttt{FAILED}, su pedido no se marcó \texttt{DELIVERED} y el repartidor siguió no disponible
+con la ruta como bloqueante hasta su regreso. En el teléfono, después del cierre (hecho por API con el
+token del repartidor, ver \texttt{DEF-07}), la app mostró ``Completada · 1 de 2 entregados · 1 con
+intento fallido · Sigues ocupado: regresa al depósito y confirma tu llegada''.}{PASS}{JSON:
+\texttt{evidencias/json/CP-077.json} y \texttt{movil-telefono.json}; captura del teléfono}{Ninguno}
+
+\casoejec{CP-078}{Bloqueo de nueva salida antes de confirmar regreso (returnedAt)}{Con la ruta previa
+\texttt{COMPLETED} y \texttt{returnedAt} nulo, asignar a DRIVER-A una nueva ruta de hoy respondió 409.
+La segunda ruta quedó en \texttt{DRAFT} sin conductor y DRIVER-A conservó una sola reserva activa, sin
+doble reserva.}{PASS}{JSON: \texttt{evidencias/json/CP-078.json}}{Ninguno}
+
+\casoejec{CP-079}{Confirmación de regreso por titular libera y actualiza disponibilidad}{\texttt{POST
+/routes/:id/return} de DRIVER-A respondió 200 con \texttt{returnedAt}, liberó la reserva (0 activas) y
+dejó al repartidor disponible. Con otro repartidor con ausencia vigente hoy, el regreso también se
+registró y liberó la reserva, pero su disponibilidad siguió en \texttt{false} por la ausencia. En el
+teléfono, tras confirmar el regreso por API (\texttt{DEF-07}), la app mostró ``Visitas finalizadas.
+Regreso al depósito confirmado'' y el repartidor quedó disponible.}{PASS}{JSON:
+\texttt{evidencias/json/CP-079.json} y \texttt{movil-telefono.json}; captura del teléfono}{Ninguno}
+
+\casoejec{CP-080}{Repetición de regreso a tienda sin duplicar ni liberar dos veces}{Repetir
+\texttt{POST /routes/:id/return} respondió 200 con exactamente la misma respuesta que la primera vez
+(idempotente). \texttt{returnedAt} y \texttt{returnedById} no cambiaron, no se creó ni liberó otra
+reserva y la disponibilidad del repartidor siguió igual.}{PASS}{JSON y consulta a la base:
+\texttt{evidencias/json/CP-080.json}}{Ninguno}
+
+\casoejec{CP-081}{Intento de cierre o regreso por DRIVER-B rechazado sobre ruta ajena}{Con el JWT de
+DRIVER-B, \texttt{POST /routes/:id/complete} y \texttt{POST /routes/:id/return} sobre la ruta de
+DRIVER-A respondieron 403. El estado, \texttt{completedAt}, \texttt{returnedAt} y la reserva activa
+de DRIVER-A quedaron exactamente iguales.}{PASS}{JSON: \texttt{evidencias/json/CP-081.json}}{Ninguno}
