@@ -5,32 +5,144 @@
 % - Resultado obtenido: describir lo observado al ejecutar la prueba.
 % - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
 \par\medskip\noindent\textbf{Módulo Web --- Tienda en línea y panel de rutas (27 casos: CP-028 a CP-054).}\par\smallskip
-Pruebas ejecutadas sobre la aplicación web React conectada al backend aislado y verificadas mediante Playwright y Vitest.
+En esta sección se presentan los resultados de la ejecución de los 27 casos de prueba del módulo web
+(\texttt{CP-028} a \texttt{CP-054}). Los casos abarcan la tienda en línea (historial de pedidos,
+cobertura de entrega, horario y regresión del proceso de compra) y el panel administrativo de
+planificación de rutas con el motor vial.
 
-\casoejec{CP-028}{Historial unificado Mis pedidos con compras SHOP y ADMIN propias}{}{}{Captura UI / reporte}{}
-\casoejec{CP-029}{Bloqueo en lista y detalle ante pedido ajeno o invitado coincidente}{}{}{Captura UI / reporte}{}
-\casoejec{CP-030}{Pedido sin PurchaseReceipt y sin importes inventados}{}{}{Captura UI / reporte}{}
-\casoejec{CP-031}{Cobertura tienda: punto interior al polígono aceptado en web}{}{}{Captura UI / reporte}{}
-\casoejec{CP-032}{Cobertura tienda: punto exactamente en el borde del polígono}{}{}{Captura UI / reporte}{}
-\casoejec{CP-033}{Cobertura tienda: punto exterior rechazado con 422 en web}{}{}{Captura UI / reporte}{}
-\casoejec{CP-034}{Cambio de cobertura A a B conserva pedidos ya aceptados}{}{}{Captura UI / reporte}{}
-\casoejec{CP-035}{Compra nueva tras cambio de cobertura aplica área B vigente}{}{}{Captura UI / reporte}{}
-\casoejec{CP-036}{Horario Shop límite inicial 07:\allowbreak{}00 America/\allowbreak{}Guayaquil aceptado}{}{}{Captura UI / reporte}{}
-\casoejec{CP-037}{Horario Shop límite final 17:\allowbreak{}00 America/\allowbreak{}Guayaquil aceptado}{}{}{Captura UI / reporte}{}
-\casoejec{CP-038}{Horario Shop inválido 06:\allowbreak{}59 rechazado sin orden ni cobro}{}{}{Captura UI / reporte}{}
-\casoejec{CP-039}{Horario Shop inválido 17:\allowbreak{}01 rechazado sin orden ni cobro}{}{}{Captura UI / reporte}{}
-\casoejec{CP-040}{Cambio de horario en shop-settings genera 409 al confirmar}{}{}{Captura UI / reporte}{}
-\casoejec{CP-041}{Verificación UI web de aviso de hora de entrega aproximada}{}{}{Captura UI / reporte}{}
+Las pruebas se ejecutaron sobre la aplicación web React (\texttt{frontend-web-logistica}) conectada
+al backend NestJS local, con una base de datos PostgreSQL~16 aislada y el motor vial OSRM desplegado
+en Docker con la cartografía de Ecuador. Cada caso se automatizó con un script de Playwright que opera
+la interfaz real del mismo modo que lo haría un usuario y, en paralelo, consulta la API con el mismo
+token de sesión. De esta forma se contrastó lo que muestra la pantalla con lo que registra el servidor.
+
+En los casos de rechazo se compararon el stock del producto, el saldo de la tarjeta simulada y el
+número de pedidos antes y después de cada intento. Un caso solo se consideró exitoso cuando, además
+de mostrar el mensaje correcto, no dejó efectos parciales en el sistema. Todos los datos utilizados
+(clientes, productos, repartidores y pedidos) son sintéticos y se crearon exclusivamente para esta
+ejecución. Las configuraciones modificadas durante las pruebas (cobertura y horario de la tienda) se
+restauraron a sus valores originales al finalizar cada grupo.
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Historial de pedidos del cliente (CP-028 a CP-030).}\par\smallskip
+El objetivo de este grupo fue comprobar que la sección \emph{Mis pedidos} muestre al cliente
+únicamente sus propias compras, tanto las realizadas en la tienda web como las registradas por el
+administrador. También se verificó que no exponga información de pedidos ajenos y que no invente
+importes cuando un pedido no tiene comprobante. Para ello se crearon dos clientes de prueba
+(CLIENTE-A y CLIENTE-B), compras por ambos canales y un pedido de invitado con el mismo teléfono de
+CLIENTE-A.
+
+\casoejec{CP-028}{Historial unificado Mis pedidos con compras SHOP y ADMIN propias}{Se registró una compra de CLIENTE-A desde la tienda web y otra venta a su nombre desde el panel administrativo; ambas se crearon correctamente (HTTP 201). Al abrir \emph{Mis pedidos}, la web listó exactamente esas dos compras, identificadas como ``Compra en la web'' y ``Registrada en tienda'', cada una con su estado de seguimiento. La consulta \texttt{GET /shop/orders} devolvió los mismos dos pedidos con origen SHOP y ADMIN. No apareció ningún pedido de otro cliente y el detalle de ambos se abrió sin errores, por lo que la interfaz y la API coinciden.}{PASS}{Script Playwright y API: \texttt{POST /shop/checkout}, \texttt{POST /orders/admin}, \texttt{GET /shop/orders} y \texttt{/shop/orders/:id}; captura de Mis pedidos.}{Ninguno}
+\casoejec{CP-029}{Bloqueo en lista y detalle ante pedido ajeno o invitado coincidente}{Con la sesión de CLIENTE-A se intentó acceder a un pedido de CLIENTE-B y a una venta de invitado registrada con el mismo número de teléfono de CLIENTE-A. Ninguno de los dos apareció en su lista de pedidos, lo que confirma que el sistema no vincula pedidos por coincidencia de teléfono. Al abrirlos directamente por su identificador, la API respondió 404 \texttt{ORDER\_NOT\_FOUND} en ambos casos y la web mostró ``No encontramos este pedido'' sin revelar ningún dato, por lo que no existe fuga de información.}{PASS}{Script Playwright y API: \texttt{GET /shop/orders} y \texttt{/shop/orders/:id} con el token de CLIENTE-A; captura del detalle ajeno.}{Ninguno}
+\casoejec{CP-030}{Pedido sin PurchaseReceipt y sin importes inventados}{Se utilizó un pedido de CLIENTE-A creado sin comprobante de compra (PurchaseReceipt). En la lista y en el detalle el pedido aparece como ``Pedido sin comprobante'', con ``Productos no disponibles'' e ``Importe no disponible''. La API lo marca con \texttt{receiptAvailable=false} y total nulo, y la solicitud del comprobante devuelve 404 \texttt{RECEIPT\_UNAVAILABLE}. El sistema no reconstruye ni inventa importes o impuestos, y el seguimiento del pedido sigue visible para el cliente.}{PASS}{Script Playwright y API: \texttt{POST /orders}, \texttt{GET /shop/orders}, \texttt{/shop/orders/:id} y \texttt{/receipt}; captura del detalle.}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Cobertura de entrega de la tienda (CP-031 a CP-035).}\par\smallskip
+Este grupo verificó la regla geográfica de entrega: la tienda solo acepta direcciones ubicadas dentro
+o en el borde del polígono de cobertura configurado por el administrador. En las pruebas se
+seleccionaron puntos en el mapa del checkout (interior, borde y exterior). En los dos últimos casos se
+cambió el polígono para comprobar que la nueva área solo afecta a las compras futuras y no a los
+pedidos ya aceptados.
+
+\casoejec{CP-031}{Cobertura tienda: punto interior al polígono aceptado en web}{Se seleccionó en el mapa del checkout un punto ubicado dentro del polígono de cobertura. La web indicó ``Dentro de la zona de entrega.'' y permitió confirmar la ubicación. La evaluación del servidor devolvió \texttt{position=INTERIOR} y \texttt{accepted=true}. La compra se completó con la tarjeta de prueba DEMO\_APPROVED y la web mostró ``¡Compra confirmada!''. Los pedidos de CLIENTE-A pasaron de 7 a 8, lo que confirma que el punto interior se acepta sin bloqueos.}{PASS}{Script Playwright: checkout web completo con selección en el mapa; \texttt{POST /store-coverage/evaluate}.}{Ninguno}
+\casoejec{CP-032}{Cobertura tienda: punto exactamente en el borde del polígono}{Se evaluó un punto ubicado exactamente sobre un vértice del polígono. El servidor lo clasificó como \texttt{position=BOUNDARY} con \texttt{accepted=true} y la compra con esa ubicación se registró correctamente (HTTP 201). En el mapa web no es posible hacer clic con precisión exacta sobre el borde ni escribir coordenadas, por lo que la regla del borde se comprobó mediante la API. La captura muestra el checkout con el área de cobertura dibujada; para este resultado la web dispone del mensaje ``En el borde de la zona de entrega: sí entregamos ahí.''.}{PASS}{Script Playwright y API: \texttt{POST /store-coverage/evaluate} y \texttt{/shop/checkout} con el vértice del polígono; captura del checkout con el área.}{Ninguno}
+\casoejec{CP-033}{Cobertura tienda: punto exterior rechazado con 422 en web}{Se seleccionó un punto fuera del polígono. La evaluación devolvió \texttt{position=EXTERIOR} y \texttt{accepted=false}, y el intento de compra fue rechazado con 422 \texttt{DELIVERY\_OUTSIDE\_COVERAGE}. En la web apareció el mensaje ``Ese punto está fuera de la zona de entrega\ldots{}'' y no se permitió confirmar la ubicación. Al comparar los valores antes y después, el stock (29 unidades), el saldo de la tarjeta simulada (\$4328,40) y el número de pedidos (9) permanecieron iguales, por lo que el rechazo no dejó efectos.}{PASS}{Script Playwright y API: \texttt{POST /store-coverage/evaluate} y \texttt{/shop/checkout/quote}; stock, saldo y pedidos antes y después; captura del checkout.}{Ninguno}
+\casoejec{CP-034}{Cambio de cobertura A a B conserva pedidos ya aceptados}{Se registró un pedido de CLIENTE-A en un punto P dentro del área A. Luego, desde el panel ``Tienda y cobertura'', el administrador cambió la cobertura a un área B que deja al punto P fuera de la zona (respuesta 200). Al consultar nuevamente el pedido, este mantuvo su estado PENDING, su dirección y su ubicación originales. El cambio de cobertura no canceló ni modificó los pedidos ya aceptados.}{PASS}{Script Playwright y API: \texttt{PUT /admin/store-coverage}; \texttt{GET /shop/orders/:id} y \texttt{GET /orders/:id} antes y después; captura del panel con el área B.}{Ninguno}
+\casoejec{CP-035}{Compra nueva tras cambio de cobertura aplica área B vigente}{Con el área B vigente se intentó una compra nueva en el mismo punto P. La web marcó el punto como fuera de la zona y el servidor rechazó la operación con 422 \texttt{DELIVERY\_OUTSIDE\_COVERAGE}. No se generó pedido, comprobante ni cobro: el stock (28 unidades), el saldo (\$4244,45) y los pedidos (10) no cambiaron. El pedido aceptado anteriormente conservó su dirección original, lo que confirma que la nueva cobertura solo se aplica a compras futuras.}{PASS}{Script Playwright y API: \texttt{POST /shop/checkout/quote} con el punto P bajo el área B; conteos antes y después; captura del checkout.}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Horario de entrega de la tienda (CP-036 a CP-041).}\par\smallskip
+El horario de entrega configurado para la tienda es de 07:00 a 17:00 en la zona horaria de Ecuador
+(America/Guayaquil). Se probaron ambos límites permitidos, un minuto antes y un minuto después del
+rango, el cambio del horario mientras un cliente estaba pagando y el aviso de hora aproximada que
+muestra la web.
+
+\casoejec{CP-036}{Horario Shop límite inicial 07:\allowbreak{}00 America/\allowbreak{}Guayaquil aceptado}{Se realizó una compra completa desde la web con entrega programada para el 16/11/2026 a las 07:00 y pago con la tarjeta DEMO\_APPROVED. La compra se confirmó y generó su comprobante (\texttt{receiptAvailable=true}). La hora almacenada por el servidor fue 12:00 UTC, que corresponde exactamente a las 07:00 en Ecuador, y los pedidos de CLIENTE-A aumentaron de 10 a 11. El límite inicial del horario se acepta correctamente.}{PASS}{Script Playwright: checkout web completo; \texttt{GET /shop/orders/:id}; captura de la confirmación.}{Ninguno}
+\casoejec{CP-037}{Horario Shop límite final 17:\allowbreak{}00 America/\allowbreak{}Guayaquil aceptado}{Se realizó una compra completa desde la web con entrega programada para el 16/11/2026 a las 17:00. La compra se confirmó y generó su comprobante (\texttt{receiptAvailable=true}). La hora almacenada fue 22:00 UTC, equivalente a las 17:00 en Ecuador, y los pedidos de CLIENTE-A pasaron de 11 a 12. El límite final del horario se acepta sin rechazos indebidos.}{PASS}{Script Playwright: checkout web completo; \texttt{GET /shop/orders/:id}; captura de la confirmación.}{Ninguno}
+\casoejec{CP-038}{Horario Shop inválido 06:\allowbreak{}59 rechazado sin orden ni cobro}{Se intentó programar una entrega a las 06:59. La web mostró el mensaje ``La entrega debe ser entre 07:00 y 17:00 (hora de Ecuador)'' y el botón para continuar al pago permaneció deshabilitado. Al enviar la misma solicitud directamente a la API, el servidor también la rechazó con 422 \texttt{DELIVERY\_OUTSIDE\_HOURS}. No se creó pedido ni se realizó cobro: el stock (26 unidades), el saldo (\$4076,55) y los pedidos (12) quedaron iguales.}{PASS}{Script Playwright y API: \texttt{POST /shop/checkout/quote} con la hora inválida; conteos antes y después; captura del checkout.}{Ninguno}
+\casoejec{CP-039}{Horario Shop inválido 17:\allowbreak{}01 rechazado sin orden ni cobro}{Se intentó programar una entrega a las 17:01, un minuto después del cierre. La web mostró el mismo mensaje ``La entrega debe ser entre 07:00 y 17:00 (hora de Ecuador)'' y no permitió continuar al pago. El servidor rechazó la solicitud con 422 \texttt{DELIVERY\_OUTSIDE\_HOURS}. No se generó pedido, comprobante ni cobro: el stock (26 unidades), el saldo (\$4076,55) y los pedidos (12) no variaron.}{PASS}{Script Playwright y API: \texttt{POST /shop/checkout/quote} con la hora inválida; conteos antes y después; captura del checkout.}{Ninguno}
+\casoejec{CP-040}{Cambio de horario en shop-settings genera 409 al confirmar}{CLIENTE-A cotizó su compra y llegó al formulario de pago; en ese momento el administrador cambió el horario de entrega a 08:00--17:00 (respuesta 200). Al confirmar el pago, el servidor respondió 409 \texttt{SHOP\_SETTINGS\_CHANGED}. La web regresó al paso de entrega con el aviso ``La tienda cambió su configuración (IVA o reglas). Revisa y acepta el nuevo total.'' y mostró el total recalculado con las reglas vigentes. No se creó pedido ni se debitó la tarjeta (12 pedidos y saldo de \$4076,55 sin cambios), por lo que no es posible comprar con condiciones desactualizadas. Al finalizar se restauró el horario original.}{PASS}{Script Playwright y API: pago en la web después de \texttt{PATCH /admin/shop-settings}; respuesta interceptada de \texttt{POST /shop/checkout}.}{Ninguno}
+\casoejec{CP-041}{Verificación UI web de aviso de hora de entrega aproximada}{En la sección de fecha y hora del checkout se muestra el texto ``La hora que elijas es aproximada: la entrega puede llegar un poco antes o un poco después.''. El detalle del pedido presenta la entrega programada en hora de Ecuador. Se revisaron los textos de ambas pantallas y ninguno promete una hora exacta ni un margen fijo de 30 minutos, cumpliendo el criterio de comunicar una hora aproximada.}{PASS}{Script Playwright: lectura de los textos del checkout y del detalle del pedido; captura del aviso.}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Planificación de rutas del día (CP-042 a CP-045).}\par\smallskip
+Estos casos validan el flujo del panel administrativo para planificar las entregas: generar propuestas
+de ruta, confirmarlas como borrador y asignarles un repartidor. El sistema solo permite confirmar
+rutas del día en curso, por lo que las pruebas se ejecutaron dentro del horario de reparto con pedidos
+programados para el mismo día. Se crearon dos repartidores de prueba: REPARTIDOR-A, disponible, y
+REPARTIDOR-B, con una ausencia registrada para ese día.
+
 \casoejec{CP-042}{Propuesta de rutas en panel ADMIN es solo lectura sin persistir}{}{}{Captura UI / reporte}{}
 \casoejec{CP-043}{Confirmación de borrador DRAFT en hoy persiste ruta sin conductor}{}{}{Captura UI / reporte}{}
 \casoejec{CP-044}{Asignación separada de ruta DRAFT a conductor disponible}{}{}{Captura UI / reporte}{}
 \casoejec{CP-045}{Rechazo de asignación a conductor no disponible o ausente (409)}{}{}{Captura UI / reporte}{}
-\casoejec{CP-046}{Motor vial OSRM indisponible muestra aviso sin rutas en línea recta}{}{}{Captura UI / reporte}{}
-\casoejec{CP-047}{Preservación de pedidos pendientes y rutas tras falla OSRM}{}{}{Captura UI / reporte}{}
-\casoejec{CP-048}{Recuperación tras indisponibilidad OSRM genera propuestas válidas}{}{}{Captura UI / reporte}{}
-\casoejec{CP-049}{Origen y retorno común en tienda única reflejado en propuesta y mapa}{}{}{Captura UI / reporte}{}
-\casoejec{CP-050}{Paradas y trazado vial en panel ADMIN coinciden con motor vial}{}{}{Captura UI / reporte}{}
-\casoejec{CP-051}{Distancias y duraciones mostradas como estimadas sin tráfico en vivo}{}{}{Captura UI / reporte}{}
-\casoejec{CP-052}{Regresión Shop: compra válida con DEMO\_APPROVED crea pedido y recibo}{}{}{Captura UI / reporte}{}
-\casoejec{CP-053}{Regresión Shop: carrito mixto con agotado rechazado sin efectos}{}{}{Captura UI / reporte}{}
-\casoejec{CP-054}{Regresión Shop: precio o total manipulado en cliente no es aceptado}{}{}{Captura UI / reporte}{}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Motor vial OSRM (CP-046 a CP-051).}\par\smallskip
+Las propuestas de ruta utilizan el motor vial OSRM para calcular distancias y recorridos sobre las
+calles reales. Este grupo verificó el comportamiento del panel cuando el motor no está disponible, la
+recuperación posterior y la información que se muestra sobre las rutas propuestas. Para simular la
+caída se detuvo el contenedor Docker de OSRM y luego se volvió a iniciar. Se usaron tres pedidos de
+prueba cercanos a la tienda y programados para un día futuro.
+
+\casoejec{CP-046}{Motor vial OSRM indisponible muestra aviso sin rutas en línea recta}{Con el contenedor de OSRM detenido, el servidor informó que el motor no estaba disponible (\texttt{available=false}) y la solicitud de propuestas fue rechazada con 503 \texttt{ROAD\_ENGINE\_UNAVAILABLE}. En el panel de Planificación apareció el aviso ``El motor vial no responde\ldots{}''. Al previsualizar, se mostró el mensaje ``No se generó ninguna ruta\ldots{}'' junto con el botón Reintentar. No se presentó ninguna propuesta ni se dibujaron rutas en línea recta como alternativa.}{PASS}{Script Playwright y API: detención del contenedor OSRM; \texttt{GET /route-proposals/road-engine} y \texttt{/route-proposals}; captura de Planificación.}{Ninguno}
+\casoejec{CP-047}{Preservación de pedidos pendientes y rutas tras falla OSRM}{Se compararon los pedidos y las rutas antes y después de la falla del motor. Los tres pedidos de prueba continuaron en estado PENDING sin ruta asignada y la lista de rutas existentes (identificador, estado y repartidor) se mantuvo idéntica. La falla no provocó cambios, cancelaciones ni reservas parciales en la información.}{PASS}{Script API: \texttt{GET /routes} y \texttt{GET /orders/:id} antes y después de la falla del motor (verificación sin captura).}{Ninguno}
+\casoejec{CP-048}{Recuperación tras indisponibilidad OSRM genera propuestas válidas}{Al iniciar nuevamente el contenedor, el motor volvió a estar disponible con una latencia de 36~ms y la solicitud de propuestas respondió 200 con el método de distancia \texttt{OSRM\_ROAD\_NETWORK}. La propuesta con los pedidos de prueba incluyó una distancia por calles de 10,21~km y una duración estimada de 1034~s (unos 17 minutos). El panel mostró ``Motor vial activo.'' y el resumen de kilómetros calculados por calles, lo que confirma la recuperación sin intervención adicional.}{PASS}{Script Playwright y API: reinicio del contenedor OSRM; \texttt{GET /route-proposals/road-engine} y \texttt{/route-proposals?includeGeometry=true}; captura de Planificación.}{Ninguno}
+\casoejec{CP-049}{Origen y retorno común en tienda única reflejado en propuesta y mapa}{Todas las propuestas del día parten de la ubicación única de la tienda (-1.24908, -78.61675), registrada en la configuración de cobertura. El recorrido calculado comienza y termina en el punto de la red vial más cercano a la tienda (-1.249129, -78.616921), a pocos metros de ella. El mapa del panel muestra la salida y el regreso a ese mismo punto, y no existen depósitos distintos por zona.}{PASS}{Script Playwright y API: \texttt{GET /route-proposals?includeGeometry=true} (origen y extremos del trazado); captura del mapa de Planificación.}{Ninguno}
+\casoejec{CP-050}{Paradas y trazado vial en panel ADMIN coinciden con motor vial}{La propuesta agrupó las tres paradas de prueba, programadas a las 10:00, 10:10 y 10:20 (hora de Ecuador), en orden cronológico. El trazado devuelto por el motor contiene 407 puntos, es decir, sigue las calles en lugar de unir las paradas con líneas rectas. La tarjeta de la propuesta lista las paradas en el mismo orden que la API y el mapa dibuja el recorrido con la leyenda ``Recorrido por calles calculado por el motor vial\ldots{}''.}{PASS}{Script Playwright y API: \texttt{GET /route-proposals?includeGeometry=true} (paradas y trazado); captura de la tarjeta y del mapa.}{Ninguno}
+\casoejec{CP-051}{Distancias y duraciones mostradas como estimadas sin tráfico en vivo}{Las métricas entregadas por el servidor indican que las distancias y duraciones son estimaciones (\texttt{estimate=true}) y que no consideran el tráfico (\texttt{trafficAware=false}). El panel lo comunica con el aviso ``Distancias y duraciones estimadas por calles\ldots{} sin tráfico en vivo: la duración no es una hora de llegada garantizada'' y muestra la duración con el símbolo $\approx$. Ningún texto de la pantalla promete una hora exacta, tráfico en tiempo real ni una ruta óptima garantizada.}{PASS}{Script Playwright y API: \texttt{GET /route-proposals} (métricas) y lectura de los textos de Planificación; captura del aviso.}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Regresión del proceso de compra (CP-052 a CP-054).}\par\smallskip
+Por último, se repitió el flujo principal de compra para confirmar que sigue funcionando después de
+los cambios anteriores y que el total a pagar depende únicamente del servidor. Se probó una compra
+válida completa, un carrito con un producto agotado y una solicitud con precios manipulados desde el
+cliente.
+
+\casoejec{CP-052}{Regresión Shop: compra válida con DEMO\_APPROVED crea pedido y recibo}{Se añadió un producto al carrito desde el catálogo web, se completaron los datos de entrega y se pagó con la tarjeta de prueba DEMO\_APPROVED. El comprobante emitido por el servidor muestra un subtotal de \$73,00, IVA del 15~\% de \$10,95, envío de \$0,00 y total de \$83,95, el mismo valor que se mostraba en el resumen ``Total a pagar'' antes del pago. El stock bajó de 25 a 24 unidades y el saldo de la tarjeta simulada se redujo exactamente en \$83,95, es decir, ambos se descontaron una sola vez. El comprobante muestra únicamente los últimos cuatro dígitos de la tarjeta, sin el número completo ni el CVV.}{PASS}{Script Playwright y API: catálogo, carrito, checkout, pago y comprobante; \texttt{GET /shop/orders/:id/receipt}; stock y saldo antes y después.}{Ninguno}
+\casoejec{CP-053}{Regresión Shop: carrito mixto con agotado rechazado sin efectos}{Se creó un regalo con stock 0; en su página aparece como no disponible y el botón para añadirlo al carrito está deshabilitado. Luego se armó un carrito con un producto disponible y el agotado. La cotización (200) marcó el producto agotado con \texttt{available=false} y en el checkout el botón ``Continuar al pago'' permaneció deshabilitado. Al forzar el pago por la API, el servidor lo rechazó con 409 \texttt{STOCK\_UNAVAILABLE}. No se creó un pedido parcial: el stock del producto disponible (24 unidades), el saldo (\$3908,65) y los pedidos (14) no cambiaron.}{PASS}{Script Playwright y API: \texttt{POST /shop/checkout/quote} y \texttt{/shop/checkout} con el carrito mixto; página del producto agotado; captura del checkout.}{Ninguno}
+\casoejec{CP-054}{Regresión Shop: precio o total manipulado en cliente no es aceptado}{Se envió directamente a la API una solicitud de pago con el precio del producto alterado a \$0,01 (\texttt{priceCents=1}) y un total de \$0,01 (\texttt{totalCents=1}). El servidor la rechazó con 400 por contener campos no permitidos y la cotización con el precio manipulado también fue rechazada con 400. No se creó ningún pedido ni débito (13 pedidos y saldo de \$3992,60 sin cambios). La cotización legítima del mismo producto fue de \$83,95, lo que confirma que el total solo lo calcula el servidor. Esta prueba se realizó únicamente por API, ya que la interfaz web no permite modificar precios.}{PASS}{Script API: solicitudes manipuladas a \texttt{POST /shop/checkout} y \texttt{/shop/checkout/quote} con el token de CLIENTE-A; conteos antes y después (verificación sin captura).}{Ninguno}
+
+% ---------------------------------------------------------------------------
+\par\medskip\noindent\textbf{Resumen de resultados del módulo web.}\par\smallskip
+La siguiente tabla resume el resultado de cada caso de prueba del módulo web.
+
+\noindent{\footnotesize\textbf{Tabla:} Resumen de ejecución de los casos \texttt{CP-028} a \texttt{CP-054}.}
+{\footnotesize
+\begin{longtable}{|P{1.6cm}|P{4.6cm}|P{7.4cm}|P{1.5cm}|}
+\hline
+\textbf{Caso} & \textbf{Funcionalidad evaluada} & \textbf{Resultado obtenido} & \textbf{Estado} \\ \hline
+\endfirsthead
+\hline
+\textbf{Caso} & \textbf{Funcionalidad evaluada} & \textbf{Resultado obtenido} & \textbf{Estado} \\ \hline
+\endhead
+\texttt{CP-028} & Historial Mis pedidos & Solo se listan las compras propias (web y tienda). & PASS \\ \hline
+\texttt{CP-029} & Pedidos ajenos o de invitado & Acceso bloqueado con 404, sin fuga de datos. & PASS \\ \hline
+\texttt{CP-030} & Pedido sin comprobante & No se inventan importes; comprobante no disponible. & PASS \\ \hline
+\texttt{CP-031} & Punto dentro de la cobertura & Ubicación aceptada y compra confirmada. & PASS \\ \hline
+\texttt{CP-032} & Punto en el borde & Clasificado como BOUNDARY y aceptado. & PASS \\ \hline
+\texttt{CP-033} & Punto fuera de la cobertura & Compra rechazada (422) sin efectos. & PASS \\ \hline
+\texttt{CP-034} & Cambio de cobertura & Los pedidos aceptados no se modifican. & PASS \\ \hline
+\texttt{CP-035} & Compra con la nueva cobertura & Se aplica el área vigente; compra rechazada. & PASS \\ \hline
+\texttt{CP-036} & Horario 07:00 & Compra aceptada en el límite inicial. & PASS \\ \hline
+\texttt{CP-037} & Horario 17:00 & Compra aceptada en el límite final. & PASS \\ \hline
+\texttt{CP-038} & Horario 06:59 & Rechazada (422) sin pedido ni cobro. & PASS \\ \hline
+\texttt{CP-039} & Horario 17:01 & Rechazada (422) sin pedido ni cobro. & PASS \\ \hline
+\texttt{CP-040} & Cambio de horario durante el pago & Pago rechazado (409) y total recalculado. & PASS \\ \hline
+\texttt{CP-041} & Aviso de hora aproximada & La web no promete una hora exacta. & PASS \\ \hline
+\texttt{CP-042} & Propuesta de rutas & & \\ \hline
+\texttt{CP-043} & Confirmación de borrador & & \\ \hline
+\texttt{CP-044} & Asignación de repartidor & & \\ \hline
+\texttt{CP-045} & Repartidor ausente & & \\ \hline
+\texttt{CP-046} & Motor vial caído & Aviso claro y ninguna ruta en línea recta. & PASS \\ \hline
+\texttt{CP-047} & Datos tras la falla del motor & Pedidos y rutas sin cambios. & PASS \\ \hline
+\texttt{CP-048} & Recuperación del motor & Propuestas por calles con distancia y duración. & PASS \\ \hline
+\texttt{CP-049} & Origen común en la tienda & Las rutas salen y regresan a la tienda. & PASS \\ \hline
+\texttt{CP-050} & Paradas y trazado & Orden cronológico y recorrido por calles. & PASS \\ \hline
+\texttt{CP-051} & Métricas estimadas & Se indican como estimadas, sin tráfico en vivo. & PASS \\ \hline
+\texttt{CP-052} & Compra válida & Pedido y comprobante correctos, cobro único. & PASS \\ \hline
+\texttt{CP-053} & Carrito con producto agotado & Pago rechazado (409) sin pedido parcial. & PASS \\ \hline
+\texttt{CP-054} & Precio manipulado & Solicitud rechazada (400); total calculado por el servidor. & PASS \\ \hline
+\end{longtable}
+}
+\noindent{\footnotesize Fuente: elaboración propia.}
