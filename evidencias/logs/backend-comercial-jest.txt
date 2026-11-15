@@ -1,0 +1,28 @@
+$ node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --runInBand --verbose --runTestsByPath test/ape4-backend-commercial.e2e-spec.ts
+  console.error
+    ◇ injected env (0) from ../../../../../../../dev/null
+
+    > 1 | import 'dotenv/config';
+        | ^
+      2 | import postgres from '@prisma/orm-postgres/runtime';
+      3 | import type { Contract } from './contract.d';
+      4 | import contractJson from './contract.json' with { type: 'json' };
+
+      at X (../node_modules/.pnpm/dotenv@18.0.0/node_modules/dotenv/dist/index.cjs:7:300)
+      at Object.z [as configDotenv] (../node_modules/.pnpm/dotenv@18.0.0/node_modules/dotenv/dist/index.cjs:7:1124)
+      at Object.Z [as config] (../node_modules/.pnpm/dotenv@18.0.0/node_modules/dotenv/dist/index.cjs:7:1231)
+      at Object.<anonymous> (../node_modules/.pnpm/dotenv@18.0.0/node_modules/dotenv/dist/config.cjs:1:24)
+      at Object.<anonymous> (../src/prisma/db.ts:1:1)
+      at Object.<anonymous> (../src/database/prisma.service.ts:3:1)
+      at Object.<anonymous> (../src/database/prisma.module.ts:2:1)
+      at Object.<anonymous> (../src/app.module.ts:4:1)
+      at ape4-backend-commercial.e2e-spec.ts:137:27
+      at Object.<anonymous> (ape4-backend-commercial.e2e-spec.ts:137:27)
+
+(node:389030) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        9.71 s
+Ran all test suites within paths "test/ape4-backend-commercial.e2e-spec.ts".

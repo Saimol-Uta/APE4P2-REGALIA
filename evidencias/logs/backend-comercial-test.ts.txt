@@ -1,0 +1,1009 @@
+import { randomUUID } from 'node:crypto';
+import type { INestApplication } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import type { JwtService } from '@nestjs/jwt';
+import request from 'supertest';
+import { AdminOrdersDatabase } from './admin-guest-orders-migration.fixtures.js';
+
+// Fail closed before any application or Prisma module loads.
+if (process.env.DATABASE_URL) {
+  throw new Error('Refusing inherited DATABASE_URL before app imports');
+}
+
+jest.setTimeout(240_000);
+
+describe('APE4 Backend Commercial & Checkout Proofs (CP-001..CP-012, owned PostgreSQL 16)', () => {
+  const database = new AdminOrdersDatabase();
+  const dbName = 'ape4_commercial';
+
+  let app: INestApplication;
+  let db: {
+    user: { create: (data: Record<string, unknown>) => Promise<unknown> };
+    client: {
+      orm: {
+        public: {
+          Category: { create: (data: Record<string, unknown>) => Promise<unknown> };
+          Product: { create: (data: Record<string, unknown>) => Promise<unknown> };
+          UploadedAsset: { create: (data: Record<string, unknown>) => Promise<unknown> };
+          ProductImage: { create: (data: Record<string, unknown>) => Promise<unknown> };
+          Zone: { create: (data: Record<string, unknown>) => Promise<unknown> };
+          Driver: { create: (data: Record<string, unknown>) => Promise<unknown> };
+        };
+      };
+    };
+  };
+  let jwt: JwtService;
+
+  let adminId: string;
+  let clientAId: string;
+  let clientAEmail: string;
+  let driverAId: string;
+  let adminToken: string;
+  let clientAToken: string;
+  let driverAToken: string;
+
+  let categoryId: string;
+  let productId: string;
+  let product7300Id: string;
+  let zoneId: string;
+
+  const clientAPhone = '+593991110001';
+  const futureYear = new Date().getUTCFullYear() + 2;
+  const scheduledAt = `${futureYear}-06-14T10:00:00-05:00`;
+
+  const approvedCard = {
+    number: '9000 0000 0000 0001',
+    holderName: 'PRUEBA APROBADA',
+    expiresMonth: 12,
+    expiresYear: 2030,
+    cvv: '111',
+  };
+
+  const http = () => request(app.getHttpServer());
+  const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
+
+  const sqlScalar = (query: string): string => database.sql(dbName, query);
+
+  const countOrders = (): number => Number(sqlScalar('SELECT count(*) FROM public."order"'));
+  const countReceipts = (): number => Number(sqlScalar('SELECT count(*) FROM public."purchaseReceipt"'));
+  const countUsers = (): number => Number(sqlScalar('SELECT count(*) FROM public."user"'));
+  const countPaymentAttempts = (): number => Number(sqlScalar('SELECT count(*) FROM public."paymentAttempt"'));
+  const getProductStock = (id: string): number =>
+    Number(sqlScalar(`SELECT stock FROM public.product WHERE id='${id}'`));
+  const getApprovedCardBalanceCents = (): bigint =>
+    BigInt(sqlScalar(`SELECT "balanceCents" FROM public."simulatedCard" WHERE "fixtureId"='DEMO_APPROVED'`));
+
+  const baseAdminOrderPayload = (overrides: Record<string, unknown> = {}) => ({
+    buyer: {
+      type: 'REGISTERED_CLIENT',
+      clientId: clientAId,
+      contactPhone: clientAPhone,
+    },
+    payment: { method: 'CASH' },
+    zoneId,
+    deliveryAddress: 'Av. Cevallos y Montalvo, Ambato',
+    deliveryLat: -1.2425,
+    deliveryLng: -78.6188,
+    scheduledDeliveryDate: scheduledAt,
+    items: [{ productId, quantity: 1 }],
+    ...overrides,
+  });
+
+  const baseShopDelivery = () => ({
+    recipient: {
+      name: 'Ana Destinataria',
+      phone: '0991234567',
+    },
+    zoneId,
+    deliveryAddress: 'Av. Cevallos y Montalvo, Ambato',
+    deliveryLocation: {
+      lat: -1.2425,
+      lng: -78.6188,
+    },
+    scheduledDeliveryDate: scheduledAt,
+    deliveryNotes: 'Entregar en recepcion',
+  });
+
+  const ensureTaxRateBps = async (rateBps: number) => {
+    const current = await http().get('/api/v1/admin/shop-settings').set(bearer(adminToken)).expect(200);
+    if (current.body.tax.rateBps !== rateBps || current.body.tax.enabled !== true) {
+      await http()
+        .patch('/api/v1/admin/shop-settings')
+        .set(bearer(adminToken))
+        .send({
+          expectedVersion: current.body.version,
+          tax: { enabled: true, rateBps },
+        })
+        .expect(200);
+    }
+  };
+
+  beforeAll(async () => {
+    if (process.env.DATABASE_URL) {
+      throw new Error('Refusing inherited DATABASE_URL before container startup');
+    }
+
+    database.start();
+    database.create(dbName);
+    database.prisma(dbName, 'migrate');
+
+    process.env.DOTENV_CONFIG_PATH = '/dev/null';
+    process.env.DATABASE_URL = database.ownedUrl(dbName);
+    process.env.JWT_SECRET = randomUUID();
+    process.env.NODE_ENV = 'test';
+    process.env.SIMULATED_PAYMENTS_ENABLED = 'true';
+
+    const { AppModule } = await import('../src/app.module.js');
+    const { PrismaService } = await import('../src/database/prisma.service.js');
+    const { JwtService: NestJwtService } = await import('@nestjs/jwt');
+    const { bootstrapSimulatedCards } = await import('../src/modules/shop/checkout/simulated-card.js');
+    const { seedAmbatoStoreCoverage } = await import('./ambato-store-coverage.fixture.js');
+
+    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = moduleRef.createNestApplication();
+    app.setGlobalPrefix('api/v1');
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+    await app.init();
+
+    db = app.get(PrismaService) as typeof db;
+    jwt = app.get(NestJwtService);
+
+    await bootstrapSimulatedCards(app.get(PrismaService));
+    await seedAmbatoStoreCoverage(app.get(PrismaService));
+
+    adminId = randomUUID();
+    const adminEmail = `admin-${adminId}@example.test`;
+    await db.user.create({
+      id: adminId,
+      name: 'Admin Regalia',
+      email: adminEmail,
+      password: 'fixture-password-hash',
+      role: 'ADMIN',
+    });
+    adminToken = jwt.sign({ sub: adminId, email: adminEmail, role: 'ADMIN' });
+
+    clientAId = randomUUID();
+    clientAEmail = `client-a-${clientAId}@example.test`;
+    await db.user.create({
+      id: clientAId,
+      name: 'María Pérez',
+      email: clientAEmail,
+      password: 'fixture-password-hash',
+      role: 'CLIENT',
+    });
+    clientAToken = jwt.sign({ sub: clientAId, email: clientAEmail, role: 'CLIENT' });
+
+    driverAId = randomUUID();
+    const driverEmail = `driver-a-${driverAId}@example.test`;
+    await db.user.create({
+      id: driverAId,
+      name: 'Driver A',
+      email: driverEmail,
+      password: 'fixture-password-hash',
+      role: 'DRIVER',
+    });
+    await db.client.orm.public.Driver.create({
+      id: randomUUID(),
+      userId: driverAId,
+      vehicle: 'Furgoneta Demo',
+      isAvailable: true,
+    });
+    driverAToken = jwt.sign({ sub: driverAId, email: driverEmail, role: 'DRIVER' });
+
+    categoryId = randomUUID();
+    await db.client.orm.public.Category.create({
+      id: categoryId,
+      name: 'Arreglos Regalia',
+      slug: `arreglos-${randomUUID().slice(0, 8)}`,
+      isActive: true,
+    });
+
+    productId = randomUUID();
+    await db.client.orm.public.Product.create({
+      id: productId,
+      name: 'Caja Sorpresa Clásica',
+      description: 'Caja de regalo clásica para pruebas comerciales',
+      sku: `SKU-CLS-${randomUUID().slice(0, 8)}`,
+      price: 36.5,
+      priceCents: 3650n,
+      stock: 50,
+      isPublished: true,
+      isFeatured: true,
+      categoryId,
+    });
+
+    // Dedicated product with primary image attachment so PATCH /admin/catalog/products/:id can mutate priceCents via HTTP.
+    product7300Id = randomUUID();
+    await db.client.orm.public.Product.create({
+      id: product7300Id,
+      name: 'Caja Edición Especial 73',
+      description: 'Producto con precio exacto 7300 centavos para verificación de IVA 15%',
+      sku: `SKU-7300-${randomUUID().slice(0, 8)}`,
+      price: 73,
+      priceCents: 7300n,
+      stock: 20,
+      isPublished: true,
+      isFeatured: true,
+      categoryId,
+    });
+
+    const uploadId = randomUUID();
+    const secureUrl = `https://cdn.example.test/products/${product7300Id}.jpg`;
+    const publicId = `products/${product7300Id}`;
+    const nowInstant = Temporal.Now.instant();
+    await db.client.orm.public.UploadedAsset.create({
+      id: uploadId,
+      actorId: adminId,
+      publicId,
+      secureUrl,
+      format: 'jpg',
+      bytes: 2048,
+      width: 800,
+      height: 800,
+      status: 'ATTACHED',
+      expiresAt: nowInstant.add({ hours: 24 }),
+      attachedAt: nowInstant,
+    });
+    await db.client.orm.public.ProductImage.create({
+      id: randomUUID(),
+      productId: product7300Id,
+      uploadId,
+      publicId,
+      secureUrl,
+      altText: 'Caja Edición Especial 73',
+      position: 0,
+      isPrimary: true,
+    });
+
+    zoneId = randomUUID();
+    await db.client.orm.public.Zone.create({
+      id: zoneId,
+      name: 'Centro Ambato',
+      code: `AMB-${randomUUID().slice(0, 4).toUpperCase()}`,
+      depotLat: -1.2425,
+      depotLng: -78.6188,
+    });
+  }, 180_000);
+
+  afterAll(async () => {
+    try {
+      if (app) await app.close();
+    } finally {
+      delete process.env.DATABASE_URL;
+      delete process.env.JWT_SECRET;
+      delete process.env.DOTENV_CONFIG_PATH;
+      database.stop();
+    }
+  });
+
+  it('CP-001: ADMIN purchase for REGISTERED_CLIENT with independent giftRecipient', async () => {
+    const stockBefore = getProductStock(productId);
+    const idempotencyKey = randomUUID();
+
+    const createRes = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', idempotencyKey)
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'REGISTERED_CLIENT',
+            clientId: clientAId,
+            contactPhone: clientAPhone,
+          },
+          giftRecipient: {
+            name: 'Ana Destinataria',
+            contactPhone: '+593992220002',
+          },
+          payment: { method: 'CASH' },
+          items: [{ productId, quantity: 2 }],
+        }),
+      )
+      .expect(201);
+
+    const orderId = createRes.body.id as string;
+    expect(createRes.body).toMatchObject({
+      id: expect.any(String),
+      userId: clientAId,
+      createdById: adminId,
+      recipientType: 'REGISTERED_CLIENT',
+      buyerName: 'María Pérez',
+      buyerPhone: clientAPhone,
+      recipientName: 'Ana Destinataria',
+      recipientPhone: '+593992220002',
+      status: 'PENDING',
+    });
+
+    const adminOrder = await http()
+      .get(`/api/v1/orders/${orderId}`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(adminOrder.body).toMatchObject({
+      id: orderId,
+      userId: clientAId,
+      buyerName: 'María Pérez',
+      buyerPhone: clientAPhone,
+      recipientName: 'Ana Destinataria',
+      recipientPhone: '+593992220002',
+    });
+
+    const adminReceipt = await http()
+      .get(`/api/v1/orders/${orderId}/receipt`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(adminReceipt.body).toMatchObject({
+      orderId,
+      buyer: { name: 'María Pérez', email: clientAEmail, phone: clientAPhone },
+      recipient: { name: 'Ana Destinataria', phone: '+593992220002' },
+      subtotalCents: 7300,
+      tax: { mode: 'SIMULATED', enabled: true, rateBps: 1500, amountCents: 1095 },
+      totalCents: 8395,
+    });
+
+    const clientOrder = await http()
+      .get(`/api/v1/shop/orders/${orderId}`)
+      .set(bearer(clientAToken))
+      .expect(200);
+    expect(clientOrder.body).toMatchObject({
+      id: orderId,
+      source: 'ADMIN',
+      receiptAvailable: true,
+      receiptId: createRes.body.receipt.id,
+      buyer: { id: clientAId, name: 'María Pérez', email: clientAEmail },
+      recipient: { name: 'Ana Destinataria', phone: '+593992220002' },
+      subtotalCents: 7300,
+      taxAmountCents: 1095,
+      totalCents: 8395,
+    });
+
+    expect(getProductStock(productId)).toBe(stockBefore - 2);
+  });
+
+  it('CP-002: rejects ADMIN REGISTERED_CLIENT purchase without buyer contactPhone with 400 and no side effects', async () => {
+    const ordersBefore = countOrders();
+    const receiptsBefore = countReceipts();
+    const stockBefore = getProductStock(productId);
+
+    const rejected = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'REGISTERED_CLIENT',
+            clientId: clientAId,
+          },
+        }),
+      )
+      .expect(400);
+
+    expect(rejected.body.statusCode).toBe(400);
+    expect(countOrders()).toBe(ordersBefore);
+    expect(countReceipts()).toBe(receiptsBefore);
+    expect(getProductStock(productId)).toBe(stockBefore);
+  });
+
+  it('CP-003: ADMIN GUEST purchase creates printable commercial receipt without creating a user account', async () => {
+    const usersBefore = countUsers();
+
+    const created = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'GUEST',
+            name: 'Carlos Invitado',
+            contactPhone: '+593993330003',
+          },
+          giftRecipient: {
+            name: 'Lucía Destinataria',
+            contactPhone: '+593993330004',
+          },
+          payment: { method: 'CASH' },
+          items: [{ productId, quantity: 1 }],
+        }),
+      )
+      .expect(201);
+
+    const orderId = created.body.id as string;
+    expect(created.body).toMatchObject({
+      id: orderId,
+      userId: null,
+      recipientType: 'GUEST',
+      buyerName: 'Carlos Invitado',
+      buyerPhone: '+593993330003',
+      recipientName: 'Lucía Destinataria',
+      recipientPhone: '+593993330004',
+    });
+
+    const receipt = await http()
+      .get(`/api/v1/orders/${orderId}/receipt`)
+      .set(bearer(adminToken))
+      .expect(200);
+
+    expect(receipt.body).toMatchObject({
+      id: created.body.receipt.id,
+      number: expect.any(String),
+      orderId,
+      issuedAt: expect.any(String),
+      merchantName: 'REGALÍA',
+      currency: 'USD',
+      buyer: { name: 'Carlos Invitado', phone: '+593993330003' },
+      recipient: { name: 'Lucía Destinataria', phone: '+593993330004' },
+      subtotalCents: 3650,
+      tax: { mode: 'SIMULATED', enabled: true, rateBps: 1500, ratePercent: 15, amountCents: 548 },
+      shipping: { status: 'FREE_INCLUDED', amountCents: 0, includedInPrices: true },
+      totalCents: 4198,
+      disclaimer: 'COMPROBANTE DE COMPRA SIMULADO — SIN VALIDEZ TRIBUTARIA',
+    });
+    expect(receipt.body.buyer).not.toHaveProperty('email');
+    expect(receipt.body.items).toEqual([
+      {
+        sku: expect.any(String),
+        name: 'Caja Sorpresa Clásica',
+        quantity: 1,
+        unitPriceCents: 3650,
+        lineTotalCents: 3650,
+      },
+    ]);
+    expect(countUsers()).toBe(usersBefore);
+    expect(sqlScalar(`SELECT ("buyerId" IS NULL)::text FROM public."purchaseReceipt" WHERE "orderId"='${orderId}'`)).toBe('true');
+  });
+
+  it('CP-004: rejects ADMIN GUEST purchase without mandatory contactPhone with 400 and no persistence', async () => {
+    const ordersBefore = countOrders();
+    const receiptsBefore = countReceipts();
+    const usersBefore = countUsers();
+    const stockBefore = getProductStock(productId);
+
+    const missingPhone = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'GUEST',
+            name: 'Invitado Sin Teléfono',
+          },
+        }),
+      )
+      .expect(400);
+    expect(missingPhone.body.statusCode).toBe(400);
+
+    const blankPhone = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'GUEST',
+            name: 'Invitado Teléfono Vacío',
+            contactPhone: '   ',
+          },
+        }),
+      )
+      .expect(400);
+    expect(blankPhone.body.statusCode).toBe(400);
+
+    expect(countOrders()).toBe(ordersBefore);
+    expect(countReceipts()).toBe(receiptsBefore);
+    expect(countUsers()).toBe(usersBefore);
+    expect(getProductStock(productId)).toBe(stockBefore);
+  });
+
+  it('CP-005: ADMIN GUEST purchase using CLIENT-A phone does not link to CLIENT-A or leak via shop orders', async () => {
+    const usersBefore = countUsers();
+
+    const created = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'GUEST',
+            name: 'Invitado Homónimo Teléfono',
+            contactPhone: clientAPhone,
+          },
+        }),
+      )
+      .expect(201);
+
+    const guestOrderId = created.body.id as string;
+    expect(created.body.userId).toBeNull();
+    expect(created.body.recipientType).toBe('GUEST');
+
+    const clientList = await http()
+      .get('/api/v1/shop/orders?page=1&pageSize=50')
+      .set(bearer(clientAToken))
+      .expect(200);
+    expect(clientList.body.items.some((item: { id: string }) => item.id === guestOrderId)).toBe(false);
+
+    const clientDetail = await http()
+      .get(`/api/v1/shop/orders/${guestOrderId}`)
+      .set(bearer(clientAToken));
+    expect([403, 404]).toContain(clientDetail.status);
+    expect(clientDetail.status).toBe(404);
+    expect(clientDetail.body.error.code).toBe('ORDER_NOT_FOUND');
+
+    expect(countUsers()).toBe(usersBefore);
+    expect(sqlScalar(`SELECT ("userId" IS NULL)::text FROM public."order" WHERE id='${guestOrderId}'`)).toBe('true');
+  });
+
+  it('CP-006: ADMIN external declared payment in CASH without simulated card debit or bank fields', async () => {
+    const paymentAttemptsBefore = countPaymentAttempts();
+    const cardBalanceBefore = getApprovedCardBalanceCents();
+
+    const created = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          payment: {
+            method: 'CASH',
+            note: 'Pago en caja',
+          },
+        }),
+      )
+      .expect(201);
+
+    const orderId = created.body.id as string;
+    expect(created.body.payment).toEqual({
+      kind: 'ADMIN_DECLARED_EXTERNAL',
+      status: 'DECLARED',
+      method: 'CASH',
+      declaredById: adminId,
+      declaredAt: expect.any(String),
+    });
+    expect(created.body.payment).not.toHaveProperty('cardLast4');
+    expect(created.body.payment).not.toHaveProperty('reference');
+
+    const receipt = await http()
+      .get(`/api/v1/orders/${orderId}/receipt`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(receipt.body.payment).toEqual({
+      kind: 'ADMIN_DECLARED_EXTERNAL',
+      status: 'DECLARED',
+      method: 'CASH',
+      declaredById: adminId,
+      declaredAt: created.body.payment.declaredAt,
+    });
+    expect(receipt.body.payment).not.toHaveProperty('cardLast4');
+    expect(receipt.body.payment).not.toHaveProperty('reference');
+
+    const declarationRow = sqlScalar(
+      `SELECT method::text || '|' || "declaredById" || '|' || COALESCE(note, '') FROM public."externalPaymentDeclaration" WHERE "orderId"='${orderId}'`,
+    );
+    expect(declarationRow).toBe(`CASH|${adminId}|Pago en caja`);
+    expect(countPaymentAttempts()).toBe(paymentAttemptsBefore);
+    expect(getApprovedCardBalanceCents()).toBe(cardBalanceBefore);
+  });
+
+  it('CP-007: ADMIN external declared payment by TRANSFER succeeds without bank reference or verification', async () => {
+    const paymentAttemptsBefore = countPaymentAttempts();
+
+    const created = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          payment: {
+            method: 'TRANSFER',
+          },
+        }),
+      )
+      .expect(201);
+
+    const orderId = created.body.id as string;
+    expect(created.body.payment).toEqual({
+      kind: 'ADMIN_DECLARED_EXTERNAL',
+      status: 'DECLARED',
+      method: 'TRANSFER',
+      declaredById: adminId,
+      declaredAt: expect.any(String),
+    });
+    expect(created.body.payment).not.toHaveProperty('reference');
+    expect(created.body.payment).not.toHaveProperty('cardLast4');
+
+    const receipt = await http()
+      .get(`/api/v1/orders/${orderId}/receipt`)
+      .set(bearer(adminToken))
+      .expect(200);
+    expect(receipt.body.payment).toEqual({
+      kind: 'ADMIN_DECLARED_EXTERNAL',
+      status: 'DECLARED',
+      method: 'TRANSFER',
+      declaredById: adminId,
+      declaredAt: created.body.payment.declaredAt,
+    });
+    expect(receipt.body.payment).not.toHaveProperty('reference');
+    expect(receipt.body.payment).not.toHaveProperty('bankReference');
+    expect(receipt.body.payment).not.toHaveProperty('cardLast4');
+
+    const declarationRow = sqlScalar(
+      `SELECT method::text || '|' || "declaredById" || '|' || (note IS NULL)::text FROM public."externalPaymentDeclaration" WHERE "orderId"='${orderId}'`,
+    );
+    expect(declarationRow).toBe(`TRANSFER|${adminId}|true`);
+    expect(countPaymentAttempts()).toBe(paymentAttemptsBefore);
+  });
+
+  it('CP-008: tax rate change after shop quote rejects checkout with 409 SHOP_SETTINGS_CHANGED and zero side effects', async () => {
+    await ensureTaxRateBps(1500);
+    const settingsBefore = await http().get('/api/v1/admin/shop-settings').set(bearer(adminToken)).expect(200);
+    const ordersBefore = countOrders();
+    const receiptsBefore = countReceipts();
+    const stockBefore = getProductStock(productId);
+    const balanceBefore = getApprovedCardBalanceCents();
+
+    const quoteRes = await http()
+      .post('/api/v1/shop/checkout/quote')
+      .set(bearer(clientAToken))
+      .send({
+        items: [{ productId, quantity: 1 }],
+        delivery: baseShopDelivery(),
+      })
+      .expect(200);
+    expect(quoteRes.body.tax.rateBps).toBe(1500);
+
+    await http()
+      .patch('/api/v1/admin/shop-settings')
+      .set(bearer(adminToken))
+      .send({
+        expectedVersion: settingsBefore.body.version,
+        tax: { rateBps: 1200 },
+      })
+      .expect(200);
+
+    const checkoutRes = await http()
+      .post('/api/v1/shop/checkout')
+      .set(bearer(clientAToken))
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        items: [{ productId, quantity: 1 }],
+        delivery: baseShopDelivery(),
+        paymentCard: approvedCard,
+        quoteToken: quoteRes.body.quoteToken,
+      })
+      .expect(409);
+
+    expect(checkoutRes.body.error.code).toBe('SHOP_SETTINGS_CHANGED');
+    expect(countOrders()).toBe(ordersBefore);
+    expect(countReceipts()).toBe(receiptsBefore);
+    expect(getProductStock(productId)).toBe(stockBefore);
+    expect(getApprovedCardBalanceCents()).toBe(balanceBefore);
+  });
+
+  it('CP-009: price change after quote fails with 409 PRICE_CHANGED and valid 7300+15% purchase remains immutable after later changes', async () => {
+    await ensureTaxRateBps(1500);
+    await http()
+      .patch(`/api/v1/admin/catalog/products/${product7300Id}`)
+      .set(bearer(adminToken))
+      .send({ priceCents: 7300 })
+      .expect(200);
+
+    const ordersBefore = countOrders();
+    const receiptsBefore = countReceipts();
+    const stockBefore = getProductStock(product7300Id);
+    const balanceBefore = getApprovedCardBalanceCents();
+
+    const staleQuote = await http()
+      .post('/api/v1/shop/checkout/quote')
+      .set(bearer(clientAToken))
+      .send({
+        items: [{ productId: product7300Id, quantity: 1 }],
+        delivery: baseShopDelivery(),
+      })
+      .expect(200);
+    expect(staleQuote.body).toMatchObject({
+      subtotalCents: 7300,
+      tax: { rateBps: 1500, amountCents: 1095 },
+      totalCents: 8395,
+    });
+
+    await http()
+      .patch(`/api/v1/admin/catalog/products/${product7300Id}`)
+      .set(bearer(adminToken))
+      .send({ priceCents: 7900 })
+      .expect(200);
+
+    const priceChangedRes = await http()
+      .post('/api/v1/shop/checkout')
+      .set(bearer(clientAToken))
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        items: [{ productId: product7300Id, quantity: 1 }],
+        delivery: baseShopDelivery(),
+        paymentCard: approvedCard,
+        quoteToken: staleQuote.body.quoteToken,
+      })
+      .expect(409);
+
+    expect(priceChangedRes.body.error.code).toBe('PRICE_CHANGED');
+    expect(countOrders()).toBe(ordersBefore);
+    expect(countReceipts()).toBe(receiptsBefore);
+    expect(getProductStock(product7300Id)).toBe(stockBefore);
+    expect(getApprovedCardBalanceCents()).toBe(balanceBefore);
+
+    await http()
+      .patch(`/api/v1/admin/catalog/products/${product7300Id}`)
+      .set(bearer(adminToken))
+      .send({ priceCents: 7300 })
+      .expect(200);
+
+    const freshQuote = await http()
+      .post('/api/v1/shop/checkout/quote')
+      .set(bearer(clientAToken))
+      .send({
+        items: [{ productId: product7300Id, quantity: 1 }],
+        delivery: baseShopDelivery(),
+      })
+      .expect(200);
+
+    const checkoutSuccess = await http()
+      .post('/api/v1/shop/checkout')
+      .set(bearer(clientAToken))
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        items: [{ productId: product7300Id, quantity: 1 }],
+        delivery: baseShopDelivery(),
+        paymentCard: approvedCard,
+        quoteToken: freshQuote.body.quoteToken,
+      })
+      .expect(201);
+
+    const orderId = checkoutSuccess.body.order.id as string;
+    expect(checkoutSuccess.body.order).toMatchObject({
+      subtotalCents: 7300,
+      taxAmountCents: 1095,
+      taxRateBps: 1500,
+      totalCents: 8395,
+    });
+    expect(checkoutSuccess.body.receipt).toEqual({
+      id: expect.any(String),
+      number: expect.any(String),
+    });
+
+    const initialReceipt = await http()
+      .get(`/api/v1/shop/orders/${orderId}/receipt`)
+      .set(bearer(clientAToken))
+      .expect(200);
+    expect(initialReceipt.body).toMatchObject({
+      orderId,
+      subtotalCents: 7300,
+      totalCents: 8395,
+      tax: { mode: 'SIMULATED', enabled: true, rateBps: 1500, ratePercent: 15, amountCents: 1095 },
+      disclaimer: 'COMPROBANTE DE COMPRA SIMULADO — SIN VALIDEZ TRIBUTARIA',
+    });
+
+    // Mutate both tax rate and catalog price after purchase, then re-read receipt.
+    const settingsNow = await http().get('/api/v1/admin/shop-settings').set(bearer(adminToken)).expect(200);
+    await http()
+      .patch('/api/v1/admin/shop-settings')
+      .set(bearer(adminToken))
+      .send({ expectedVersion: settingsNow.body.version, tax: { rateBps: 1200 } })
+      .expect(200);
+    await http()
+      .patch(`/api/v1/admin/catalog/products/${product7300Id}`)
+      .set(bearer(adminToken))
+      .send({ priceCents: 9500 })
+      .expect(200);
+
+    const rereadReceipt = await http()
+      .get(`/api/v1/shop/orders/${orderId}/receipt`)
+      .set(bearer(clientAToken))
+      .expect(200);
+    expect(rereadReceipt.body).toMatchObject({
+      orderId,
+      subtotalCents: 7300,
+      totalCents: 8395,
+      tax: { mode: 'SIMULATED', enabled: true, rateBps: 1500, ratePercent: 15, amountCents: 1095 },
+      disclaimer: 'COMPROBANTE DE COMPRA SIMULADO — SIN VALIDEZ TRIBUTARIA',
+    });
+    expect(JSON.stringify(rereadReceipt.body)).not.toMatch(/factura\s*fiscal|autorizaci[oó]n\s*sri/i);
+
+    await ensureTaxRateBps(1500);
+  });
+
+  it('CP-010: authorized ADMIN contact correction bumps contactRevision and records append-only audit', async () => {
+    const created = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'REGISTERED_CLIENT',
+            clientId: clientAId,
+            contactPhone: '+593990001001',
+          },
+          giftRecipient: {
+            name: 'Destinatario CP010',
+            contactPhone: '+593990001002',
+          },
+        }),
+      )
+      .expect(201);
+
+    const orderId = created.body.id as string;
+    const patched = await http()
+      .patch(`/api/v1/orders/${orderId}/contact`)
+      .set(bearer(adminToken))
+      .send({
+        contactRevision: 0,
+        buyerPhone: '+593990001112',
+        recipientPhone: '+593990001113',
+      })
+      .expect(200);
+
+    expect(patched.body).toMatchObject({
+      id: orderId,
+      buyerPhone: '+593990001112',
+      recipientPhone: '+593990001113',
+      contactRevision: 1,
+    });
+
+    const history = await http()
+      .get(`/api/v1/orders/${orderId}/contact-history`)
+      .set(bearer(adminToken))
+      .expect(200);
+
+    expect(history.body).toEqual([
+      {
+        id: expect.any(String),
+        field: 'buyerPhone',
+        previousValue: '+593990001001',
+        nextValue: '+593990001112',
+        actorId: adminId,
+        createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      },
+      {
+        id: expect.any(String),
+        field: 'recipientPhone',
+        previousValue: '+593990001002',
+        nextValue: '+593990001113',
+        actorId: adminId,
+        createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      },
+    ]);
+  });
+
+  it('CP-011: ADMIN contact correction on P1 keeps P1 receipt frozen and control order P2 untouched', async () => {
+    const p1 = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'REGISTERED_CLIENT',
+            clientId: clientAId,
+            contactPhone: '+593990002000',
+          },
+          giftRecipient: {
+            name: 'Destinatario P1',
+            contactPhone: '+593990002001',
+          },
+        }),
+      )
+      .expect(201);
+
+    const p2 = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'REGISTERED_CLIENT',
+            clientId: clientAId,
+            contactPhone: '+593990002010',
+          },
+          giftRecipient: {
+            name: 'Destinatario P2',
+            contactPhone: '+593990002002',
+          },
+        }),
+      )
+      .expect(201);
+
+    const p1Id = p1.body.id as string;
+    const p2Id = p2.body.id as string;
+
+    const p1ReceiptBefore = await http().get(`/api/v1/orders/${p1Id}/receipt`).set(bearer(adminToken)).expect(200);
+    const p2OrderBefore = await http().get(`/api/v1/orders/${p2Id}`).set(bearer(adminToken)).expect(200);
+
+    const patched = await http()
+      .patch(`/api/v1/orders/${p1Id}/contact`)
+      .set(bearer(adminToken))
+      .send({
+        contactRevision: 0,
+        recipientPhone: '+593994445556',
+      })
+      .expect(200);
+    expect(patched.body).toMatchObject({
+      id: p1Id,
+      recipientPhone: '+593994445556',
+      contactRevision: 1,
+    });
+
+    const p1OrderAfter = await http().get(`/api/v1/orders/${p1Id}`).set(bearer(adminToken)).expect(200);
+    expect(p1OrderAfter.body).toMatchObject({
+      id: p1Id,
+      recipientPhone: '+593994445556',
+      contactRevision: 1,
+    });
+
+    const p1ReceiptAfter = await http().get(`/api/v1/orders/${p1Id}/receipt`).set(bearer(adminToken)).expect(200);
+    expect(p1ReceiptAfter.body).toEqual(p1ReceiptBefore.body);
+    expect(p1ReceiptAfter.body.recipient.phone).toBe('+593990002001');
+
+    const p2OrderAfter = await http().get(`/api/v1/orders/${p2Id}`).set(bearer(adminToken)).expect(200);
+    expect(p2OrderAfter.body).toEqual(p2OrderBefore.body);
+    expect(p2OrderAfter.body.contactRevision).toBe(0);
+    expect(p2OrderAfter.body.recipientPhone).toBe('+593990002002');
+  });
+
+  it('CP-012: rejects contact correction by CLIENT-A and DRIVER-A with 403 and preserves contact and audit history', async () => {
+    const created = await http()
+      .post('/api/v1/orders/admin')
+      .set(bearer(adminToken))
+      .set('Idempotency-Key', randomUUID())
+      .send(
+        baseAdminOrderPayload({
+          buyer: {
+            type: 'REGISTERED_CLIENT',
+            clientId: clientAId,
+            contactPhone: '+593990003001',
+          },
+          giftRecipient: {
+            name: 'Destinatario CP012',
+            contactPhone: '+593990003002',
+          },
+        }),
+      )
+      .expect(201);
+
+    const orderId = created.body.id as string;
+    const orderBefore = await http().get(`/api/v1/orders/${orderId}`).set(bearer(adminToken)).expect(200);
+    const historyBefore = await http().get(`/api/v1/orders/${orderId}/contact-history`).set(bearer(adminToken)).expect(200);
+
+    await http()
+      .patch(`/api/v1/orders/${orderId}/contact`)
+      .set(bearer(clientAToken))
+      .send({
+        contactRevision: 0,
+        recipientPhone: '+593998887776',
+      })
+      .expect(403);
+
+    await http()
+      .patch(`/api/v1/orders/${orderId}/contact`)
+      .set(bearer(driverAToken))
+      .send({
+        contactRevision: 0,
+        recipientPhone: '+593998887776',
+      })
+      .expect(403);
+
+    const orderAfter = await http().get(`/api/v1/orders/${orderId}`).set(bearer(adminToken)).expect(200);
+    const historyAfter = await http().get(`/api/v1/orders/${orderId}/contact-history`).set(bearer(adminToken)).expect(200);
+
+    expect(orderAfter.body).toEqual(orderBefore.body);
+    expect(historyAfter.body).toEqual(historyBefore.body);
+  });
+});

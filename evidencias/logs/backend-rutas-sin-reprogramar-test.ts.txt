@@ -1,0 +1,1225 @@
+import { createServer, type Server } from 'node:http';
+import { createServer as createNetServer, Socket } from 'node:net';
+import { AddressInfo } from 'node:net';
+import { randomUUID } from 'node:crypto';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import postgres from '@prisma/orm-postgres/runtime';
+import type { Contract } from '../src/prisma/contract.d';
+import contractJson from '../src/prisma/contract.json' with { type: 'json' };
+import {
+  cleanupOwnedResources,
+  createOwnedDatabase,
+  runPrismaMigrate,
+  startOwnedContainer,
+} from './geolocation-migration.fixtures.js';
+import { seedAmbatoStoreCoverage } from './ambato-store-coverage.fixture.js';
+import { fakeOsrmResponse } from './fake-osrm.js';
+import { bootstrapSimulatedCards } from '../src/modules/shop/checkout/simulated-card.js';
+
+// Fail closed before any application or Prisma module import if DATABASE_URL is inherited.
+if (process.env.DATABASE_URL) {
+  throw new Error('Refusing ambient DATABASE_URL before app imports');
+}
+
+jest.setTimeout(300_000);
+
+const BUSINESS_TZ = 'America/Guayaquil';
+const STORE_ORIGIN = { lat: -1.24908, lng: -78.61675 };
+const VALID_DELIVERY_POINT = { lat: -1.2425, lng: -78.6188 };
+const CLUSTER_POINT_A = { lat: -1.236, lng: -78.612 };
+const CLUSTER_POINT_B = { lat: -1.237, lng: -78.611 };
+const CLUSTER_POINT_C = { lat: -1.2371, lng: -78.6109 };
+
+function localDay(offsetDays: number): string {
+  return Temporal.Now.zonedDateTimeISO(BUSINESS_TZ)
+    .toPlainDate()
+    .add({ days: offsetDays })
+    .toString();
+}
+
+function localOffsetIso(offsetDays: number, plainTime: string): string {
+  const dateStr = localDay(offsetDays);
+  return `${dateStr}T${plainTime}-05:00`;
+}
+
+function localInstant(offsetDays: number, plainTime: string): Temporal.Instant {
+  return Temporal.Now.zonedDateTimeISO(BUSINESS_TZ)
+    .toPlainDate()
+    .add({ days: offsetDays })
+    .toZonedDateTime({ timeZone: BUSINESS_TZ, plainTime })
+    .toInstant();
+}
+
+function formatGuayaquilClock(isoInstant: string): string {
+  const zdt = Temporal.Instant.from(isoInstant).toZonedDateTimeISO(BUSINESS_TZ);
+  const hh = String(zdt.hour).padStart(2, '0');
+  const mm = String(zdt.minute).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+interface CustomOsrmServer {
+  url: string;
+  setTableOverride: (fn: ((rawUrl: string) => { status: number; body: unknown } | null) | null) => void;
+  close: () => Promise<void>;
+}
+
+async function startCaseOsrmServer(): Promise<CustomOsrmServer> {
+  let tableOverride: ((rawUrl: string) => { status: number; body: unknown } | null) | null = null;
+  const server: Server = createServer((req, res) => {
+    const rawUrl = req.url ?? '/';
+    const overridden = tableOverride ? tableOverride(rawUrl) : null;
+    const { status, body } = overridden ?? fakeOsrmResponse(rawUrl, { mode: 'ok' });
+    res.writeHead(status, {
+      'content-type': typeof body === 'string' ? 'text/html' : 'application/json',
+    });
+    res.end(typeof body === 'string' ? body : JSON.stringify(body));
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address() as AddressInfo;
+  return {
+    url: `http://127.0.0.1:${port}`,
+    setTableOverride: (fn) => {
+      tableOverride = fn;
+    },
+    close: () =>
+      new Promise<void>((resolve) => {
+        server.close(() => resolve());
+        server.closeAllConnections?.();
+      }),
+  };
+}
+
+interface CaseHarness {
+  app: INestApplication;
+  db: { client: ReturnType<typeof postgres<Contract>>; user: any };
+  pgClient: ReturnType<typeof postgres<Contract>>;
+  adminId: string;
+  clientId: string;
+  driverUserId: string;
+  driverId: string;
+  zoneId: string;
+  categoryId: string;
+  productId: string;
+  adminToken: string;
+  clientToken: string;
+  driverToken: string;
+}
+
+async function closeCaseHarness(h: CaseHarness | undefined): Promise<void> {
+  if (!h) return;
+  const server = h.app.getHttpServer() as
+    | {
+        closeIdleConnections?: () => void;
+        closeAllConnections?: () => void;
+      }
+    | undefined;
+  try {
+    server?.closeIdleConnections?.();
+    await h.app.close();
+  } finally {
+    server?.closeAllConnections?.();
+    await h.pgClient.close();
+  }
+}
+
+async function bootCaseHarness(dbPrefix: string): Promise<CaseHarness> {
+  const suffix = randomUUID().replaceAll('-', '').slice(0, 10);
+  const dbUrl = createOwnedDatabase(`${dbPrefix}_${suffix}`);
+  runPrismaMigrate(dbUrl);
+
+  process.env.DOTENV_CONFIG_PATH = '/dev/null';
+  process.env.NODE_ENV = 'test';
+  process.env.SIMULATED_PAYMENTS_ENABLED = 'true';
+  process.env.DATABASE_URL = dbUrl;
+  process.env.JWT_SECRET = randomUUID();
+
+  const pgClient = postgres<Contract>({ contractJson, url: dbUrl });
+  let app: CaseHarness['app'] | undefined;
+
+  try {
+    const { AppModule } = await import('../src/app.module.js');
+    const { PrismaService } = await import('../src/database/prisma.service.js');
+    const { JwtService } = await import('@nestjs/jwt');
+
+    const prismaOverride = {
+      client: pgClient,
+      orm: pgClient.orm,
+      sql: pgClient.sql,
+      user: pgClient.orm.public.User,
+      driver: pgClient.orm.public.Driver,
+      zone: pgClient.orm.public.Zone,
+      storeCoverage: pgClient.orm.public.StoreCoverage,
+      product: pgClient.orm.public.Product,
+      category: pgClient.orm.public.Category,
+      productImage: pgClient.orm.public.ProductImage,
+      uploadedAsset: pgClient.orm.public.UploadedAsset,
+      route: pgClient.orm.public.Route,
+      order: pgClient.orm.public.Order,
+      orderItem: pgClient.orm.public.OrderItem,
+    };
+
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
+    })
+      .overrideProvider(PrismaService)
+      .useValue(prismaOverride)
+      .compile();
+
+    app = moduleRef.createNestApplication();
+  app.setGlobalPrefix('api/v1');
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  await app.listen(0);
+
+  const db = prismaOverride;
+  const jwt = app.get(JwtService);
+
+  await bootstrapSimulatedCards(db);
+
+  const adminId = randomUUID();
+  const clientId = randomUUID();
+  const driverUserId = randomUUID();
+  const driverId = randomUUID();
+  const zoneId = randomUUID();
+  const categoryId = randomUUID();
+  const productId = randomUUID();
+
+  await db.user.create({
+    id: adminId,
+    name: 'Admin APE4',
+    email: `admin-${suffix}@example.test`,
+    password: 'fixture-password',
+    role: 'ADMIN',
+  });
+  await db.user.create({
+    id: clientId,
+    name: 'Client A APE4',
+    email: `client-${suffix}@example.test`,
+    password: 'fixture-password',
+    role: 'CLIENT',
+  });
+  await db.user.create({
+    id: driverUserId,
+    name: 'Driver A APE4',
+    email: `driver-${suffix}@example.test`,
+    password: 'fixture-password',
+    role: 'DRIVER',
+  });
+
+  await db.client.orm.public.Driver.create({
+    id: driverId,
+    userId: driverUserId,
+    vehicle: 'Moto APE4',
+    isAvailable: true,
+  });
+
+  await db.client.orm.public.Zone.create({
+    id: zoneId,
+    name: `Ambato ${suffix}`,
+    code: `AMB-${suffix.slice(0, 4).toUpperCase()}`,
+    depotLat: STORE_ORIGIN.lat,
+    depotLng: STORE_ORIGIN.lng,
+  });
+
+  await seedAmbatoStoreCoverage(db);
+
+  await db.client.orm.public.Category.create({
+    id: categoryId,
+    name: `Regalos ${suffix}`,
+    slug: `regalos-${suffix}`,
+    isActive: true,
+  });
+
+  await db.client.orm.public.Product.create({
+    id: productId,
+    name: 'Caja Regalo APE4',
+    description: 'Producto de prueba APE4',
+    sku: `SKU-APE4-${suffix}`,
+    price: 36.5,
+    priceCents: 3650n,
+    stock: 100,
+    isPublished: true,
+    isFeatured: true,
+    categoryId,
+  });
+
+  const adminToken = jwt.sign({ sub: adminId, email: `admin-${suffix}@example.test`, role: 'ADMIN' });
+  const clientToken = jwt.sign({ sub: clientId, email: `client-${suffix}@example.test`, role: 'CLIENT' });
+  const driverToken = jwt.sign({ sub: driverUserId, email: `driver-${suffix}@example.test`, role: 'DRIVER' });
+
+    return {
+      app,
+      db,
+      pgClient,
+      adminId,
+      clientId,
+      driverUserId,
+      driverId,
+      zoneId,
+      categoryId,
+      productId,
+      adminToken,
+      clientToken,
+      driverToken,
+    };
+  } catch (error) {
+    if (app) {
+      const server = app.getHttpServer() as
+        | {
+            closeIdleConnections?: () => void;
+            closeAllConnections?: () => void;
+          }
+        | undefined;
+      try {
+        server?.closeIdleConnections?.();
+        await app.close().catch(() => {});
+      } finally {
+        server?.closeAllConnections?.();
+      }
+    }
+    await pgClient.close().catch(() => {});
+    throw error;
+  }
+}
+
+describe('APE4 Backend Proofs CP-013 through CP-027 (isolated owned PostgreSQL + loopback OSRM)', () => {
+  let osrm: CustomOsrmServer;
+
+  beforeAll(async () => {
+    startOwnedContainer();
+    osrm = await startCaseOsrmServer();
+    process.env.ROAD_ENGINE = 'OSRM';
+    process.env.OSRM_BASE_URL = osrm.url;
+    process.env.OSRM_TIMEOUT_MS = '2000';
+  });
+
+  afterAll(async () => {
+    try {
+      const { db: singletonDb } = await import('../src/prisma/db.js');
+      await singletonDb.close();
+    } catch {
+      // Ignore if db module was never initialized or already closed.
+    }
+    for (const key of [
+      'DATABASE_URL',
+      'JWT_SECRET',
+      'ROAD_ENGINE',
+      'OSRM_BASE_URL',
+      'OSRM_TIMEOUT_MS',
+      'SIMULATED_PAYMENTS_ENABLED',
+      'DOTENV_CONFIG_PATH',
+    ]) {
+      delete process.env[key];
+    }
+    if (osrm) await osrm.close();
+    cleanupOwnedResources();
+  });
+
+  describe('Orders, Delivery Schedule & Checkout Idempotency (CP-013..CP-016, CP-022, CP-024..CP-026)', () => {
+    let h!: CaseHarness;
+
+    const http = () => request(h.app.getHttpServer());
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+
+    const adminOrderPayload = (scheduledDeliveryDate: string) => ({
+      buyer: {
+        type: 'REGISTERED_CLIENT',
+        clientId: h.clientId,
+        contactPhone: '+593990001001',
+      },
+      payment: { method: 'CASH', note: 'Pago en caja' },
+      zoneId: h.zoneId,
+      deliveryAddress: 'Av. Cevallos y Montalvo, Ambato',
+      deliveryLat: VALID_DELIVERY_POINT.lat,
+      deliveryLng: VALID_DELIVERY_POINT.lng,
+      scheduledDeliveryDate,
+      items: [{ productId: h.productId, quantity: 1 }],
+    });
+
+    beforeAll(async () => {
+      h = await bootCaseHarness('ape4_orders');
+    });
+
+    afterAll(async () => {
+      const target = h;
+      (h as CaseHarness | undefined) = undefined;
+      await closeCaseHarness(target);
+    });
+
+    it('CP-013: Horario ADMIN límite inicial 07:00 America/Guayaquil', async () => {
+      const settingsRes = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsRes.body.deliverySchedule).toMatchObject({
+        timeZone: BUSINESS_TZ,
+        startTime: '07:00',
+        endTime: '17:00',
+        boundariesInclusive: true,
+      });
+
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+
+      const scheduledIso = localOffsetIso(5, '07:00:00');
+      const createRes = await http()
+        .post('/api/v1/orders/admin')
+        .set(auth(h.adminToken))
+        .set('Idempotency-Key', randomUUID())
+        .send(adminOrderPayload(scheduledIso))
+        .expect(201);
+
+      expect(createRes.body.status).toBe('PENDING');
+      expect(formatGuayaquilClock(createRes.body.scheduledDeliveryDate)).toBe('07:00');
+
+      const orderRes = await http()
+        .get(`/api/v1/orders/${createRes.body.id}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(orderRes.body.status).toBe('PENDING');
+      expect(formatGuayaquilClock(orderRes.body.scheduledDeliveryDate)).toBe('07:00');
+
+      const receiptRes = await http()
+        .get(`/api/v1/orders/${createRes.body.id}/receipt`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(receiptRes.body.orderId).toBe(createRes.body.id);
+      expect(receiptRes.body.number).toBeTruthy();
+
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      expect(stockAfter).toBe(stockBefore - 1);
+    });
+
+    it('CP-014: Horario ADMIN límite final 17:00 America/Guayaquil', async () => {
+      const settingsRes = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsRes.body.deliverySchedule).toMatchObject({
+        timeZone: BUSINESS_TZ,
+        startTime: '07:00',
+        endTime: '17:00',
+        boundariesInclusive: true,
+      });
+
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+
+      const scheduledIso = localOffsetIso(5, '17:00:00');
+      const createRes = await http()
+        .post('/api/v1/orders/admin')
+        .set(auth(h.adminToken))
+        .set('Idempotency-Key', randomUUID())
+        .send(adminOrderPayload(scheduledIso))
+        .expect(201);
+
+      expect(createRes.body.status).toBe('PENDING');
+      expect(formatGuayaquilClock(createRes.body.scheduledDeliveryDate)).toBe('17:00');
+
+      const orderRes = await http()
+        .get(`/api/v1/orders/${createRes.body.id}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(orderRes.body.status).toBe('PENDING');
+      expect(formatGuayaquilClock(orderRes.body.scheduledDeliveryDate)).toBe('17:00');
+
+      const receiptRes = await http()
+        .get(`/api/v1/orders/${createRes.body.id}/receipt`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(receiptRes.body.orderId).toBe(createRes.body.id);
+
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      expect(stockAfter).toBe(stockBefore - 1);
+    });
+
+    it('CP-015: Rechazo horario ADMIN inválido 06:59 (422)', async () => {
+      const ordersBefore = (await h.db.client.orm.public.Order.all()).length;
+      const receiptsBefore = (await h.db.client.orm.public.PurchaseReceipt.all()).length;
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+
+      const res = await http()
+        .post('/api/v1/orders/admin')
+        .set(auth(h.adminToken))
+        .set('Idempotency-Key', randomUUID())
+        .send(adminOrderPayload(localOffsetIso(5, '06:59:00')))
+        .expect(422);
+
+      expect(res.body.error.code).toBe('DELIVERY_OUTSIDE_HOURS');
+
+      expect((await h.db.client.orm.public.Order.all()).length).toBe(ordersBefore);
+      expect((await h.db.client.orm.public.PurchaseReceipt.all()).length).toBe(receiptsBefore);
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      expect(stockAfter).toBe(stockBefore);
+    });
+
+    it('CP-016: Rechazo horario ADMIN inválido 17:01 (422)', async () => {
+      const ordersBefore = (await h.db.client.orm.public.Order.all()).length;
+      const receiptsBefore = (await h.db.client.orm.public.PurchaseReceipt.all()).length;
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+
+      const res = await http()
+        .post('/api/v1/orders/admin')
+        .set(auth(h.adminToken))
+        .set('Idempotency-Key', randomUUID())
+        .send(adminOrderPayload(localOffsetIso(5, '17:01:00')))
+        .expect(422);
+
+      expect(res.body.error.code).toBe('DELIVERY_OUTSIDE_HOURS');
+
+      expect((await h.db.client.orm.public.Order.all()).length).toBe(ordersBefore);
+      expect((await h.db.client.orm.public.PurchaseReceipt.all()).length).toBe(receiptsBefore);
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      expect(stockAfter).toBe(stockBefore);
+    });
+
+    it('CP-022: Creación de pedido sin fecha programada (scheduledDeliveryDate nulo)', async () => {
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+
+      const createRes = await http()
+        .post('/api/v1/orders')
+        .set(auth(h.clientToken))
+        .send({
+          zoneId: h.zoneId,
+          deliveryAddress: 'Calle Bolívar 200, Ambato',
+          deliveryLat: VALID_DELIVERY_POINT.lat,
+          deliveryLng: VALID_DELIVERY_POINT.lng,
+          items: [{ productId: h.productId, quantity: 2 }],
+        })
+        .expect(201);
+
+      expect(createRes.body.status).toBe('PENDING');
+      expect(createRes.body.scheduledDeliveryDate).toBeNull();
+
+      const getRes = await http()
+        .get(`/api/v1/orders/${createRes.body.id}`)
+        .set(auth(h.clientToken))
+        .expect(200);
+      expect(getRes.body.status).toBe('PENDING');
+      expect(getRes.body.scheduledDeliveryDate).toBeNull();
+
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      expect(stockAfter).toBe(stockBefore - 2);
+    });
+
+    it('CP-024: Idempotencia Shop checkout con replay 201', async () => {
+      const delivery = {
+        recipient: { name: 'Ana Regalo', phone: '0991234567' },
+        zoneId: h.zoneId,
+        deliveryAddress: 'Av. Cevallos 123, Ambato',
+        deliveryLocation: VALID_DELIVERY_POINT,
+        scheduledDeliveryDate: localOffsetIso(6, '10:00:00'),
+      };
+      const items = [{ productId: h.productId, quantity: 1 }];
+
+      const quoteRes = await http()
+        .post('/api/v1/shop/checkout/quote')
+        .set(auth(h.clientToken))
+        .send({ items, delivery })
+        .expect(200);
+
+      const checkoutPayload = {
+        items,
+        delivery,
+        quoteToken: quoteRes.body.quoteToken,
+        paymentCard: {
+          number: '9000 0000 0000 0001',
+          holderName: 'PRUEBA APROBADA',
+          expiresMonth: 12,
+          expiresYear: 2030,
+          cvv: '111',
+        },
+      };
+
+      const ordersBefore = (await h.db.client.orm.public.Order.all()).length;
+      const receiptsBefore = (await h.db.client.orm.public.PurchaseReceipt.all()).length;
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      const balanceBefore = (
+        await h.db.client.orm.public.SimulatedCard.where({ fixtureId: 'DEMO_APPROVED' }).first()
+      ).balanceCents;
+
+      const key1 = randomUUID();
+      const first = await http()
+        .post('/api/v1/shop/checkout')
+        .set(auth(h.clientToken))
+        .set('Idempotency-Key', key1)
+        .send(checkoutPayload)
+        .expect(201);
+
+      const second = await http()
+        .post('/api/v1/shop/checkout')
+        .set(auth(h.clientToken))
+        .set('Idempotency-Key', key1)
+        .send(checkoutPayload)
+        .expect(201);
+
+      expect(second.body.order.id).toBe(first.body.order.id);
+      expect(second.body.receipt.id).toBe(first.body.receipt.id);
+
+      expect((await h.db.client.orm.public.Order.all()).length).toBe(ordersBefore + 1);
+      expect((await h.db.client.orm.public.PurchaseReceipt.all()).length).toBe(receiptsBefore + 1);
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      const balanceAfter = (
+        await h.db.client.orm.public.SimulatedCard.where({ fixtureId: 'DEMO_APPROVED' }).first()
+      ).balanceCents;
+
+      expect(stockAfter).toBe(stockBefore - 1);
+      expect(balanceBefore - balanceAfter).toBe(BigInt(first.body.order.totalCents));
+    });
+
+    it('CP-025: Recuperación Shop ante timeout con mismo Idempotency-Key', async () => {
+      const delivery = {
+        recipient: { name: 'Elena Recuperacion', phone: '0991234567' },
+        zoneId: h.zoneId,
+        deliveryAddress: 'Av. Miraflores 456, Ambato',
+        deliveryLocation: VALID_DELIVERY_POINT,
+        scheduledDeliveryDate: localOffsetIso(6, '11:00:00'),
+      };
+      const items = [{ productId: h.productId, quantity: 1 }];
+
+      const quoteRes = await http()
+        .post('/api/v1/shop/checkout/quote')
+        .set(auth(h.clientToken))
+        .send({ items, delivery })
+        .expect(200);
+
+      const checkoutPayload = {
+        items,
+        delivery,
+        quoteToken: quoteRes.body.quoteToken,
+        paymentCard: {
+          number: '9000 0000 0000 0001',
+          holderName: 'PRUEBA APROBADA',
+          expiresMonth: 12,
+          expiresYear: 2030,
+          cvv: '111',
+        },
+      };
+
+      const ordersBefore = (await h.db.client.orm.public.Order.all()).length;
+      const receiptsBefore = (await h.db.client.orm.public.PurchaseReceipt.all()).length;
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      const balanceBefore = (
+        await h.db.client.orm.public.SimulatedCard.where({ fixtureId: 'DEMO_APPROVED' }).first()
+      ).balanceCents;
+
+      const key2 = randomUUID();
+      const targetPort = (h.app.getHttpServer().address() as AddressInfo).port;
+      let interceptedCommit = false;
+      let clientSawCut = false;
+      const activeSockets = new Set<Socket>();
+      let proxyServer: ReturnType<typeof createNetServer> | null = null;
+
+      try {
+        proxyServer = createNetServer((clientSock: Socket) => {
+          activeSockets.add(clientSock);
+          const targetSock = new Socket();
+          activeSockets.add(targetSock);
+
+          targetSock.connect(targetPort, '127.0.0.1', () => {
+            clientSock.pipe(targetSock);
+          });
+
+          targetSock.on('data', (chunk: Buffer) => {
+            if (chunk.toString().includes('201') && !interceptedCommit) {
+              interceptedCommit = true;
+              setTimeout(() => {
+                clientSock.destroy();
+                targetSock.destroy();
+              }, 20);
+            } else {
+              clientSock.write(chunk);
+            }
+          });
+
+          clientSock.on('error', () => {});
+          targetSock.on('error', () => {});
+          clientSock.on('close', () => activeSockets.delete(clientSock));
+          targetSock.on('close', () => activeSockets.delete(targetSock));
+        });
+
+        await new Promise<void>((resolve) => proxyServer!.listen(0, '127.0.0.1', resolve));
+        const proxyPort = (proxyServer.address() as AddressInfo).port;
+
+        try {
+          await request(`http://127.0.0.1:${proxyPort}`)
+            .post('/api/v1/shop/checkout')
+            .set(auth(h.clientToken))
+            .set('Idempotency-Key', key2)
+            .timeout({ response: 5000, deadline: 10000 })
+            .send(checkoutPayload);
+        } catch {
+          clientSawCut = true;
+        }
+      } finally {
+        for (const sock of activeSockets) {
+          try {
+            sock.destroy();
+          } catch {}
+        }
+        activeSockets.clear();
+        if (proxyServer) {
+          await new Promise<void>((resolve) => {
+            const timer = setTimeout(resolve, 1000);
+            proxyServer!.close(() => {
+              clearTimeout(timer);
+              resolve();
+            });
+            proxyServer!.closeAllConnections?.();
+          });
+        }
+      }
+
+      expect(interceptedCommit).toBe(true);
+      expect(clientSawCut).toBe(true);
+
+      const retryRes = await http()
+        .post('/api/v1/shop/checkout')
+        .set(auth(h.clientToken))
+        .set('Idempotency-Key', key2)
+        .send(checkoutPayload)
+        .expect(201);
+
+      expect(retryRes.body.status).toBe('SUCCEEDED');
+      expect(retryRes.body.order.id).toBeTruthy();
+      expect(retryRes.body.receipt.id).toBeTruthy();
+
+      expect((await h.db.client.orm.public.Order.all()).length).toBe(ordersBefore + 1);
+      expect((await h.db.client.orm.public.PurchaseReceipt.all()).length).toBe(receiptsBefore + 1);
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      const balanceAfter = (
+        await h.db.client.orm.public.SimulatedCard.where({ fixtureId: 'DEMO_APPROVED' }).first()
+      ).balanceCents;
+
+      expect(stockAfter).toBe(stockBefore - 1);
+      expect(balanceBefore - balanceAfter).toBe(BigInt(retryRes.body.order.totalCents));
+    });
+
+    it('CP-026: Conflicto Idempotency-Key con payload distinto (409)', async () => {
+      const delivery1 = {
+        recipient: { name: 'Carlos Conflicto', phone: '0991234567' },
+        zoneId: h.zoneId,
+        deliveryAddress: 'Av. Los Shyris 100, Ambato',
+        deliveryLocation: VALID_DELIVERY_POINT,
+        scheduledDeliveryDate: localOffsetIso(6, '12:00:00'),
+      };
+      const items1 = [{ productId: h.productId, quantity: 1 }];
+      const quote1 = await http()
+        .post('/api/v1/shop/checkout/quote')
+        .set(auth(h.clientToken))
+        .send({ items: items1, delivery: delivery1 })
+        .expect(200);
+
+      const key3 = randomUUID();
+      const card = {
+        number: '9000 0000 0000 0001',
+        holderName: 'PRUEBA APROBADA',
+        expiresMonth: 12,
+        expiresYear: 2030,
+        cvv: '111',
+      };
+
+      await http()
+        .post('/api/v1/shop/checkout')
+        .set(auth(h.clientToken))
+        .set('Idempotency-Key', key3)
+        .send({
+          items: items1,
+          delivery: delivery1,
+          quoteToken: quote1.body.quoteToken,
+          paymentCard: card,
+        })
+        .expect(201);
+
+      const ordersBefore = (await h.db.client.orm.public.Order.all()).length;
+      const receiptsBefore = (await h.db.client.orm.public.PurchaseReceipt.all()).length;
+      const stockBefore = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      const balanceBefore = (
+        await h.db.client.orm.public.SimulatedCard.where({ fixtureId: 'DEMO_APPROVED' }).first()
+      ).balanceCents;
+
+      const delivery2 = {
+        ...delivery1,
+        deliveryAddress: 'Otra Direccion 999, Ambato',
+      };
+      const items2 = [{ productId: h.productId, quantity: 2 }];
+      const quote2 = await http()
+        .post('/api/v1/shop/checkout/quote')
+        .set(auth(h.clientToken))
+        .send({ items: items2, delivery: delivery2 })
+        .expect(200);
+
+      const conflictRes = await http()
+        .post('/api/v1/shop/checkout')
+        .set(auth(h.clientToken))
+        .set('Idempotency-Key', key3)
+        .send({
+          items: items2,
+          delivery: delivery2,
+          quoteToken: quote2.body.quoteToken,
+          paymentCard: card,
+        })
+        .expect(409);
+
+      expect(conflictRes.body.error.code).toBe('IDEMPOTENCY_KEY_REUSED');
+
+      expect((await h.db.client.orm.public.Order.all()).length).toBe(ordersBefore);
+      expect((await h.db.client.orm.public.PurchaseReceipt.all()).length).toBe(receiptsBefore);
+      const stockAfter = (
+        await h.db.client.orm.public.Product.where({ id: h.productId }).first()
+      ).stock;
+      const balanceAfter = (
+        await h.db.client.orm.public.SimulatedCard.where({ fixtureId: 'DEMO_APPROVED' }).first()
+      ).balanceCents;
+      expect(stockAfter).toBe(stockBefore);
+      expect(balanceAfter).toBe(balanceBefore);
+    });
+  });
+
+  describe('Route Planning, Margin, Null Date Exclusion & RELEASE_DRAFT (CP-017..CP-021, CP-023, CP-027)', () => {
+    let h: CaseHarness;
+
+    const http = () => request(h.app.getHttpServer());
+    const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
+
+    const seedPendingOrder = async (
+      point: { lat: number; lng: number },
+      scheduledDeliveryDate: Temporal.Instant | null,
+      address = 'Calle Ambato',
+    ) => {
+      return h.db.client.orm.public.Order.create({
+        userId: h.clientId,
+        zoneId: h.zoneId,
+        status: 'PENDING',
+        deliveryAddress: address,
+        deliveryLat: point.lat,
+        deliveryLng: point.lng,
+        scheduledDeliveryDate,
+      });
+    };
+
+    beforeEach(async () => {
+      osrm.setTableOverride(null);
+      h = await bootCaseHarness('ape4_routing');
+    });
+
+    afterEach(async () => {
+      osrm.setTableOverride(null);
+      const target = h;
+      (h as CaseHarness | undefined) = undefined;
+      await closeCaseHarness(target);
+    });
+
+    it('CP-017: Agrupación temporal por extremos (10:00, 10:25, 10:50)', async () => {
+      const today = localDay(0);
+      const o1 = await seedPendingOrder(CLUSTER_POINT_A, localInstant(0, '10:00:00'), 'Stop 10:00');
+      const o2 = await seedPendingOrder(CLUSTER_POINT_B, localInstant(0, '10:25:00'), 'Stop 10:25');
+      const o3 = await seedPendingOrder(CLUSTER_POINT_C, localInstant(0, '10:50:00'), 'Stop 10:50');
+
+      const settingsRes = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsRes.body.routePlanning.timeWindowMarginMinutes).toBe(30);
+
+      const routesBefore = (await h.db.client.orm.public.Route.all()).length;
+      const claimsBefore = (await h.db.client.orm.public.OrderClaim.all()).length;
+
+      const res = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      expect(res.body.timeWindowMarginMinutes).toBe(30);
+      expect(res.body.proposals).toHaveLength(2);
+      expect(res.body.proposals[0].orderIds).toEqual([o1.id, o2.id]);
+      expect(res.body.proposals[0].stops.map((s: any) => s.sequence)).toEqual([1, 2]);
+      expect(res.body.proposals[1].orderIds).toEqual([o3.id]);
+      expect(res.body.proposals[1].stops.map((s: any) => s.sequence)).toEqual([1]);
+
+      expect((await h.db.client.orm.public.Route.all()).length).toBe(routesBefore);
+      expect((await h.db.client.orm.public.OrderClaim.all()).length).toBe(claimsBefore);
+    });
+
+    it('CP-018: Agrupación por extremos con separación de 29 minutos', async () => {
+      const today = localDay(0);
+      const o1 = await seedPendingOrder(CLUSTER_POINT_A, localInstant(0, '10:00:00'), 'Stop 10:00');
+      const o2 = await seedPendingOrder(CLUSTER_POINT_B, localInstant(0, '10:29:00'), 'Stop 10:29');
+
+      const settingsRes = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsRes.body.routePlanning.timeWindowMarginMinutes).toBe(30);
+
+      const res = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      expect(res.body.capacity).toBe(4);
+      expect(res.body.proposals).toHaveLength(1);
+      expect(res.body.proposals[0].orderIds).toEqual([o1.id, o2.id]);
+      expect(res.body.proposals[0].stops).toHaveLength(2);
+      expect(res.body.proposals[0].stops.map((s: any) => formatGuayaquilClock(s.scheduledDeliveryDate))).toEqual([
+        '10:00',
+        '10:29',
+      ]);
+    });
+
+    it('CP-019: Agrupación por extremos con separación exacta de 30 min', async () => {
+      const today = localDay(0);
+      const o1 = await seedPendingOrder(CLUSTER_POINT_A, localInstant(0, '10:00:00'), 'Stop 10:00');
+      const o2 = await seedPendingOrder(CLUSTER_POINT_B, localInstant(0, '10:30:00'), 'Stop 10:30');
+
+      const settingsRes = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsRes.body.routePlanning.timeWindowMarginMinutes).toBe(30);
+
+      const res = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      expect(res.body.timeWindowMarginMinutes).toBe(30);
+      expect(res.body.proposals).toHaveLength(1);
+      expect(res.body.proposals[0].orderIds).toEqual([o1.id, o2.id]);
+      expect(res.body.proposals[0].stops.map((s: any) => formatGuayaquilClock(s.scheduledDeliveryDate))).toEqual([
+        '10:00',
+        '10:30',
+      ]);
+    });
+
+    it('CP-020: Separación de rutas por extremos con 31 minutos', async () => {
+      const today = localDay(0);
+      const o1 = await seedPendingOrder(CLUSTER_POINT_A, localInstant(0, '10:00:00'), 'Stop 10:00');
+      const o2 = await seedPendingOrder(CLUSTER_POINT_B, localInstant(0, '10:31:00'), 'Stop 10:31');
+
+      const settingsRes = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsRes.body.routePlanning.timeWindowMarginMinutes).toBe(30);
+
+      const res = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      expect(res.body.proposals).toHaveLength(2);
+      expect(res.body.proposals[0].orderIds).toEqual([o1.id]);
+      expect(res.body.proposals[0].stops).toHaveLength(1);
+      expect(res.body.proposals[1].orderIds).toEqual([o2.id]);
+      expect(res.body.proposals[1].stops).toHaveLength(1);
+    });
+
+    it('CP-021: Cambio de margen horario (5..180) y desempate OSRM', async () => {
+      const today = localDay(0);
+      const o1 = await seedPendingOrder(CLUSTER_POINT_A, localInstant(0, '10:00:00'), 'Stop 10:00');
+      const o2 = await seedPendingOrder(CLUSTER_POINT_B, localInstant(0, '10:25:00'), 'Stop 10:25');
+      const o3 = await seedPendingOrder(CLUSTER_POINT_C, localInstant(0, '10:50:00'), 'Stop 10:50');
+
+      const settingsBefore = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      await http()
+        .patch('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .send({ expectedVersion: settingsBefore.body.version, routePlanning: { timeWindowMarginMinutes: 4 } })
+        .expect(400);
+
+      await http()
+        .patch('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .send({ expectedVersion: settingsBefore.body.version, routePlanning: { timeWindowMarginMinutes: 181 } })
+        .expect(400);
+
+      const patched = await http()
+        .patch('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .send({ expectedVersion: settingsBefore.body.version, routePlanning: { timeWindowMarginMinutes: 60 } })
+        .expect(200);
+      expect(patched.body.routePlanning.timeWindowMarginMinutes).toBe(60);
+
+      const settingsPersisted = await http()
+        .get('/api/v1/admin/shop-settings')
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(settingsPersisted.body.routePlanning.timeWindowMarginMinutes).toBe(60);
+
+      const groupedRes = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      expect(groupedRes.body.timeWindowMarginMinutes).toBe(60);
+      expect(groupedRes.body.distanceMethod).toBe('OSRM_ROAD_NETWORK');
+      expect(groupedRes.body.roadMetrics).toMatchObject({ provider: 'OSRM', distanceUnit: 'km', durationUnit: 's' });
+      expect(groupedRes.body.proposals).toHaveLength(1);
+      expect(groupedRes.body.proposals[0].orderIds).toEqual([o1.id, o2.id, o3.id]);
+      expect(groupedRes.body.proposals[0].totalDistanceKm).toBeGreaterThan(0);
+      expect(groupedRes.body.proposals[0].totalDurationSeconds).toBeGreaterThan(0);
+      expect(
+        groupedRes.body.proposals[0].stops.every((s: any) => s.legDistanceKm > 0 && s.legDurationSeconds > 0),
+      ).toBe(true);
+
+      // Verify OSRM durationsS primary and distancesM secondary tie-breaking via GET /route-proposals
+      const tieDay = localDay(1);
+      const tieA = await seedPendingOrder({ lat: -1.235, lng: -78.613 }, localInstant(1, '10:00:00'), 'Tie A');
+      const tieB = await seedPendingOrder({ lat: -1.239, lng: -78.609 }, localInstant(1, '10:00:00'), 'Tie B');
+
+      // Matrix indices correspond to uniquePoints([depot, tieA, tieB]): 0=depot, 1=tieA, 2=tieB
+      const buildTableBody = (durations: number[][], distances: number[][]) => {
+        const coords = [
+          [STORE_ORIGIN.lng, STORE_ORIGIN.lat],
+          [-78.613, -1.235],
+          [-78.609, -1.239],
+        ];
+        const wp = (i: number) => ({ location: coords[i], distance: 5, name: `W${i}` });
+        return {
+          code: 'Ok',
+          durations,
+          distances,
+          sources: [0, 1, 2].map(wp),
+          destinations: [0, 1, 2].map(wp),
+        };
+      };
+
+      // Case 1: depot->A->B->depot has shorter duration (100+50+100=250s) than depot->B->A->depot (200+500+200=900s)
+      // even though depot->A->B->depot has longer distance (5000+1000+5000=11000m > 1000+1000+1000=3000m).
+      osrm.setTableOverride((rawUrl) => {
+        if (!rawUrl.startsWith('/table/v1/')) return null;
+        return {
+          status: 200,
+          body: buildTableBody(
+            [
+              [0, 100, 200],
+              [200, 0, 50],
+              [100, 500, 0],
+            ],
+            [
+              [0, 5000, 1000],
+              [1000, 0, 1000],
+              [5000, 1000, 0],
+            ],
+          ),
+        };
+      });
+
+      const durWin = await http()
+        .get(`/api/v1/route-proposals?date=${tieDay}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(durWin.body.proposals).toHaveLength(1);
+      expect(durWin.body.proposals[0].orderIds).toEqual([tieA.id, tieB.id]);
+
+      // Case 2: Equal duration for both directions (100+50+100=250s vs 100+50+100=250s);
+      // distancesM breaks the tie in favor of depot->B->A->depot (1000+1000+1000=3000m < 5000+1000+5000=11000m).
+      osrm.setTableOverride((rawUrl) => {
+        if (!rawUrl.startsWith('/table/v1/')) return null;
+        return {
+          status: 200,
+          body: buildTableBody(
+            [
+              [0, 100, 100],
+              [100, 0, 50],
+              [100, 50, 0],
+            ],
+            [
+              [0, 5000, 1000],
+              [1000, 0, 1000],
+              [5000, 1000, 0],
+            ],
+          ),
+        };
+      });
+
+      const distTieWin = await http()
+        .get(`/api/v1/route-proposals?date=${tieDay}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(distTieWin.body.proposals).toHaveLength(1);
+      expect(distTieWin.body.proposals[0].orderIds).toEqual([tieB.id, tieA.id]);
+    });
+
+    it('CP-023: Exclusión en propuestas y 409 en asignación sin fecha', async () => {
+      const today = localDay(0);
+      const order = await seedPendingOrder(VALID_DELIVERY_POINT, null, 'Sin Fecha Programada');
+
+      const routesBefore = (await h.db.client.orm.public.Route.all()).length;
+      const claimsBefore = (await h.db.client.orm.public.OrderClaim.all()).length;
+
+      const proposalsRes = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+
+      const proposedOrderIds = proposalsRes.body.proposals.flatMap((p: any) => p.orderIds);
+      expect(proposedOrderIds).not.toContain(order.id);
+      expect(proposalsRes.body.excluded.some((e: any) => e.orderId === order.id)).toBe(true);
+
+      await http()
+        .post('/api/v1/routes')
+        .set(auth(h.adminToken))
+        .send({
+          zoneId: h.zoneId,
+          routeDate: localInstant(0, '12:00:00').toString(),
+          orderIds: [order.id],
+        })
+        .expect(409);
+
+      await http()
+        .post('/api/v1/routes/assign')
+        .set(auth(h.adminToken))
+        .send({
+          driverId: h.driverId,
+          zoneId: h.zoneId,
+          orderIds: [order.id],
+        })
+        .expect(409);
+
+      expect((await h.db.client.orm.public.Route.all()).length).toBe(routesBefore);
+      expect((await h.db.client.orm.public.OrderClaim.all()).length).toBe(claimsBefore);
+    });
+
+    it('CP-027: Liberación auditada de DRAFT caducado (RELEASE_DRAFT)', async () => {
+      const yesterdayNoon = localInstant(-1, '12:00:00');
+      const today = localDay(0);
+
+      const order = await seedPendingOrder(VALID_DELIVERY_POINT, yesterdayNoon, 'Draft Caducado St');
+      const expiredRoute = await h.db.client.transaction(async (tx: any) => {
+        const created = await tx.orm.public.Route.create({
+          zoneId: h.zoneId,
+          date: yesterdayNoon,
+          status: 'DRAFT',
+        });
+        await tx.orm.public.OrderClaim.create({
+          orderId: order.id,
+          routeId: created.id,
+          claimedAt: yesterdayNoon,
+        });
+        await tx.orm.public.RouteStop.create({
+          routeId: created.id,
+          orderId: order.id,
+          sequence: 1,
+          outcome: 'PENDING',
+          isLegacy: false,
+        });
+        return created;
+      });
+
+      const assignRes = await http()
+        .post(`/api/v1/routes/${expiredRoute.id}/assign`)
+        .set(auth(h.adminToken))
+        .send({ driverId: h.driverId })
+        .expect(409);
+      expect(assignRes.body.code).toBe('ROUTE_DATE_NOT_TODAY');
+
+      const requestId = randomUUID();
+      const interventionPayload = {
+        action: 'RELEASE_DRAFT',
+        routeId: expiredRoute.id,
+        requestId,
+        reason: 'Draft caducado del día operativo anterior',
+      };
+
+      const releaseRes = await http()
+        .post('/api/v1/dispatch/interventions')
+        .set(auth(h.adminToken))
+        .send(interventionPayload)
+        .expect(200);
+      expect(releaseRes.body).toMatchObject({
+        action: 'RELEASE_DRAFT',
+        routeId: expiredRoute.id,
+        requestId,
+        outcome: 'APPLIED',
+      });
+
+      const stopsAfter = await h.db.client.orm.public.RouteStop.where({
+        routeId: expiredRoute.id,
+      }).all();
+      expect(stopsAfter).toHaveLength(0);
+
+      const claimsAfter = await h.db.client.orm.public.OrderClaim.where({
+        routeId: expiredRoute.id,
+      }).all();
+      expect(claimsAfter).toHaveLength(1);
+      expect(claimsAfter[0].releasedAt).not.toBeNull();
+
+      const orderAfter = await h.db.client.orm.public.Order.where({ id: order.id }).first();
+      expect(orderAfter.status).toBe('PENDING');
+      expect(orderAfter.scheduledDeliveryDate).not.toBeNull();
+      expect(
+        Temporal.Instant.compare(
+          Temporal.Instant.from(orderAfter.scheduledDeliveryDate!),
+          yesterdayNoon,
+        ),
+      ).toBe(0);
+
+      const auditsAfter = await h.db.client.orm.public.DispatchIntervention.where({
+        routeId: expiredRoute.id,
+      }).all();
+      expect(auditsAfter).toHaveLength(1);
+      expect(auditsAfter[0].action).toBe('RELEASE_DRAFT');
+
+      // Replay with identical requestId must be idempotent
+      const replayRes = await http()
+        .post('/api/v1/dispatch/interventions')
+        .set(auth(h.adminToken))
+        .send(interventionPayload)
+        .expect(200);
+      expect(replayRes.body.id).toBe(releaseRes.body.id);
+      expect(
+        await h.db.client.orm.public.DispatchIntervention.where({
+          routeId: expiredRoute.id,
+        }).all(),
+      ).toHaveLength(1);
+
+      const proposalsRes = await http()
+        .get(`/api/v1/route-proposals?date=${today}`)
+        .set(auth(h.adminToken))
+        .expect(200);
+      expect(proposalsRes.body.proposals).toHaveLength(1);
+      expect(proposalsRes.body.proposals[0].orderIds).toEqual([order.id]);
+    });
+  });
+});

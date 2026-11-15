@@ -111,16 +111,15 @@
 \section{PORTADA}
 
 \begin{tabbing}
-\textbf{Tema:}\hspace{7cm} \= APE GPIS 4: Diseño y ejecución de pruebas (REGALÍA)\\
+\textbf{Tema:}\hspace{7cm} \= APE GPIS 4: Diseño y ejecución de pruebas\\
 \textbf{Carrera:}\hspace{7cm} \= SOFTWARE \\
 \textbf{Unidad de Organización Curricular:} \hspace{1cm} \= \ PROFESIONAL\\
 \textbf{Nivel y Paralelo:} \> 6 - A\\
-\textbf{Alumnos participantes:}  \> Jimenez Chango Saimol Steph\\
- \> Chicaiza Kerly\\
- \> Ramos Carlos\\
- \> Auz José Mateo\\
-\textbf{Asignatura:} \> GESTION DE PRUEBAS E IMPLANTACIÓN DE\\
- \> SOFTWARE \\
+\textbf{Alumnos participantes:}  \> Auz Mayorga José Mateo\\
+ \> Chicaiza Llerena Kerly Mishelle\\
+ \> Jimenez Chango Saimol Steph\\
+ \> Ramos Jacome Carlos Giovanni\\
+\textbf{Asignatura:} \> Gestión de pruebas e integración de software \\
 \textbf{Docente:} \> Mgtr. Ing. Leonardo David Torres Valverde
 \end{tabbing}
 
@@ -130,10 +129,7 @@
 
 \subsection{Objetivos}
 \textbf{General:}\\
-Diseñar y ejecutar un conjunto integral de casos de prueba que permita validar el correcto
-funcionamiento del sistema de Logística de Última Milla y la tienda en línea REGALÍA, cubriendo sus
-requisitos funcionales (\texttt{NR-01} a \texttt{NR-29}), de seguridad, concurrencia y rendimiento
-(\texttt{100/500/2000} pedidos).\\
+Diseñar y ejecutar casos de prueba que permitan validar el correcto funcionamiento de un sistema de software.
 
 \textbf{Específicos:}\\
 \begin{itemize}
@@ -144,8 +140,6 @@ requisitos funcionales (\texttt{NR-01} a \texttt{NR-29}), de seguridad, concurre
     pedidos), con entradas, acciones, resultados esperados y criterios de aceptación.
     \item Configurar el entorno aislado con datos sintéticos, registrando los resultados obtenidos y
     los defectos detectados con su nivel de severidad.
-    \item Verificar los resultados obtenidos frente a los esperados y consolidar el informe técnico
-    de pruebas en formato PDF.
 \end{itemize}
 
 \subsection{Modalidad}
@@ -177,9 +171,7 @@ Listado de equipos y materiales generales empleados en la guía práctica:\\
     \item Computador o laptop, y un dispositivo o emulador Android para la aplicación móvil.
     \item Internet.
     \item Apuntes de clase.
-    \item Documentación técnica del sistema REGALÍA (requisitos funcionales \texttt{NR-01}--\texttt{NR-29} y escenarios \texttt{NP-01}--\texttt{NP-19}).
-    \item Componentes del sistema: backend (NestJS, Prisma 8, PostgreSQL), aplicación web (React) y aplicación móvil (Flutter).
-    \item Herramientas de prueba: Jest, Supertest, Newman, Vitest, Testing Library, Playwright, \texttt{flutter\_test}, JMeter, OSRM (motor vial), \texttt{oxlint} y \texttt{flutter analyze}.
+    \item Diseñar y ejecutar casos de prueba que permitan validar el correcto funcionamiento de un sistema de software.
 \end{itemize}
 \textbf{TAC (Tecnologías para el Aprendizaje y Conocimiento) empleados en la guía práctica:}\\
 $\boxtimes$ Plataformas educativas \\
@@ -188,16 +180,16 @@ $\square$ Aplicaciones educativas \\
 $\square$ Recursos audiovisuales \\
 $\square$ Gamificación \\
 $\boxtimes$ Inteligencia Artificial \\
-Otros (Especifique): \underline{Docker, emulador Android, GitHub Actions} \\
+Otros (Especifique): \underline{} \\
 
 \subsection{Actividades por desarrollar}
 Desarrollar la guía APE en base al formato y las instrucciones brindadas.
 
 \subsection{Resultados obtenidos}
-Se diseñaron y ejecutaron \textbf{107 casos de prueba individuales} (\texttt{CP-001} a
-\texttt{CP-107}) sobre el sistema REGALÍA (API NestJS, aplicación web React y aplicación móvil
-Flutter), cubriendo de manera integral los módulos comercial, geográfico, de planificación de rutas,
-operación móvil, seguridad, incidencias, concurrencia y rendimiento:
+Se diseñaron y registraron resultados para \textbf{107 casos de prueba individuales}
+(\texttt{CP-001} a \texttt{CP-107}) del sistema REGALÍA, integrado por una API NestJS, una
+aplicación web React y una aplicación móvil Flutter. Las fichas documentan los resultados de la
+última ejecución registrada para cada caso y conservan los antecedentes de las reejecuciones:
 
 % GUÍA PARA EL EQUIPO (asignación interna y cronograma de registro; no visible en el PDF):
 % - Backend (Saimol Jimenez, 27 casos: CP-001..CP-027): levantar entorno común (PostgreSQL, seed aislado), API/settings y llenar secciones/backend/ejecucion.tex + capturas.tex.
@@ -241,6 +233,7 @@ prueba es la siguiente:
 \end{tabularx}
 \end{center}
 
+\newpage
 % ===========================================================================
 \subsubsection{Diseño de pruebas}
 Cada caso del catálogo incluye entradas, acciones, resultado esperado y criterio de aceptación
@@ -283,7 +276,7 @@ Las pruebas se ejecutaron sobre un entorno de validación aislado con datos sint
 por los siguientes componentes:
 
 \begin{enumerate}
-    \item API Backend: PostgreSQL 16 aislado, migraciones Prisma 8 aplicadas, \texttt{StoreCoverage} y \texttt{ShopBusinessSettings} configurados, \texttt{ROAD\_ENGINE=OSRM} disponible y conjunto de datos sintéticos.
+    \item API Backend: PostgreSQL 16 aislado, migraciones Prisma 8 y datos sintéticos. Las pruebas de planificación utilizaron un servicio vial simulado; adicionalmente se verificó una instancia real de OSRM.
     \item Aplicación Web: compilación y ejecución con \texttt{pnpm install} y \texttt{pnpm dev} conectada a la API local aislada.
     \item Aplicación Móvil: cliente \texttt{app-movil-logistica} en Flutter (\texttt{flutter pub get}) ejecutado sobre emulador o dispositivo Android.
     \item Carga y Concurrencia: JMeter con lotes sintéticos de \texttt{100}, \texttt{500} y \texttt{2000} pedidos, además de entorno de base de datos aislado para validación de rollback (\texttt{CP-107}).
@@ -294,11 +287,11 @@ por los siguientes componentes:
 \begin{tabularx}{\textwidth}{|l|P{3.2cm}|P{2.8cm}|L|}
 \hline
 \textbf{Componente} & \textbf{Commit (git rev-parse --short HEAD)} & \textbf{Versión de herramienta} & \textbf{Observaciones} \\ \hline
-Backend & & Node: & \\ \hline
-Frontend web & & Node: & \\ \hline
+Backend & \texttt{cac8fec} & Node: v26.9.0 & Pruebas locales adicionales no versionadas; PostgreSQL temporal y datos sintéticos. \\ \hline
+Frontend web & No registrado & Node: no registrado & Aplicación local conectada a API y base de datos aisladas; pruebas web y de API. \\ \hline
 App móvil & \texttt{89f7050} (backend \texttt{9b17cce}) & Flutter: 3.41.3; Node: v26.11.1 & Dispositivo físico Xiaomi M2101K6G, Android 13 (API 33), por USB con \texttt{adb reverse tcp:3003}; base aislada \texttt{logistica\_ape4\_movil}. \\ \hline
-Base de datos & & PostgreSQL: & Seed aislado: Sí / No \\ \hline
-Motor vial y rendimiento & --- (backend \texttt{7eb9a5a}; CP-104 con \texttt{9b8557c}, PR \#76) & OSRM: v5.26.0 (mld, mapa de Ecuador); JMeter: 5.6.3 (Java 25) & CPU y RAM: Intel Core i9-14900HX (32 hilos), 31,7 GB; API, PostgreSQL, OSRM y generador en la misma laptop. \\ \hline
+Base de datos & No aplica & PostgreSQL: 16 & Bases aisladas y datos sintéticos para las ejecuciones registradas. \\ \hline
+Motor vial y rendimiento & Backend \texttt{7eb9a5a}; corrección PR \#76 & OSRM: v5.26.0 (mld, Ecuador); JMeter: 5.6.3 (Java 25) & Intel Core i9-14900HX (32 hilos), 31,7 GB; servicios y generador en la misma laptop. La medición corregida se registró sobre \texttt{7eb9a5a} con el arreglo posteriormente incluido en \texttt{9b8557c}. \\ \hline
 \end{tabularx}
 \end{center}
 
@@ -315,8 +308,8 @@ Motor vial y rendimiento & --- (backend \texttt{7eb9a5a}; CP-104 con \texttt{9b8
 %   * Capturas: guardar cada captura representativa en evidencias/CP-XXX.png (el documento la inserta automáticamente).
 %   * API/automatizadas: indicar el log o reporte real (Jest, Newman, Playwright o JMeter).
 % - Ningún caso debe marcarse PASS sin haber sido ejecutado realmente.
-A continuación se detallan los resultados obtenidos tras la ejecución de los 107 casos de prueba
-del sistema REGALÍA, junto con la referencia de evidencia correspondiente a cada caso.
+A continuación se presentan las fichas de ejecución y sus evidencias. En cada una se consigna el
+resultado registrado; las pruebas con reejecuciones conservan sus antecedentes cuando corresponde.
 
 \clearpage
 \input{secciones/backend/ejecucion}
@@ -346,29 +339,36 @@ parciales.
 \begin{tabularx}{\textwidth}{|l|c|c|c|c|c|L|}
 \hline
 \textbf{Módulo / Área} & \textbf{Casos} & \textbf{PASS} & \textbf{FAIL} & \textbf{BLOCKED} & \textbf{N/A} & \textbf{\% de éxito (PASS / ejecutados)} \\ \hline
-Backend y reglas de negocio & 27 & & & & & \\ \hline
-Aplicación Web REGALÍA & 27 & & & & & \\ \hline
-Aplicación Móvil & 27 & & & & & \\ \hline
-Calidad y Rendimiento & 26 & & & & & \\ \hline
-\textbf{Total} & \textbf{107} & & & & & \\ \hline
+Backend y reglas de negocio & 27 & 27 & 0 & 0 & 0 & 100\% (27 de 27; última ejecución) \\ \hline
+Aplicación Web REGALÍA & 27 & 27 & 0 & 0 & 0 & 100\% (27 de 27) \\ \hline
+Aplicación Móvil & 27 & 24 & 3 & 0 & 0 & 88,89\% (24 de 27) \\ \hline
+Calidad y Rendimiento & 26 & 26 & 0 & 0 & 0 & 100\% (26 de 26) \\ \hline
+\textbf{Total} & \textbf{107} & \textbf{104} & \textbf{3} & \textbf{0} & \textbf{0} & \textbf{97,20\% (104 de 107)} \\ \hline
 \end{tabularx}
 \end{center}
 
 % GUÍA PARA EL EQUIPO: reemplazar los espacios subrayados con los conteos reales PASS/FAIL/BLOCKED/N/A, defectos S1..S4 y conclusión final.
-Se ejecutaron los 107 casos del catálogo: \underline{\hspace{1cm}} PASS,
-\underline{\hspace{1cm}} FAIL, \underline{\hspace{1cm}} BLOCKED y \underline{\hspace{1cm}} N/A. Se
-registraron \underline{\hspace{1cm}} defectos (S1: \underline{\hspace{0.6cm}}, S2:
-\underline{\hspace{0.6cm}}, S3: \underline{\hspace{0.6cm}}, S4: \underline{\hspace{0.6cm}}).
-Conclusión de la verificación: \underline{\hspace{9cm}}.
+De los 107 casos registrados, 104 obtuvieron \texttt{PASS} y 3 \texttt{FAIL}; no se registraron
+casos \texttt{BLOCKED} ni \texttt{N/A}. Los tres fallos corresponden a \texttt{CP-067},
+\texttt{CP-071} y \texttt{CP-073}. El reporte contiene nueve incidencias: cuatro abiertas,
+tres corregidas y dos cerradas por aclaración de fichas. Por severidad se registran dos S2,
+dos S3 y tres S4; las dos aclaraciones no tienen severidad de producto.\par
+Las acciones de cierre y retorno de algunos escenarios móviles se realizaron mediante la API,
+por lo que sus resultados no acreditan la disponibilidad de dichas acciones en la interfaz móvil.
+Los defectos abiertos S2 asociados a la operación móvil limitan la aceptación integral del sistema.
+
+\medskip\noindent\textbf{Mediciones de planificación.} Con \texttt{OSRM\_MAX\_POINTS=2100},
+OSRM real y siete repeticiones por volumen, la mediana registrada fue de 219 ms para 100 pedidos,
+3773 ms para 500 y 52978 ms para 2000; el máximo para 2000 fue 55804 ms. En la configuración
+con límite de 300 puntos, los lotes de 500 y 2000 devolvieron HTTP 422. Estas mediciones describen
+el entorno indicado y no se comparan con un umbral de aceptación no definido.
 
 % ===========================================================================
 \subsubsection{Entrega de evidencias}
 % GUÍA PARA EL EQUIPO: como solo se entrega el PDF final, no se duplican capturas aquí ni se referencia una carpeta externa.
 % Todas las capturas (evidencias/CP-XXX.png) y extractos de logs/reportes deben quedar embebidos en 2.7.4.
-Las capturas de pantalla y extractos de registros correspondientes a los 107 casos de prueba
-(\texttt{CP-001}--\texttt{CP-107}) se encuentran integrados directamente en cada ficha de ejecución
-de la sección~2.7.4. De acuerdo con el formato establecido, la entrega se consolida íntegramente en
-el presente documento PDF.
+Las imágenes y extractos de evidencia se integran en las fichas correspondientes de la
+sección~2.7.4. El presente documento consolida los resultados y las evidencias en un único PDF.
 
 \clearpage
 \subsection{Habilidades blandas empleadas en la práctica}
@@ -385,9 +385,9 @@ el presente documento PDF.
 \subsection{Conclusiones}
 % GUÍA PARA EL EQUIPO: si se desea, agregar cifras exactas (% de éxito y latencias observadas en 100/500/2000 pedidos) tras llenar las tablas.
 \begin{itemize}
-    \item La ejecución integral de los 107 casos de prueba (\texttt{CP-001}--\texttt{CP-107}) permitió validar los flujos operativos de la tienda en línea y el sistema de logística REGALÍA conforme a los requisitos definidos (\texttt{NR-01}--\texttt{NR-29}).
-    \item La matriz de trazabilidad implementada cubre de manera consistente la autenticación y autorización por rol, la validación geográfica de cobertura, la planificación diaria de rutas, la gestión de incidencias y la persistencia transaccional.
-    \item La evaluación de concurrencia, recuperación ante fallos y carga con lotes de \texttt{100}, \texttt{500} y \texttt{2000} pedidos permite verificar la estabilidad y comportamiento del sistema bajo condiciones controladas de operación.
+    \item La última ejecución registrada de los 107 casos produjo 104 resultados satisfactorios y 3 fallidos, equivalentes al 97,20\% y al 2,80\%, respectivamente. Los fallos se concentraron en los escenarios móviles \texttt{CP-067}, \texttt{CP-071} y \texttt{CP-073}.
+    \item Las pruebas registradas abarcaron comercio, acceso por roles, cobertura, planificación, incidencias, concurrencia y recuperación. La presencia de dos defectos móviles abiertos de severidad S2 impide concluir que la operación móvil cumple íntegramente los criterios evaluados.
+    \item En el entorno de medición, el aumento del volumen de pedidos incrementó los tiempos observados de planificación. Para 2000 pedidos se obtuvo una mediana de 52978 ms con el límite ampliado; los resultados constituyen una línea base y no una evaluación frente a un SLA no establecido.
 \end{itemize}
 
 \subsection{Recomendaciones}
@@ -407,8 +407,7 @@ el presente documento PDF.
 \end{enumerate}
 
 \subsection{Anexos}
-Las capturas de pantalla, extractos de registro y resultados detallados de las suites Jest, Newman,
-Playwright, \texttt{flutter\_test} y JMeter (\texttt{100/500/2000} pedidos) se encuentran
-consolidados dentro de las fichas de ejecución (sección~2.7.4) del presente informe PDF.
+Las imágenes y extractos de resultados de las pruebas de API, web, móvil y rendimiento se
+encuentran integrados en las fichas de ejecución de la sección~2.7.4 del presente informe PDF.
 
 \end{document}

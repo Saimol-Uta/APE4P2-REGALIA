@@ -227,9 +227,9 @@
 **Origen:** `C26.2` | **Prioridad:** Media | **Método:** API | **Trazabilidad:** NR-10; NP-15
 **Dependencias:** Entorno aislado con pedido PENDING sin fecha (CP-022), conductor disponible y cuenta ADMIN.
 **Entradas:** Token ADMIN; orderId con scheduledDeliveryDate=null; fecha operativa HOY; driverId disponible.
-**Acciones:** 1) Consultar GET /api/v1/route-proposals?date=HOY. 2) Intentar confirmar/asignar el pedido vía POST /api/v1/routes y POST /api/v1/routes/assign.
-**Resultado esperado:** GET /route-proposals lo incluye en excluded (fuera de proposals); POST /routes y /routes/assign responden 409 ConflictException.
-**Criterio de aceptación:** Pedido sin fecha no entra en propuestas ni se asigna; no se crea ruta ni OrderClaim.
+**Acciones:** 1) Consultar el listado administrativo de pedidos PENDING e identificar el pedido con fecha null. 2) Consultar GET /api/v1/route-proposals?date=HOY. 3) Intentar confirmar/asignar el pedido vía POST /api/v1/routes y POST /api/v1/routes/assign.
+**Resultado esperado:** El listado administrativo permite identificar el pedido sin fecha; no aparece en propuestas; POST /routes y /routes/assign responden 409 ConflictException.
+**Criterio de aceptación:** Pedido sin fecha identificable, no propuesto ni asignado; sin nueva ruta ni OrderClaim.
 **Evidencia esperada:** Log / reporte
 
 ### CP-024 — Idempotencia Shop checkout con replay 201
@@ -263,9 +263,9 @@
 **Origen:** `C11.5` | **Prioridad:** Alta | **Método:** API | **Trazabilidad:** NR-16, NR-20; NP-07
 **Dependencias:** Entorno aislado con ruta DRAFT de ayer (sin conductor, con paradas y OrderClaim activo) y cuenta ADMIN.
 **Entradas:** Token ADMIN; routeId DRAFT con fecha del día anterior; driverId disponible; requestId UUIDv4 y reason válido para RELEASE_DRAFT.
-**Acciones:** 1) Intentar POST /api/v1/routes/:id/assign -> 409 ROUTE_DATE_NOT_TODAY. 2) Enviar POST /api/v1/dispatch/interventions con action=RELEASE_DRAFT. 3) Reconsultar pedidos y propuestas.
-**Resultado esperado:** Asignación rechaza 409 ROUTE_DATE_NOT_TODAY; RELEASE_DRAFT retorna éxito liberando claims y eliminando paradas del DRAFT.
-**Criterio de aceptación:** Pedidos quedan PENDING sin claim activo (elegibles hoy), auditoría registrada y reenvío con igual requestId es idempotente.
+**Acciones:** 1) Intentar POST /api/v1/routes/:id/assign. 2) Enviar RELEASE_DRAFT y repetir con el mismo requestId. 3) Comprobar fecha original y ausencia en propuestas de hoy. 4) Registrar acuerdo mediante CONTACT y aplicar RESCHEDULE con fecha futura; consultar propuestas de esa fecha.
+**Resultado esperado:** Asignación rechaza 409 ROUTE_DATE_NOT_TODAY; RELEASE_DRAFT libera claims y paradas y registra auditoría, sin cambiar la fecha original. Tras el acuerdo y reprogramación, el pedido aparece en propuestas de la nueva fecha.
+**Criterio de aceptación:** Pedido PENDING sin claim activo; no se reprograma automáticamente; reenvío idempotente y elegibilidad comprobada después de reprogramación autorizada.
 **Evidencia esperada:** Log / reporte
 
 ## Módulo Web — Tienda en línea y panel de rutas (`CP-028`–`CP-054`, 27 casos)

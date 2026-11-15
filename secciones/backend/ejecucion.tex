@@ -5,32 +5,32 @@
 % - Resultado obtenido: describir lo observado al ejecutar la prueba.
 % - Si existe evidencias/<ID>.png, la imagen se inserta automáticamente dentro de su ficha.
 \par\medskip\noindent\textbf{Módulo Backend y reglas de negocio (27 casos: CP-001 a CP-027).}\par\smallskip
-Pruebas ejecutadas sobre la API REST en entorno aislado (\texttt{pnpm test:cov}, \texttt{pnpm test:e2e:isolated}, \texttt{pnpm test:api:isolated}) y clientes HTTP.
+Se ejecutaron pruebas automatizadas de la API REST en un entorno aislado. Las imágenes son representaciones de los resúmenes conjuntos reales de Jest, no capturas individuales de las respuestas HTTP; el código de prueba identifica las aserciones de cada caso. Las pruebas de ruteo emplearon un servicio vial simulado, no OSRM real.
 
-\casoejec{CP-001}{Compra ADMIN para cliente con destinatario de regalo}{}{}{Log / reporte}{}
-\casoejec{CP-002}{Rechazo compra ADMIN cliente sin teléfono de comprador}{}{}{Log / reporte}{}
-\casoejec{CP-003}{Compra ADMIN invitado y lectura de comprobante}{}{}{Log / reporte}{}
-\casoejec{CP-004}{Rechazo compra ADMIN invitado sin teléfono obligatorio}{}{}{Log / reporte}{}
-\casoejec{CP-005}{Compra invitado con teléfono de cliente sin vínculo}{}{}{Log / reporte}{}
-\casoejec{CP-006}{Pago externo declarado ADMIN en efectivo}{}{}{Log / reporte}{}
-\casoejec{CP-007}{Pago externo declarado ADMIN por transferencia}{}{}{Log / reporte}{}
-\casoejec{CP-008}{Cambio de tasa IVA tras cotizar (409 SHOP\_SETTINGS\_CHANGED)}{}{}{Log / reporte}{}
-\casoejec{CP-009}{Cambio de precio tras cotizar e inmutabilidad 15\% IVA}{}{}{Log / reporte}{}
-\casoejec{CP-010}{Corrección autorizada de contacto ADMIN y auditoría}{}{}{Log / reporte}{}
-\casoejec{CP-011}{Aislamiento de corrección de contacto en recibo y pedido}{}{}{Log / reporte}{}
-\casoejec{CP-012}{Rechazo de corrección de contacto por rol no autorizado}{}{}{Log / reporte}{}
-\casoejec{CP-013}{Horario ADMIN límite inicial 07:\allowbreak{}00 America/\allowbreak{}Guayaquil}{}{}{Log / reporte}{}
-\casoejec{CP-014}{Horario ADMIN límite final 17:\allowbreak{}00 America/\allowbreak{}Guayaquil}{}{}{Log / reporte}{}
-\casoejec{CP-015}{Rechazo horario ADMIN inválido 06:\allowbreak{}59 (422)}{}{}{Log / reporte}{}
-\casoejec{CP-016}{Rechazo horario ADMIN inválido 17:\allowbreak{}01 (422)}{}{}{Log / reporte}{}
-\casoejec{CP-017}{Agrupación temporal por extremos (10:\allowbreak{}00, 10:\allowbreak{}25, 10:\allowbreak{}50)}{}{}{Log / reporte}{}
-\casoejec{CP-018}{Agrupación por extremos con separación de 29 minutos}{}{}{Log / reporte}{}
-\casoejec{CP-019}{Agrupación por extremos con separación exacta de 30 min}{}{}{Log / reporte}{}
-\casoejec{CP-020}{Separación de rutas por extremos con 31 minutos}{}{}{Log / reporte}{}
-\casoejec{CP-021}{Cambio de margen horario (5..180) y desempate OSRM}{}{}{Log / reporte}{}
-\casoejec{CP-022}{Creación de pedido sin fecha programada (scheduledDeliveryDate nulo)}{}{}{Log / reporte}{}
-\casoejec{CP-023}{Exclusión en propuestas y 409 en asignación sin fecha}{}{}{Log / reporte}{}
-\casoejec{CP-024}{Idempotencia Shop checkout con replay 201}{}{}{Log / reporte}{}
-\casoejec{CP-025}{Recuperación Shop ante timeout con mismo Idempotency-Key}{}{}{Log / reporte}{}
-\casoejec{CP-026}{Conflicto Idempotency-Key con payload distinto (409)}{}{}{Log / reporte}{}
-\casoejec{CP-027}{Liberación auditada de DRAFT caducado (RELEASE\_DRAFT)}{}{}{Log / reporte}{}
+\casoejec{CP-001}{Compra ADMIN para cliente con destinatario de regalo}{Compra registrada con destinatario independiente; lecturas ADMIN y cliente correctas y stock descontado.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-002}{Rechazo compra ADMIN cliente sin teléfono de comprador}{HTTP 400; pedidos, comprobantes y stock permanecieron sin cambios.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-003}{Compra ADMIN invitado y lectura de comprobante}{Compra invitado exitosa, comprobante comercial consultado y ningún usuario nuevo creado.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-004}{Rechazo compra ADMIN invitado sin teléfono obligatorio}{Teléfono ausente y vacío rechazados con HTTP 400, sin cambios en pedidos, comprobantes, usuarios ni stock.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-005}{Compra invitado con teléfono de cliente sin vínculo}{La compra invitada no se vinculó al cliente con el mismo teléfono; su historial no la mostró y el detalle devolvió 404.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-006}{Pago externo declarado ADMIN en efectivo}{Pago externo en efectivo declarado y comprobante verificados; sin débito de tarjeta simulada.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-007}{Pago externo declarado ADMIN por transferencia}{Transferencia declarada y comprobante registrados sin referencia bancaria ni intento de pago simulado.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-008}{Cambio de tasa IVA tras cotizar (409 SHOP\_SETTINGS\_CHANGED)}{Tras cambiar el IVA se obtuvo HTTP 409 SHOP\_SETTINGS\_CHANGED sin cambios en pedido, comprobante, stock ni saldo.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-009}{Cambio de precio tras cotizar e inmutabilidad 15\% IVA}{Precio modificado rechazado con HTTP 409; tras recotizar, el comprobante conservó 7300/1095/8395 centavos ante cambios posteriores.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-010}{Corrección autorizada de contacto ADMIN y auditoría}{ADMIN actualizó ambos teléfonos; la revisión pasó de 0 a 1 y se registró el historial auditado.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-011}{Aislamiento de corrección de contacto en recibo y pedido}{La corrección de P1 conservó su comprobante original y no alteró el pedido de control P2.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-012}{Rechazo de corrección de contacto por rol no autorizado}{CLIENTE y REPARTIDOR recibieron HTTP 403; pedido e historial permanecieron iguales.}{PASS}{Suite automatizada CP-001 a CP-012; ver log backend comercial.}{Ninguno}
+\casoejec{CP-013}{Horario ADMIN límite inicial 07:\allowbreak{}00 America/\allowbreak{}Guayaquil}{HTTP 201 a las 07:00; pedido PENDING y comprobante consultados, con descuento de una unidad de stock.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-014}{Horario ADMIN límite final 17:\allowbreak{}00 America/\allowbreak{}Guayaquil}{HTTP 201 a las 17:00; pedido PENDING y comprobante consultados, con descuento de una unidad de stock.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-015}{Rechazo horario ADMIN inválido 06:\allowbreak{}59 (422)}{HTTP 422 DELIVERY\_OUTSIDE\_HOURS; pedidos, comprobantes y stock sin cambios.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-016}{Rechazo horario ADMIN inválido 17:\allowbreak{}01 (422)}{HTTP 422 DELIVERY\_OUTSIDE\_HOURS; pedidos, comprobantes y stock sin cambios.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-017}{Agrupación temporal por extremos (10:\allowbreak{}00, 10:\allowbreak{}25, 10:\allowbreak{}50)}{HTTP 200: dos propuestas, una con 10:00 y 10:25 y otra con 10:50; sin persistir ruta. Motor vial simulado.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-018}{Agrupación por extremos con separación de 29 minutos}{HTTP 200: los dos pedidos se agruparon en una propuesta cronológica con margen de 30 minutos. Motor vial simulado.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-019}{Agrupación por extremos con separación exacta de 30 min}{HTTP 200: los pedidos separados exactamente 30 minutos se agruparon en una propuesta. Motor vial simulado.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-020}{Separación de rutas por extremos con 31 minutos}{HTTP 200: los pedidos separados 31 minutos produjeron dos propuestas individuales. Motor vial simulado.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-021}{Cambio de margen horario (5..180) y desempate OSRM}{Se aceptaron los límites 5 y 180, se rechazaron 4 y 181 y se aplicó margen 60. El agrupamiento y desempate se verificaron con matrices simuladas; adicionalmente, una prueba aislada del motor OSRM real respondió correctamente.}{PASS}{Suites de configuración, ruteo simulado y motor OSRM real; resumen en imagen.}{Ninguno}
+\casoejec{CP-022}{Creación de pedido sin fecha programada (scheduledDeliveryDate nulo)}{HTTP 201; pedido PENDING con fecha nula confirmado por consulta y dos unidades descontadas del stock.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-023}{Exclusión en propuestas y 409 en asignación sin fecha}{La ejecución anterior falló al exigir el pedido en \texttt{excluded}. Tras aclarar la regla, el pedido con fecha nula se identificó en el listado ADMIN, no apareció en propuestas y ambos intentos de asignación respondieron 409 sin crear ruta ni reclamo.}{PASS}{Nueva ejecución aislada: 15/15 pruebas de la suite aprobadas; antecedente DEF-08 en la imagen.}{DEF-08 cerrado}
+\casoejec{CP-024}{Idempotencia Shop checkout con replay 201}{Ambas respuestas fueron HTTP 201 con los mismos identificadores; un pedido, un comprobante y un solo descuento y débito.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-025}{Recuperación Shop ante timeout con mismo Idempotency-Key}{Tras corte de conexión, el reintento respondió 201 y quedó un solo pedido, comprobante, descuento y débito. La suite previa de recuperación también verificó los identificadores recuperados.}{PASS}{Suite CP-013 a CP-027 y suite aislada de recuperación Shop.}{Ninguno}
+\casoejec{CP-026}{Conflicto Idempotency-Key con payload distinto (409)}{HTTP 409 IDEMPOTENCY\_KEY\_REUSED; pedidos, comprobantes, stock y saldo sin cambios adicionales.}{PASS}{Suite CP-013 a CP-027; resumen conjunto de Jest.}{Ninguno}
+\casoejec{CP-027}{Liberación auditada de DRAFT caducado (RELEASE\_DRAFT)}{La ejecución anterior falló al esperar elegibilidad hoy sin reprogramar. Con la regla aclarada, se verificaron el 409, la liberación y replay auditado, la fecha original conservada y la reprogramación mediante CONTACT y RESCHEDULE. El pedido apareció en propuestas para el día futuro acordado. Motor vial simulado.}{PASS}{Nueva ejecución aislada: 15/15 pruebas de la suite aprobadas; antecedente DEF-09 en la imagen.}{DEF-09 cerrado}
